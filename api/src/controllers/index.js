@@ -13,12 +13,38 @@ import * as faltas from '../services/faltas.js';
 import * as auditoria from '../services/auditoria.js';
 import * as estagios from '../services/estagios.js';
 import * as painel from '../services/painel.js';
+import * as documentos from '../services/documentos.js';
 
 /** Cria um controlador a partir de fn(req), que devolve o corpo da resposta. */
 const acao = (fn, estado = 200) => async (req, res) => {
   const corpo = await fn(req, req.dados ?? {}, req.utilizador);
   if (estado === 204) return res.status(204).end();
   res.status(estado).json(corpo);
+};
+
+/** Envia um PDF como ficheiro para descarregar. */
+function enviarPdf(res, nome, buffer) {
+  res.type('application/pdf').attachment(nome).send(buffer);
+}
+
+export const documentosCtrl = {
+  async miniPauta(req, res) {
+    const { params, query } = req.dados;
+    enviarPdf(res, `mini-pauta-${query.trimestre}-trimestre.pdf`,
+      await documentos.miniPauta(req.bd, req.utilizador, params.id, params.disciplinaId, query.trimestre));
+  },
+  async termo(req, res) {
+    enviarPdf(res, 'termo-frequencia-aproveitamento.pdf', await documentos.termo(req.bd, req.utilizador, req.dados.params.id, req.dados.query));
+  },
+  previa: acao((req, d, u) => documentos.previaCertificado(req.bd, u, d.params.id, d.query.ciclo)),
+  emitir: acao((req, d, u) => documentos.emitirCertificado(req.bd, u, d.params.id, d.body), 201),
+  listar: acao((req, d, u) => documentos.listarDocumentos(req.bd, u, d.params.id)),
+  async pdf(req, res) {
+    const r = await documentos.documentoPdf(req.bd, req.utilizador, req.dados.params.id);
+    enviarPdf(res, r.nome, r.pdf);
+  },
+  escola: acao((req, d, u) => documentos.obterEscola(req.bd, u)),
+  actualizarEscola: acao((req, d, u) => documentos.actualizarEscola(req.bd, u, d.body)),
 };
 
 export const sistema = {
@@ -107,9 +133,18 @@ export const notasCtrl = {
   descritivas: acao((req, d, u) => notas.lancarDescritivas(req.bd, u, d.params.id, d.query.trimestre, d.body)),
   publicar: acao((req, d, u) => notas.publicar(req.bd, u, d.params.id, d.params.n)),
   corrigir: acao((req, d, u) => notas.corrigir(req.bd, u, d.params.id, d.body)),
-  pautaTrimestral: acao((req, d, u) => notas.pautaTrimestral(req.bd, u, d.params.id, d.params.n)),
+  async pautaTrimestral(req, res) {
+    const { params, query } = req.dados;
+    if (query.formato === 'pdf') {
+      return enviarPdf(res, `pauta-${params.n}-trimestre.pdf`, await documentos.pautaPdf(req.bd, req.utilizador, params.id, params.n));
+    }
+    res.json(await notas.pautaTrimestral(req.bd, req.utilizador, params.id, params.n));
+  },
   async pautaFinal(req, res) {
     const { params, query } = req.dados;
+    if (query.formato === 'pdf') {
+      return enviarPdf(res, 'pauta-final.pdf', await documentos.pautaPdf(req.bd, req.utilizador, params.id));
+    }
     if (query.formato === 'csv') {
       const csv = await notas.pautaFinalCsv(req.bd, req.utilizador, params.id);
       res.type('text/csv; charset=utf-8').attachment(`pauta-final-${params.id}.csv`).send(csv);

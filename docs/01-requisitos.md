@@ -70,6 +70,9 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 | RF23 | Anular ou mudar de turma uma matrícula | SE | M | Exige motivo; o registo não é apagado |
 | RF44 | Ficha de matrícula de um aluno novo (aluno, encarregado e turma) | SE | M | Uma só operação: se a turma estiver cheia, nada fica gravado |
 | RF45 | Importar uma lista de alunos para uma turma | SE | D | Até 100 por vez; colar do Excel ou CSV; tudo ou nada; avisa as vagas e as linhas com erros |
+| RF46 | Mini-pauta e pautas (trimestral e final) em PDF | PR, DT, DE, SE, CO | M | Cabeçalho oficial (República, Governo da Província, escola); assinaturas; negativas a negrito |
+| RF47 | Termo de frequência e aproveitamento em PDF | SE, DE | M | Modelo da escola: dois anos lado a lado, Ct/F por trimestre, CAP, CPE, CF, OBS |
+| RF48 | Certificado do Ensino Primário e do I Ciclo em PDF | SE, DE | M | Modelos do MED; numeração seguida por ano (N.º x/aaaa); só com notas e dados completos (ou rascunho sem número); reimpressão igual; nunca se apaga |
 
 ### M6. Avaliação e pautas
 | ID | Requisito | Ator | Prior. | Critérios de aceitação |
@@ -158,7 +161,7 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 - Horários e detecção de conflitos de sala ou professor.
 - Gestão detalhada do estágio (relatórios, avaliação pela entidade de acolhimento).
 - Transferência de alunos entre escolas.
-- Emissão de declarações e certificados em PDF.
+- Declarações em PDF, certificado do II Ciclo e da Educação de Adultos (falta o modelo oficial).
 - Integração com o SIGE ou outros sistemas do MED; envio de emails ou SMS.
 
 ---

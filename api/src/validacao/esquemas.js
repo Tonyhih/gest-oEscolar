@@ -68,6 +68,13 @@ export const aluno = z.object({
   naturalidade: texto(2, 100).optional(),
   morada: texto(2, 300).optional(),
   telefone: texto(9, 20).optional(),
+  // Pedidos pelo termo e pelos certificados do MED
+  nomePai: texto(3).optional(),
+  nomeMae: texto(3).optional(),
+  municipioNaturalidade: texto(2, 100).optional(),
+  provinciaNaturalidade: texto(2, 100).optional(),
+  documentoEmissaoLocal: texto(2, 100).optional(),
+  documentoEmissaoData: data.optional(),
 });
 export const actualizarAluno = aluno.partial().extend({ estado: estado.optional() });
 export const filtroAlunos = z.object({
@@ -125,7 +132,15 @@ export const correccao = z.object({
   campo: z.enum(['mac', 'npp', 'npt', 'exame']), valor: nota,
   justificacao: texto(10, 500).describe('Mínimo de 10 caracteres.'),
 });
-export const formatoPauta = z.object({ formato: z.enum(['json', 'csv']).default('json') });
+export const formatoPauta = z.object({ formato: z.enum(['json', 'csv', 'pdf']).default('json') });
+export const formatoPautaTrimestral = z.object({ formato: z.enum(['json', 'pdf']).default('json') });
+export const dadosEscola = z.object({ decretoCriacao: texto(3, 120) });
+export const queryAnoLectivo = z.object({ anoLectivo: uuid.optional() });
+export const queryCiclo = z.object({ ciclo: z.enum(['primario', 'i_ciclo']) });
+export const certificado = z.object({
+  ciclo: z.enum(['primario', 'i_ciclo']), livroRegisto: texto(1, 30).optional(), conferidoPor: texto(3).optional(),
+  rascunho: z.boolean().default(false),
+});
 
 // ---------------------------------------------------------------- Faltas
 export const queryData = z.object({ data });

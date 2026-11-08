@@ -29,6 +29,7 @@
 | Auditoria | `/auditoria` | RF39 |
 | Estágio e TFC (13.ª) | `/estagios`, `/estagios/:id`, `/estagios/:id/tfc` | RF40–RF43 |
 | Painel do director | `/painel` | RF38 |
+| Documentos em PDF | `…/mini-pauta`, `…/pautas/…?formato=pdf`, `/alunos/:id/termo`, `/alunos/:id/certificados` (+ `/previa`), `/alunos/:id/documentos`, `/documentos/:id/pdf`, `/escola` | RF46–RF48 |
 
 **Estágio e TFC:** só na 13.ª classe e um por matrícula. A nota do estágio e o TFC são da coordenação (a secretaria regista o estágio). A nota da defesa exige a data da defesa.
 
@@ -126,3 +127,25 @@ curl -s localhost:3000/api/v1/turmas -H "Authorization: Bearer $TOKEN"
 ## 7. Por verificar
 - [ ] Correr `npm run migrar`, `npm run seed` e `npm run dev` contra um PostgreSQL real (local ou Neon). Os testes usam o PGlite, que é PostgreSQL 16, mas ainda não houve uma execução contra um servidor real.
 - [x] Rotas desejáveis: estágio e TFC (RF40–RF43) e painel (RF38), com 9 testes de integração.
+
+---
+
+## 8. Documentos em PDF (RF46–RF48)
+
+Gerados na API com o **pdfkit** (JavaScript puro, sem dependências nativas, A4, fontes Times). A insígnia da República foi extraída do modelo oficial enviado pelo autor (`api/assets/insignia.png`).
+
+| Documento | Modelo | Regras |
+|---|---|---|
+| Mini-pauta | Uma disciplina, uma turma, um trimestre: MAC, NPP, NPT, MT e faltas | Mesmas permissões que a grelha de notas |
+| Pauta trimestral e final | A4 paisagem, disciplinas-chave com `*`, situação de cada aluno | Mesmas permissões que a pauta no ecrã |
+| Termo de frequência e aproveitamento | Modelo da escola: dados do aluno, fotografia, dois anos lado a lado (Ct 1–3, F, CAP, CPE, CF, OBS) | Secretaria e direcção; fica na auditoria |
+| Certificado (Ensino Primário e I Ciclo) | Modelos do MED: texto com o artigo 109.º da LBSEE 17/16, notas da 2.ª/4.ª/6.ª ou da 7.ª/8.ª/9.ª, média por extenso | Ver abaixo |
+
+**Certificado:**
+- `GET /alunos/:id/certificados/previa?ciclo=` mostra as notas, as médias e o que falta: matrículas, notas finais e dados pessoais (filiação, B.I., naturalidade).
+- `POST /alunos/:id/certificados` só emite com tudo completo. Atribui o número seguinte por escola e por ano (`N.º 1/2026`) e guarda todos os dados impressos. A reimpressão sai sempre igual, mesmo que os dados do aluno mudem depois.
+- Com `rascunho: true`, gera o documento sem número e com a marca de água "RASCUNHO", para conferir.
+- Os documentos emitidos **nunca se apagam** (trigger) e a emissão fica na auditoria.
+- A média de cada disciplina é a média das três classes, arredondada à unidade, e a média geral é a média das médias, também arredondada ⚠️ (confirmar a regra com a escola).
+
+**Migração 003:** campos novos no aluno (pai, mãe, município e província de naturalidade, local e data de emissão do B.I.), decreto de criação da escola e tabela `documentos`.

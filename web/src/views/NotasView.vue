@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
-import { api } from '@/api/cliente.js';
+import { api, descarregar } from '@/api/cliente.js';
 import { usePedido, useAccao } from '@/composables/usePedido.js';
 import { useAutenticacao } from '@/stores/autenticacao.js';
 import { lerNota, nota1 } from '@/util/formatar.js';
@@ -78,6 +78,9 @@ async function gravarExames() {
   if (r) resultadosExame.value = Object.fromEntries(r.map((x) => [x.matricula, x]));
 }
 
+const miniPauta = () => accao.correr(() => descarregar(`/turmas/${props.id}/disciplinas/${props.disciplina}/mini-pauta`,
+  `mini-pauta-${atribuicao.value?.sigla ?? 'disciplina'}-${trimestre.value}-trimestre.pdf`, { trimestre: trimestre.value }));
+
 // ---------------------------------------------------------------- Correcção (director)
 const correcao = ref(null);
 function abrirCorrecao(l) {
@@ -100,11 +103,14 @@ async function corrigir() {
           <h1 class="h4 mb-0">Notas de {{ atribuicao?.sigla ?? 'disciplina' }}</h1>
           <span class="text-body-secondary small">{{ t.designacao }} · escala 0–{{ escala }} · aprovação ≥ {{ minima }}</span>
         </div>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+        <button type="button" class="btn btn-outline-secondary" :disabled="accao.ocupado.value" @click="miniPauta">Mini-pauta (PDF)</button>
         <div class="btn-group" role="group" aria-label="Trimestre">
           <template v-for="n in [1, 2, 3]" :key="n">
             <input :id="`tri-${n}`" v-model="trimestre" type="radio" class="btn-check" name="trimestre" :value="n" />
             <label class="btn btn-outline-primary" :for="`tri-${n}`">{{ n }}.º<span class="d-none d-sm-inline"> trimestre</span><span class="d-sm-none"> T</span></label>
           </template>
+        </div>
         </div>
       </div>
 

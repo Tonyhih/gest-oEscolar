@@ -163,6 +163,48 @@ async function entrar(page, email) {
     ok('lista de matrículas do ano mostra os importados');
     await p.close();
 
+    // 5c. Documentos em PDF: mini-pauta (professor), pauta (director), termo e certificado (secretaria)
+    const ehPdf = async (download) => require('fs').readFileSync(await download.path()).subarray(0, 5).toString() === '%PDF-';
+    p = await novaPagina(browser);
+    await entrar(p, 'adao@lda101.test');
+    await p.getByRole('link', { name: /7\.ª A/ }).first().click();
+    await p.locator('li', { hasText: 'MAT' }).getByRole('link', { name: 'Notas' }).click();
+    let [dl] = await Promise.all([p.waitForEvent('download'), p.getByRole('button', { name: 'Mini-pauta (PDF)' }).click()]);
+    if (!(await ehPdf(dl))) throw new Error('Mini-pauta não é um PDF');
+    ok(`professor descarrega a mini-pauta (${dl.suggestedFilename()})`);
+    await p.close();
+
+    p = await novaPagina(browser);
+    await entrar(p, 'director@lda101.test');
+    await p.getByRole('link', { name: 'Turmas', exact: true }).click();
+    await p.getByRole('link', { name: /9\.ª A/ }).click();
+    await p.getByRole('link', { name: 'Pautas' }).click();
+    await p.getByRole('heading', { name: /Pauta final/ }).waitFor();
+    [dl] = await Promise.all([p.waitForEvent('download'), p.getByRole('button', { name: 'PDF', exact: true }).click()]);
+    if (!(await ehPdf(dl))) throw new Error('Pauta não é um PDF');
+    ok(`director descarrega a pauta final (${dl.suggestedFilename()})`);
+    await p.close();
+
+    p = await novaPagina(browser);
+    await entrar(p, 'secretaria@lda101.test');
+    await p.getByRole('link', { name: 'Alunos', exact: true }).click();
+    await p.getByPlaceholder('Pesquisar').fill('Manuel');
+    await p.getByText('Manuel Chissola').click();
+    await p.getByText('Termo de frequência e aproveitamento').waitFor();
+    [dl] = await Promise.all([p.waitForEvent('download'), p.getByRole('button', { name: 'Descarregar PDF' }).click()]);
+    if (!(await ehPdf(dl))) throw new Error('Termo não é um PDF');
+    ok('secretaria descarrega o termo de frequência e aproveitamento');
+    await p.getByRole('button', { name: 'Verificar dados' }).click();
+    await p.getByText(/Tudo pronto\. Média final: 12 valores/).waitFor();
+    await p.getByLabel('Livro de registo n.º').fill('7');
+    p.once('dialog', (d) => d.accept());
+    [dl] = await Promise.all([p.waitForEvent('download'), p.getByRole('button', { name: 'Emitir certificado' }).click()]);
+    if (!(await ehPdf(dl))) throw new Error('Certificado não é um PDF');
+    await p.getByText(/Certificado n\.º 1\/\d{4}/).waitFor();
+    ok(`secretaria emite o certificado do I Ciclo (${dl.suggestedFilename()})`);
+    await p.screenshot({ path: `${OUT}/13-documentos.png`, fullPage: true });
+    await p.close();
+
     // 6. Painel do director e estágios (13.ª classe)
     p = await novaPagina(browser);
     await entrar(p, 'director@lda101.test');

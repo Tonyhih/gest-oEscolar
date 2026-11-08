@@ -37,6 +37,11 @@ async function publicar() {
   await accao.correr(() => api.post(`/turmas/${props.id}/trimestres/${vista.value}/publicar`), 'Trimestre publicado.');
   pauta.executar();
 }
+async function pdf() {
+  const q = vista.value === 'final' ? '/pautas/final' : `/pautas/trimestres/${vista.value}`;
+  const nome = `pauta-${vista.value === 'final' ? 'final' : `${vista.value}-trimestre`}-${p.value.turma.designacao.replace(/\W+/g, '-')}.pdf`;
+  await accao.correr(() => descarregar(`/turmas/${props.id}${q}`, nome, { formato: 'pdf' }));
+}
 async function exportar() {
   await accao.correr(() => descarregar(`/turmas/${props.id}/pautas/final`, `pauta-final-${p.value.turma.designacao.replace(/\W+/g, '-')}.csv`, { formato: 'csv' }));
 }
@@ -68,6 +73,7 @@ const valor = (v) => (vista.value === 'final' ? notaInteira(v) : nota1(v));
         </template>
         <span class="flex-grow-1"></span>
         <button v-if="podePublicar" type="button" class="btn btn-sm btn-primary" :disabled="accao.ocupado.value" @click="publicar">Publicar trimestre</button>
+        <button v-if="!qualitativa" type="button" class="btn btn-sm btn-primary" :disabled="accao.ocupado.value" @click="pdf">PDF</button>
         <button v-if="vista === 'final' && podeExportar" type="button" class="btn btn-sm btn-outline-primary" @click="exportar">Exportar CSV</button>
         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()">Imprimir</button>
       </div>

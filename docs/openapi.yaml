@@ -104,6 +104,108 @@ paths:
         '422': { $ref: '#/components/responses/Regra' }
 
   # ---------- Plataforma ----------
+  /escola:
+    get:
+      tags: [Estrutura de ensino]
+      summary: Dados da escola do utilizador
+      responses:
+        '200': { description: Escola }
+    patch:
+      tags: [Estrutura de ensino]
+      summary: Decreto executivo de criação (aparece no certificado) – DE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decretoCriacao]
+              properties:
+                decretoCriacao: { type: string, example: '123/2015, de 10 de Março' }
+      responses:
+        '200': { description: Actualizada }
+        '403': { $ref: '#/components/responses/Proibido' }
+  /turmas/{id}/disciplinas/{disciplinaId}/mini-pauta:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/DisciplinaId'
+      - $ref: '#/components/parameters/Trimestre'
+    get:
+      tags: [Avaliação]
+      summary: Mini-pauta em PDF (RF46)
+      responses:
+        '200':
+          description: PDF
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+        '403': { $ref: '#/components/responses/Proibido' }
+  /alunos/{id}/termo:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - { name: anoLectivo, in: query, schema: { $ref: '#/components/schemas/Uuid' } }
+    get:
+      tags: [Pessoas]
+      summary: Termo de frequência e aproveitamento em PDF (RF47) – SE, DE
+      responses:
+        '200':
+          description: PDF
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+  /alunos/{id}/certificados/previa:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - { name: ciclo, in: query, required: true, schema: { type: string, enum: [primario, i_ciclo] } }
+    get:
+      tags: [Pessoas]
+      summary: Prévia do certificado, com o que falta para o emitir (RF48) – SE, DE
+      responses:
+        '200': { description: 'Notas por classe, médias, completo, emFalta e dadosEmFalta' }
+  /alunos/{id}/certificados:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Pessoas]
+      summary: Emitir certificado numerado, ou rascunho sem número (RF48) – SE, DE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ciclo]
+              properties:
+                ciclo: { type: string, enum: [primario, i_ciclo] }
+                livroRegisto: { type: string }
+                conferidoPor: { type: string }
+                rascunho: { type: boolean, default: false }
+      responses:
+        '201': { description: 'Documento emitido: id, numeroTexto (ex.: 1/2026), rascunho' }
+        '422':
+          description: Faltam notas ou dados pessoais (CERTIFICADO_INCOMPLETO)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+  /alunos/{id}/documentos:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Pessoas]
+      summary: Documentos emitidos para o aluno – SE, DE
+      responses:
+        '200': { description: Lista }
+  /documentos/{id}/pdf:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Pessoas]
+      summary: Reimprimir um documento emitido, igual ao original – SE, DE
+      responses:
+        '200':
+          description: PDF
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
   /plataforma/escolas:
     get:
       tags: [Plataforma]
