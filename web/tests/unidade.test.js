@@ -87,6 +87,11 @@ describe('guarda de rotas', () => {
     expect(await guarda(auth)(rota({}))).toEqual({ name: 'trocar-palavra-passe' });
     expect(await guarda(auth)(rota({ permiteTroca: true }))).toBe(true);
   });
+  it('a política de privacidade abre com ou sem sessão', async () => {
+    expect(await guarda(auth)(rota({ publica: true, sempre: true }))).toBe(true);
+    sessao('professor');
+    expect(await guarda(auth)(rota({ publica: true, sempre: true }))).toBe(true);
+  });
   it('perfil sem acesso → início', async () => {
     sessao('professor');
     expect(await guarda(auth)(rota({ perfis: ['director'] }))).toEqual({ name: 'inicio' });

@@ -53,4 +53,7 @@ function sair() {
   <main id="conteudo" class="container-lg py-3 px-3">
     <RouterView />
   </main>
+  <footer class="container-lg px-3 pb-3 small text-body-secondary nao-imprimir">
+    <RouterLink :to="{ name: 'privacidade' }" class="link-secondary">Política de privacidade</RouterLink>
+  </footer>
 </template>

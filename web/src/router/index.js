@@ -9,6 +9,8 @@ export const rotas = [
   { path: '/entrar', name: 'entrar', component: () => import('@/views/EntrarView.vue'), meta: { publica: true, titulo: 'Entrar' } },
   { path: '/trocar-palavra-passe', name: 'trocar-palavra-passe', component: () => import('@/views/TrocarPalavraPasseView.vue'),
     meta: { titulo: 'Alterar palavra-passe', permiteTroca: true } },
+  { path: '/privacidade', name: 'privacidade', component: () => import('@/views/PrivacidadeView.vue'),
+    meta: { publica: true, sempre: true, titulo: 'Privacidade' } },
   { path: '/', name: 'inicio', component: () => import('@/views/InicioView.vue'), meta: { titulo: 'Início' } },
 
   { path: '/plataforma/escolas', name: 'escolas', component: () => import('@/views/EscolasView.vue'),
@@ -49,6 +51,7 @@ export const rotas = [
 export function guarda(auth) {
   return async (para) => {
     await auth.iniciar();
+    if (para.meta.sempre) return true;
     if (para.meta.publica) return auth.autenticado ? { name: 'inicio' } : true;
     if (!auth.autenticado) return { name: 'entrar', query: { r: para.fullPath } };
     if (auth.trocaPendente && !para.meta.permiteTroca) return { name: 'trocar-palavra-passe' };

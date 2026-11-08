@@ -1,0 +1,28 @@
+# Blueprint do Render para a API (https://render.com/docs/blueprint-spec).
+# No Render: New → Blueprint → escolha este repositório. Depois preencha DATABASE_URL e CORS_ORIGENS.
+services:
+  - type: web
+    name: gestao-escolar-api
+    runtime: node
+    plan: free
+    region: frankfurt          # a região do Render mais próxima de Angola
+    rootDir: api
+    branch: main
+    buildCommand: npm ci --omit=dev
+    # As migrações são idempotentes: só aplicam os ficheiros novos de migrations/
+    startCommand: npm run migrar:producao && npm start
+    healthCheckPath: /api/v1/saude
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "24"
+      - key: JWT_EXPIRA
+        value: 8h
+      - key: JWT_SECRET
+        generateValue: true    # o Render gera um segredo aleatório
+      - key: DATABASE_URL
+        sync: false            # cadeia de ligação do Neon (com sslmode=require)
+      - key: CORS_ORIGENS
+        sync: false            # ex.: https://tonyhih.github.io (só a origem, sem caminho)

@@ -26,8 +26,8 @@ Projecto final de Desenvolvimento Web Avançado. É uma plataforma web para **v�
 | 2. Arquitectura e contrato | [docs/02-arquitetura.md](docs/02-arquitetura.md) · [docs/openapi.yaml](docs/openapi.yaml) | Aprovado |
 | 3. Dados (PostgreSQL) | [docs/03-dados.md](docs/03-dados.md) | Aprovado |
 | 4. Back-end | [docs/04-backend.md](docs/04-backend.md) | Aprovado |
-| 5. Front-end | [docs/05-frontend.md](docs/05-frontend.md) | Em revisão |
-| 6. Publicação | — | Por fazer |
+| 5. Front-end | [docs/05-frontend.md](docs/05-frontend.md) | Aprovado |
+| 6. Publicação | [docs/06-publicacao.md](docs/06-publicacao.md) | Pronto a publicar |
 
 ## Experimentar já (sem instalar o PostgreSQL)
 
@@ -47,7 +47,7 @@ cp .env.example .env     # preencher DATABASE_URL
 npm run migrar           # cria as tabelas
 npm run seed             # dados fictícios de teste (só em desenvolvimento)
 npm run dev              # API em http://localhost:3000/api/v1
-npm test                 # 86 testes (não precisam de servidor PostgreSQL)
+npm test                 # 87 testes (não precisam de servidor PostgreSQL)
 ```
 
 ## Regras de avaliação
@@ -61,3 +61,7 @@ npm test                 # 86 testes (não precisam de servidor PostgreSQL)
 - **13.ª classe:** estágio e TFC, cada um com nota ≥ 10.
 
 Os dados de teste são fictícios.
+
+## Publicação
+
+API no Render, base de dados no Neon e front-end no GitHub Pages. O passo a passo está em [docs/06-publicacao.md](docs/06-publicacao.md).
