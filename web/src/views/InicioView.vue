@@ -19,6 +19,7 @@ const atalhos = computed(() => ({
     { to: { name: 'auditoria' }, titulo: 'Auditoria', texto: 'Quem alterou o quê e quando.' },
   ],
   secretaria: [
+    { to: { name: 'matriculas' }, titulo: 'Matrículas', texto: 'Ficha de matrícula de um aluno novo ou importar uma lista para uma turma.' },
     { to: { name: 'alunos' }, titulo: 'Alunos', texto: 'Registar alunos e encarregados, processos.' },
     { to: { name: 'turmas' }, titulo: 'Turmas e matrículas', texto: 'Criar turmas, matricular e confirmar matrículas.' },
   ],

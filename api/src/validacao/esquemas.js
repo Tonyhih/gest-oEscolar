@@ -99,6 +99,15 @@ export const filtroTurmas = z.object({ anoLectivo: uuid.optional(), classe: uuid
 export const atribuicoes = z.array(z.object({ disciplina: uuid, professor: uuid }));
 
 export const matricula = z.object({ aluno: uuid, turma: uuid });
+const encarregadoFicha = z.object({ nome: texto(3), telefone: texto(9, 20), parentesco: texto(2, 40).default('Encarregado(a)') });
+export const novaMatricula = z.object({ aluno, encarregado: encarregadoFicha.optional(), turma: uuid });
+export const importacao = z.object({
+  turma: uuid,
+  alunos: z.array(z.object({
+    nome: texto(3), dataNascimento: data, sexo: z.enum(['M', 'F']),
+    encarregadoNome: texto(3).optional(), encarregadoTelefone: texto(9, 20).optional(), parentesco: texto(2, 40).optional(),
+  })).min(1, 'A lista está vazia.').max(100, 'No máximo 100 alunos de cada vez.'),
+});
 export const confirmacao = z.object({ matriculaAnterior: uuid, turma: uuid });
 export const mudarTurma = z.object({ turma: uuid, motivo: texto(3, 500) });
 export const motivo = z.object({ motivo: texto(3, 500) });

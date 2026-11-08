@@ -90,6 +90,8 @@ export function criarRotas(config) {
   const M = C.matriculasCtrl;
   // As rotas fixas vêm antes das que têm parâmetros
   r.post('/matriculas/confirmacoes', auth, perfil(...SEC), v({ body: E.confirmacao }), M.confirmar);
+  r.post('/matriculas/novas', auth, perfil(...SEC), v({ body: E.novaMatricula }), M.matricularNovo);
+  r.post('/matriculas/importacao', auth, perfil(...SEC), v({ body: E.importacao }), M.importar);
   r.get('/matriculas', auth, perfil('director', 'secretaria', 'professor'), v({ query: E.filtroMatriculas }), M.listar);
   r.post('/matriculas', auth, perfil(...SEC), v({ body: E.matricula }), M.matricular);
   r.post('/matriculas/:id/mudar-turma', auth, perfil(...SEC), v({ params: paramsId, body: E.mudarTurma }), M.mudarTurma);

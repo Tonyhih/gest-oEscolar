@@ -26,6 +26,8 @@ export const rotas = [
   { path: '/alunos/:id', name: 'aluno', component: () => import('@/views/AlunoView.vue'), props: true,
     meta: { perfis: TODOS, titulo: 'Aluno' } },
 
+  { path: '/matriculas', name: 'matriculas', component: () => import('@/views/MatriculasView.vue'),
+    meta: { perfis: ['director', 'secretaria'], titulo: 'Matrículas' } },
   { path: '/turmas', name: 'turmas', component: () => import('@/views/TurmasView.vue'), meta: { perfis: TODOS, titulo: 'Turmas' } },
   { path: '/turmas/:id', name: 'turma', component: () => import('@/views/TurmaView.vue'), props: true,
     meta: { perfis: TODOS, titulo: 'Turma' } },

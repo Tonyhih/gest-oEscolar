@@ -79,18 +79,34 @@ const dadosAluno = ({ documento, ...d }) => ({
   documentoNumero: documento === undefined ? undefined : documento?.numero ?? null,
 });
 
+/**
+ * Insere um aluno dentro de uma transacção já aberta (usado também pelas matrículas).
+ * Sem número de processo, gera o seguinte da escola: CODIGO-0001, CODIGO-0002…
+ */
+export async function inserirAluno(c, u, dados) {
+  let { numeroProcesso } = dados;
+  if (!numeroProcesso) {
+    const { rows } = await c.query(
+      `SELECT e.codigo, (SELECT count(*)::int FROM alunos WHERE escola_id = e.id) AS n FROM escolas e WHERE e.id = $1`,
+      [u.escolaId]);
+    numeroProcesso = `${rows[0].codigo}-${String(rows[0].n + 1).padStart(4, '0')}`;
+  }
+  const aluno = await inserir(c, 'alunos', colunas({ ...dadosAluno(dados), numeroProcesso, escolaId: u.escolaId }));
+  await registar(c, u, { entidade: 'aluno', entidadeId: aluno.id, accao: 'criar' });
+  return aluno;
+}
+
+/** Insere um encarregado e liga-o ao aluno como principal (dentro de uma transacção). */
+export async function inserirEncarregadoPrincipal(c, u, alunoId, { nome, telefone, parentesco = 'Encarregado(a)' }) {
+  const ee = await inserir(c, 'encarregados', { escola_id: u.escolaId, nome, telefone });
+  await inserir(c, 'aluno_encarregados', {
+    escola_id: u.escolaId, aluno_id: alunoId, encarregado_id: ee.id, parentesco, principal: true });
+  return ee;
+}
+
 export async function criarAluno(bd, u, dados) {
   return bd.transaccao(async (c) => {
-    let { numeroProcesso } = dados;
-    if (!numeroProcesso) {
-      // Número sequencial por escola: CODIGO-0001
-      const { rows } = await c.query(
-        `SELECT e.codigo, (SELECT count(*)::int FROM alunos WHERE escola_id = e.id) AS n FROM escolas e WHERE e.id = $1`,
-        [u.escolaId]);
-      numeroProcesso = `${rows[0].codigo}-${String(rows[0].n + 1).padStart(4, '0')}`;
-    }
-    const aluno = await inserir(c, 'alunos', colunas({ ...dadosAluno(dados), numeroProcesso, escolaId: u.escolaId }));
-    await registar(c, u, { entidade: 'aluno', entidadeId: aluno.id, accao: 'criar' });
+    const aluno = await inserirAluno(c, u, dados);
     return obterAluno(c, u, aluno.id);
   });
 }

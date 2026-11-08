@@ -68,6 +68,8 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 | RF21 | Matricular um aluno numa turma | SE | M | Um aluno não pode ter duas matrículas activas no mesmo ano lectivo; a turma não pode exceder a capacidade |
 | RF22 | Confirmar a matrícula no novo ano lectivo | SE | M | Sugere a classe seguinte se o aluno transitou, ou a mesma classe se reprovou |
 | RF23 | Anular ou mudar de turma uma matrícula | SE | M | Exige motivo; o registo não é apagado |
+| RF44 | Ficha de matrícula de um aluno novo (aluno, encarregado e turma) | SE | M | Uma só operação: se a turma estiver cheia, nada fica gravado |
+| RF45 | Importar uma lista de alunos para uma turma | SE | D | Até 100 por vez; colar do Excel ou CSV; tudo ou nada; avisa as vagas e as linhas com erros |
 
 ### M6. Avaliação e pautas
 | ID | Requisito | Ator | Prior. | Critérios de aceitação |
