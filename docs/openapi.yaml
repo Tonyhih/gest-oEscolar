@@ -987,8 +987,7 @@ paths:
               type: object
               required: [campo, valor, justificacao]
               properties:
-                trimestre: { type: integer, enum: [1, 2, 3] }
-                campo: { type: string, enum: [mac, npp, npt, exame] }
+                campo: { type: string, enum: [mac, npp, npt, exame], description: 'O trimestre é o da nota indicada no caminho' }
                 valor: { type: number, minimum: 0, maximum: 20 }
                 justificacao: { type: string, minLength: 10 }
       responses:
@@ -1216,7 +1215,23 @@ paths:
                       type: object
                       properties:
                         classe: { type: string }
-                        percentagem: { type: number }
+                        total: { type: integer }
+                        transitam: { type: integer }
+                        naoTransitam: { type: integer }
+                        pendentes: { type: integer }
+                        percentagem: { type: [number, 'null'], description: Sobre os alunos com situação decidida }
+                  anoLectivo:
+                    type: object
+                    properties:
+                      id: { $ref: '#/components/schemas/Uuid' }
+                      designacao: { type: string }
+                  totais:
+                    type: object
+                    properties:
+                      alunos: { type: integer }
+                      turmas: { type: integer }
+                      professores: { type: integer }
+                      faltasInjustificadas: { type: integer }
   /auditoria:
     get:
       tags: [Auditoria]
@@ -1666,7 +1681,9 @@ components:
                 additionalProperties: { type: [number, 'null'] }
                 description: Nota por sigla de disciplina (MT na pauta trimestral, nota final na pauta final)
               negativas: { type: integer }
-              situacao: { type: [string, 'null'], enum: [transita, nao_transita, aprovado, reprovado, null] }
+              situacao: { type: [string, 'null'], enum: [transita, nao_transita, pendente, concluido, null], description: 'concluido/pendente só na 13.ª (estágio e TFC)' }
+              motivos: { type: array, items: { type: string }, description: Razões de não transitar (só na pauta final) }
+              descritiva: { type: [string, 'null'], description: Só na Iniciação }
 
     Falta:
       type: object
@@ -1676,7 +1693,7 @@ components:
         disciplina: { $ref: '#/components/schemas/Uuid' }
         data: { type: string, format: date }
         trimestre: { type: integer }
-        estado: { type: string, enum: [injustificada, justificada] }
+        estado: { type: string, enum: [injustificada, justificada, anulada], description: 'anulada: desmarcada pelo professor (nunca se apaga)' }
         motivo: { type: [string, 'null'] }
 
     EstagioEntrada:

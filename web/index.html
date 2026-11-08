@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="pt-AO">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Sistema de Gestão Escolar: alunos, turmas, notas, faltas e pautas." />
+    <title>Gestão Escolar</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23198754'/%3E%3Cpath d='M6 13l10-5 10 5-10 5z' fill='white'/%3E%3Cpath d='M10 16v5c0 1.5 3 3 6 3s6-1.5 6-3v-5' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E" />
+    <script>
+      // Tema claro ou escuro conforme o sistema (Bootstrap 5.3)
+      try {
+        const escuro = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-bs-theme', escuro ? 'dark' : 'light');
+      } catch { /* sem preferência: tema claro */ }
+    </script>
+  </head>
+  <body>
+    <noscript>Esta aplicação precisa de JavaScript.</noscript>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

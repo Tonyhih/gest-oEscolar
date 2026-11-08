@@ -1,0 +1,32 @@
+# Blueprint do Render para a API (https://render.com/docs/blueprint-spec).
+# No Render: New → Blueprint → escolha este repositório. Depois preencha DATABASE_URL, ADMIN_EMAIL e ADMIN_NOME.
+services:
+  - type: web
+    name: gestao-escolar-api
+    runtime: node
+    plan: free
+    region: frankfurt          # a região do Render mais próxima de Angola
+    rootDir: api
+    branch: main
+    buildCommand: npm ci --omit=dev
+    # Arranque: migrações novas (idempotentes) → primeiro administrador (só se ainda não existir) → API
+    startCommand: npm run migrar:producao && npm run primeiro-admin && npm start
+    healthCheckPath: /api/v1/saude
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "24"
+      - key: JWT_EXPIRA
+        value: 8h
+      - key: JWT_SECRET
+        generateValue: true    # o Render gera um segredo aleatório
+      - key: DATABASE_URL
+        sync: false            # cadeia de ligação do Neon (com sslmode=require)
+      - key: CORS_ORIGENS
+        value: https://tonyhih.github.io   # só a origem do GitHub Pages, sem caminho
+      - key: ADMIN_EMAIL
+        sync: false            # email do primeiro administrador (a palavra-passe aparece nos Logs)
+      - key: ADMIN_NOME
+        sync: false

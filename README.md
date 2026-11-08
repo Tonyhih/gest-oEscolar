@@ -24,12 +24,21 @@ Projecto final de Desenvolvimento Web Avançado. É uma plataforma web para **v�
 | 0. Enquadramento | [docs/00-enquadramento.md](docs/00-enquadramento.md) | Aprovado |
 | 1. Requisitos | [docs/01-requisitos.md](docs/01-requisitos.md) | Aprovado |
 | 2. Arquitectura e contrato | [docs/02-arquitetura.md](docs/02-arquitetura.md) · [docs/openapi.yaml](docs/openapi.yaml) | Aprovado |
-| 3. Dados (PostgreSQL) | [docs/03-dados.md](docs/03-dados.md) | Em revisão |
-| 4. Back-end | — | Por fazer |
-| 5. Front-end | — | Por fazer |
-| 6. Publicação | — | Por fazer |
+| 3. Dados (PostgreSQL) | [docs/03-dados.md](docs/03-dados.md) | Aprovado |
+| 4. Back-end | [docs/04-backend.md](docs/04-backend.md) | Aprovado |
+| 5. Front-end | [docs/05-frontend.md](docs/05-frontend.md) | Aprovado |
+| 6. Publicação | [docs/06-publicacao.md](docs/06-publicacao.md) | Pronto a publicar |
 
-## Começar (API)
+## Experimentar já (sem instalar o PostgreSQL)
+
+```bash
+cd api && npm install && npm run dev:memoria     # terminal 1: API com dados fictícios
+cd web && npm install && npm run dev             # terminal 2: http://localhost:5173
+```
+
+Entre com `director@lda101.test`, `secretaria@lda101.test`, `adao@lda101.test` ou `lurdes@lda101.test` (palavra-passe `Teste#2026`).
+
+## Começar (API com PostgreSQL)
 
 ```bash
 cd api
@@ -37,7 +46,8 @@ npm install
 cp .env.example .env     # preencher DATABASE_URL
 npm run migrar           # cria as tabelas
 npm run seed             # dados fictícios de teste (só em desenvolvimento)
-npm test                 # testes (não precisam de servidor PostgreSQL)
+npm run dev              # API em http://localhost:3000/api/v1
+npm test                 # 96 testes (não precisam de servidor PostgreSQL)
 ```
 
 ## Regras de avaliação
@@ -51,3 +61,7 @@ npm test                 # testes (não precisam de servidor PostgreSQL)
 - **13.ª classe:** estágio e TFC, cada um com nota ≥ 10.
 
 Os dados de teste são fictícios.
+
+## Publicação
+
+API no Render, base de dados no Neon e front-end no GitHub Pages. O passo a passo está em [docs/06-publicacao.md](docs/06-publicacao.md).

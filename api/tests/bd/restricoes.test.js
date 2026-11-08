@@ -128,10 +128,10 @@ describe('Utilizadores', () => {
 describe('Faltas, estágio e auditoria', () => {
   it('RF36: uma falta justificada tem de ter motivo, mesmo com autor', async () => {
     const f = await um(`SELECT * FROM faltas WHERE estado = 'injustificada' LIMIT 1`);
-    await esperarErro(bd.query(`UPDATE faltas SET estado = 'justificada' WHERE id = $1`, [f.id]), 'faltas_check');
+    await esperarErro(bd.query(`UPDATE faltas SET estado = 'justificada' WHERE id = $1`, [f.id]), 'faltas_justificada_com_motivo');
     await esperarErro(
       bd.query(`UPDATE faltas SET estado = 'justificada', justificada_por = registada_por WHERE id = $1`, [f.id]),
-      'faltas_check',
+      'faltas_justificada_com_motivo',
     );
   });
   it('RF43: curso concluído só com estágio e TFC aprovados', async () => {

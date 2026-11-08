@@ -37,10 +37,10 @@ api/
     servidor.js            liga à BD e faz listen
     config/                ambiente.js (valida as variáveis com Zod), bd.js (pool pg, emTransaccao)
     bd/                    migracoes.js (aplica migrations/*.sql), seed.js
-    repositorios/          consultas SQL parametrizadas, uma por recurso
-    routes/                um ficheiro por recurso, montado em /api/v1
-    controllers/           lê o pedido, chama o serviço, responde
-    services/              regras de negócio puras e testáveis
+    util/sql.js            inserir, actualizar, paginar, camel (SQL sempre parametrizado)
+    routes/index.js        todas as rotas, montadas em /api/v1 (autenticação → perfil → validação → controlador)
+    controllers/index.js   lê o pedido validado (req.dados), chama o serviço, responde
+    services/              regras de negócio e consultas SQL, um ficheiro por área
       avaliacao.js         decidirTransicao (as médias são calculadas na BD)
       matriculas.js        regras de matrícula e confirmação
       auditoria.js         registar(alteração)
