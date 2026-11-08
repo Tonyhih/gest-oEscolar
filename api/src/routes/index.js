@@ -109,7 +109,7 @@ export function criarRotas(config) {
     v({ params: paramsId, query: E.queryTrimestre, body: E.descritivasLote }), N.descritivas);
   r.post('/turmas/:id/trimestres/:n/publicar', auth, perfil('director', 'professor'), v({ params: E.paramsTurmaTrimestre }), N.publicar);
   r.post('/notas/:id/correccoes', auth, perfil(...DIR), v({ params: paramsId, body: E.correccao }), N.corrigir);
-  r.get('/turmas/:id/pautas/trimestres/:n', ...escola, v({ params: E.paramsTurmaTrimestre }), N.pautaTrimestral);
+  r.get('/turmas/:id/pautas/trimestres/:n', ...escola, v({ params: E.paramsTurmaTrimestre, query: E.formatoPautaTrimestral }), N.pautaTrimestral);
   r.get('/turmas/:id/pautas/final', ...escola, v({ params: paramsId, query: E.formatoPauta }), N.pautaFinal);
 
   // ---------------------------------------------------------- Assiduidade
@@ -128,6 +128,18 @@ export function criarRotas(config) {
   r.patch('/estagios/:id', auth, perfil(...ESTAGIO), v({ params: paramsId, body: E.actualizarEstagio }), G.actualizar);
   r.patch('/estagios/:id/tfc', auth, perfil('director', 'coordenador'), v({ params: paramsId, body: E.tfc }), G.tfc);
   r.get('/painel', auth, perfil(...DIR), v({ query: E.filtroAno }), C.painelCtrl.obter);
+
+  // ---------------------------------------------------------- Documentos em PDF e dados da escola
+  const D = C.documentosCtrl;
+  const SECRETARIA_DIRECCAO = ['director', 'secretaria'];
+  r.get('/escola', ...escola, D.escola);
+  r.patch('/escola', auth, perfil(...DIR), v({ body: E.dadosEscola }), D.actualizarEscola);
+  r.get('/turmas/:id/disciplinas/:disciplinaId/mini-pauta', ...escola, v({ params: td, query: E.queryTrimestre }), D.miniPauta);
+  r.get('/alunos/:id/termo', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId, query: E.queryAnoLectivo }), D.termo);
+  r.get('/alunos/:id/certificados/previa', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId, query: E.queryCiclo }), D.previa);
+  r.post('/alunos/:id/certificados', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId, body: E.certificado }), D.emitir);
+  r.get('/alunos/:id/documentos', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId }), D.listar);
+  r.get('/documentos/:id/pdf', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId }), D.pdf);
 
   // ---------------------------------------------------------- Auditoria
   r.get('/auditoria', auth, perfil(...DIR), v({ query: E.filtroAuditoria }), C.auditoriaCtrl.listar);

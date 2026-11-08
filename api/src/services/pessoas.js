@@ -19,7 +19,8 @@ function filtroProfessor(u, turma) {
 /** Lei 22/11: um professor não precisa da morada nem do documento do aluno. */
 function minimizar(u, aluno) {
   if (u.perfil !== 'professor') return aluno;
-  const { documentoTipo, documentoNumero, morada, telefone, naturalidade, ...resto } = aluno;
+  const { documentoTipo, documentoNumero, morada, telefone, naturalidade, nomePai, nomeMae, municipioNaturalidade,
+    provinciaNaturalidade, documentoEmissaoLocal, documentoEmissaoData, ...resto } = aluno;
   return resto;
 }
 

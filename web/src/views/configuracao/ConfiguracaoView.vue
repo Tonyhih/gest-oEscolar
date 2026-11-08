@@ -5,12 +5,14 @@ import AnosLectivos from './AnosLectivos.vue';
 import ClassesEscola from './ClassesEscola.vue';
 import CursosDisciplinas from './CursosDisciplinas.vue';
 import PlanosCurriculares from './PlanosCurriculares.vue';
+import DadosEscola from './DadosEscola.vue';
 
 const auth = useAutenticacao();
 const separadores = computed(() => [
   ...(auth.perfil === 'director' ? [{ id: 'anos', texto: 'Ano lectivo', comp: AnosLectivos }, { id: 'classes', texto: 'Classes e avaliação', comp: ClassesEscola }] : []),
   { id: 'cursos', texto: 'Cursos e disciplinas', comp: CursosDisciplinas },
   { id: 'planos', texto: 'Planos curriculares', comp: PlanosCurriculares },
+  ...(auth.perfil === 'director' ? [{ id: 'escola', texto: 'Dados da escola', comp: DadosEscola }] : []),
 ]);
 const activo = ref(separadores.value[0].id);
 const actual = computed(() => separadores.value.find((s) => s.id === activo.value));

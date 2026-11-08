@@ -6,6 +6,7 @@ import { useAutenticacao } from '@/stores/autenticacao.js';
 import { data as fData } from '@/util/formatar.js';
 import EstadoPedido from '@/components/EstadoPedido.vue';
 import MensagemAccao from '@/components/MensagemAccao.vue';
+import DocumentosAluno from '@/components/DocumentosAluno.vue';
 
 const props = defineProps({ id: { type: String, required: true } });
 const auth = useAutenticacao();
@@ -18,10 +19,15 @@ const edicao = ref(null);
 function editar() {
   const a = aluno.value;
   edicao.value = { nome: a.nome, dataNascimento: a.dataNascimento?.slice(0, 10), sexo: a.sexo, naturalidade: a.naturalidade ?? '',
-                   morada: a.morada ?? '', telefone: a.telefone ?? '' };
+                   morada: a.morada ?? '', telefone: a.telefone ?? '', nomePai: a.nomePai ?? '', nomeMae: a.nomeMae ?? '',
+                   municipioNaturalidade: a.municipioNaturalidade ?? '', provinciaNaturalidade: a.provinciaNaturalidade ?? '',
+                   documentoTipo: a.documentoTipo ?? 'bi', documentoNumero: a.documentoNumero ?? '',
+                   documentoEmissaoLocal: a.documentoEmissaoLocal ?? '', documentoEmissaoData: a.documentoEmissaoData ?? '' };
 }
 async function gravar() {
-  const corpo = Object.fromEntries(Object.entries(edicao.value).filter(([, v]) => v !== ''));
+  const { documentoTipo, documentoNumero, ...resto } = edicao.value;
+  const corpo = Object.fromEntries(Object.entries(resto).filter(([, v]) => v !== ''));
+  if (documentoNumero) corpo.documento = { tipo: documentoTipo, numero: documentoNumero };
   const r = await accao.correr(() => api.patch(`/alunos/${props.id}`, corpo), 'Dados gravados.');
   if (r) { aluno.value = r; edicao.value = null; }
 }
@@ -82,6 +88,15 @@ async function confirmar() {
                 <div class="col-6"><label class="form-label" for="ed-nat">Naturalidade</label><input id="ed-nat" v-model="edicao.naturalidade" class="form-control" /></div>
                 <div class="col-6"><label class="form-label" for="ed-tel">Telefone</label><input id="ed-tel" v-model="edicao.telefone" class="form-control" /></div>
                 <div class="col-12"><label class="form-label" for="ed-mor">Morada</label><input id="ed-mor" v-model="edicao.morada" class="form-control" /></div>
+                <div class="col-6"><label class="form-label" for="ed-pai">Nome do pai</label><input id="ed-pai" v-model="edicao.nomePai" class="form-control" /></div>
+                <div class="col-6"><label class="form-label" for="ed-mae">Nome da mãe</label><input id="ed-mae" v-model="edicao.nomeMae" class="form-control" /></div>
+                <div class="col-6"><label class="form-label" for="ed-mun">Município de naturalidade</label><input id="ed-mun" v-model="edicao.municipioNaturalidade" class="form-control" /></div>
+                <div class="col-6"><label class="form-label" for="ed-prov">Província de naturalidade</label><input id="ed-prov" v-model="edicao.provinciaNaturalidade" class="form-control" /></div>
+                <div class="col-4"><label class="form-label" for="ed-dtipo">Documento</label>
+                  <select id="ed-dtipo" v-model="edicao.documentoTipo" class="form-select"><option value="bi">B.I.</option><option value="cedula">Cédula</option><option value="passaporte">Passaporte</option></select></div>
+                <div class="col-8"><label class="form-label" for="ed-dnum">N.º do documento</label><input id="ed-dnum" v-model="edicao.documentoNumero" class="form-control" /></div>
+                <div class="col-6"><label class="form-label" for="ed-dloc">Emitido pelo arquivo de</label><input id="ed-dloc" v-model="edicao.documentoEmissaoLocal" class="form-control" placeholder="Ex.: Luanda" /></div>
+                <div class="col-6"><label class="form-label" for="ed-ddata">Data de emissão</label><input id="ed-ddata" v-model="edicao.documentoEmissaoData" type="date" class="form-control" /></div>
               </div>
               <div class="mt-3 d-flex gap-2"><button type="submit" class="btn btn-primary" :disabled="accao.ocupado.value">Gravar</button>
                 <button type="button" class="btn btn-outline-secondary" @click="edicao = null">Cancelar</button></div>
@@ -93,6 +108,9 @@ async function confirmar() {
                 <dt class="col-5">Naturalidade</dt><dd class="col-7">{{ aluno.naturalidade ?? '—' }}</dd>
                 <dt class="col-5">Telefone</dt><dd class="col-7">{{ aluno.telefone ?? '—' }}</dd>
                 <dt class="col-5">Morada</dt><dd class="col-7">{{ aluno.morada ?? '—' }}</dd>
+                <dt class="col-5">Filiação</dt><dd class="col-7">{{ [aluno.nomePai, aluno.nomeMae].filter(Boolean).join(' e ') || '—' }}</dd>
+                <dt class="col-5">Município / Província</dt><dd class="col-7">{{ [aluno.municipioNaturalidade, aluno.provinciaNaturalidade].filter(Boolean).join(', ') || '—' }}</dd>
+                <dt class="col-5">Documento</dt><dd class="col-7">{{ aluno.documentoNumero ? `${{ bi: 'B.I.', cedula: 'Cédula', passaporte: 'Passaporte' }[aluno.documentoTipo]} ${aluno.documentoNumero}` : '—' }}<template v-if="aluno.documentoEmissaoLocal"><br /><span class="small text-body-secondary">{{ aluno.documentoEmissaoLocal }}, {{ fData(aluno.documentoEmissaoData) }}</span></template></dd>
               </template>
             </dl>
           </div>
@@ -149,6 +167,7 @@ async function confirmar() {
           </div>
         </section>
       </div>
+      <DocumentosAluno v-if="auth.temPerfil('secretaria', 'director')" :aluno="aluno" />
     </template>
   </EstadoPedido>
 </template>

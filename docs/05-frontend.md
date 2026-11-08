@@ -20,7 +20,7 @@
 |---|---|
 | Administração da plataforma | Escolas (registar, activar/desactivar, criar a conta do director com palavra-passe provisória) |
 | Director(a) | Painel (alunos, turmas, transição por classe), configuração (ano lectivo e trimestres abertos/fechados, classes e regras de avaliação, cursos, disciplinas, planos curriculares com disciplinas-chave), utilizadores, turmas e atribuições, pautas, publicação, correcção de notas, exportação CSV, faltas, auditoria |
-| Secretaria | Matrículas (ficha de aluno novo com encarregado e turma, importação de listas do Excel, lista do ano), registo de estágios, alunos (pesquisa, registo, ficha, encarregados, confirmação de matrícula), turmas (criar, matricular, mudar de turma, anular), lançamento de exames |
+| Secretaria | Documentos do aluno (termo, certificado com prévia e rascunho, reimpressão), matrículas (ficha de aluno novo com encarregado e turma, importação de listas do Excel, lista do ano), registo de estágios, alunos (pesquisa, registo, ficha, encarregados, confirmação de matrícula), turmas (criar, matricular, mudar de turma, anular), lançamento de exames |
 | Coordenação | Cursos, disciplinas, planos curriculares, atribuição de professores, pautas, estágios e TFC (notas) |
 | Professor(a) | As minhas turmas, lançamento de notas (MAC/NPP/NPT) e exames, faltas por aula, avaliação descritiva na Iniciação |
 | Director(a) de turma | Além do professor: pautas, publicação do trimestre, resumo de faltas, justificação de faltas, fichas dos alunos da turma |
