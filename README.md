@@ -47,7 +47,7 @@ cp .env.example .env     # preencher DATABASE_URL
 npm run migrar           # cria as tabelas
 npm run seed             # dados fictícios de teste (só em desenvolvimento)
 npm run dev              # API em http://localhost:3000/api/v1
-npm test                 # 87 testes (não precisam de servidor PostgreSQL)
+npm test                 # 96 testes (não precisam de servidor PostgreSQL)
 ```
 
 ## Regras de avaliação

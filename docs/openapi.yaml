@@ -1215,7 +1215,23 @@ paths:
                       type: object
                       properties:
                         classe: { type: string }
-                        percentagem: { type: number }
+                        total: { type: integer }
+                        transitam: { type: integer }
+                        naoTransitam: { type: integer }
+                        pendentes: { type: integer }
+                        percentagem: { type: [number, 'null'], description: Sobre os alunos com situação decidida }
+                  anoLectivo:
+                    type: object
+                    properties:
+                      id: { $ref: '#/components/schemas/Uuid' }
+                      designacao: { type: string }
+                  totais:
+                    type: object
+                    properties:
+                      alunos: { type: integer }
+                      turmas: { type: integer }
+                      professores: { type: integer }
+                      faltasInjustificadas: { type: integer }
   /auditoria:
     get:
       tags: [Auditoria]

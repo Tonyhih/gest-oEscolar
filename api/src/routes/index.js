@@ -118,6 +118,15 @@ export function criarRotas(config) {
   r.get('/turmas/:id/faltas', auth, perfil('director', 'professor'), v({ params: paramsId, query: E.filtroFaltas }), F.listar);
   r.post('/faltas/:id/justificar', auth, perfil('professor'), v({ params: paramsId, body: E.motivo }), F.justificar);
 
+  // ---------------------------------------------------------- Estágio e TFC (13.ª classe) e painel
+  const G = C.estagiosCtrl;
+  const ESTAGIO = ['director', 'secretaria', 'coordenador'];
+  r.get('/estagios', auth, perfil(...ESTAGIO), v({ query: E.filtroAno }), G.listar);
+  r.post('/estagios', auth, perfil(...ESTAGIO), v({ body: E.estagio }), G.criar);
+  r.patch('/estagios/:id', auth, perfil(...ESTAGIO), v({ params: paramsId, body: E.actualizarEstagio }), G.actualizar);
+  r.patch('/estagios/:id/tfc', auth, perfil('director', 'coordenador'), v({ params: paramsId, body: E.tfc }), G.tfc);
+  r.get('/painel', auth, perfil(...DIR), v({ query: E.filtroAno }), C.painelCtrl.obter);
+
   // ---------------------------------------------------------- Auditoria
   r.get('/auditoria', auth, perfil(...DIR), v({ query: E.filtroAuditoria }), C.auditoriaCtrl.listar);
 

@@ -154,7 +154,6 @@ O Render e o GitHub Pages publicam a partir do `main`. Abra um pull request de `
 | O Render gratuito tem um limite mensal de horas ⚠️ | Um só serviço cabe no limite | Não criar mais serviços na mesma conta |
 | Não há envio de email | As palavras-passe provisórias são entregues em mão | Fora do âmbito do MVP |
 | O GitHub Pages não permite definir cabeçalhos HTTP | Sem CSP no front-end | A API tem o helmet; o Vue escapa o HTML; o token fica em `sessionStorage` |
-| Estágio, TFC (RF40–43) e painel (RF38) sem ecrãs | Registados pela base de dados e mostrados na pauta da 13.ª | Próxima iteração |
 
 ---
 
@@ -164,8 +163,8 @@ O Render e o GitHub Pages publicam a partir do `main`. Abra um pull request de `
 - [x] **Fase 1:** 43 requisitos funcionais, 11 não funcionais, 18 regras de negócio com exemplos
 - [x] **Fase 2:** arquitectura e contrato OpenAPI 3.1 validado
 - [x] **Fase 3:** PostgreSQL com isolamento entre escolas, restrições e cálculo exacto das notas
-- [x] **Fase 4:** API com 63 rotas e 87 testes (unitários, base de dados, integração)
-- [x] **Fase 5:** front-end com 15 ecrãs, 13 testes unitários e 16 fluxos testados no browser
+- [x] **Fase 4:** API com 68 rotas e 96 testes (unitários, base de dados, integração), incluindo estágio, TFC e painel
+- [x] **Fase 5:** front-end com 18 ecrãs, 13 testes unitários e 18 fluxos testados no browser
 - [x] **Fase 6:** ficheiros de publicação, dependências sem vulnerabilidades, política de privacidade, cópias de segurança, guia de operação
 - [ ] **Publicação real:** passos 1 a 5 acima (nas contas do autor)
 - [ ] **Validações externas:** regras de avaliação com o professor; prazos de conservação e política de privacidade com um jurista

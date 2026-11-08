@@ -139,7 +139,34 @@ async function entrar(page, email) {
     ok('administrador vê as escolas');
     await p.close();
 
-    // 6. Telemóvel (360 px): professora a lançar notas
+    // 6. Painel do director e estágios (13.ª classe)
+    p = await novaPagina(browser);
+    await entrar(p, 'director@lda101.test');
+    await p.getByRole('link', { name: 'Painel' }).first().click();
+    await p.getByText('Alunos que transitam, por classe').waitFor();
+    await p.getByRole('img', { name: '7.ª classe: 60 % transitam' }).waitFor();
+    ok('painel do director com a transição por classe');
+    await p.screenshot({ path: `${OUT}/10-painel.png`, fullPage: true });
+    await p.close();
+
+    p = await novaPagina(browser);
+    await entrar(p, 'coordenador@hbo201.test');
+    await p.getByRole('link', { name: 'Estágios' }).click();
+    const cartao = p.locator('.card', { hasText: 'Albertina Sakaita' });
+    await cartao.getByText('Por concluir').waitFor();
+    await cartao.getByRole('button', { name: 'Actualizar' }).click();
+    await p.getByLabel('Nota do estágio').fill('13');
+    await p.getByLabel('Tema').fill('Rede da escola');
+    await p.getByLabel('Data da defesa').fill('2027-06-21');
+    await p.getByLabel('Nota da defesa').fill('14,5');
+    await p.getByRole('button', { name: 'Gravar' }).click();
+    await p.getByText('Estágio de Albertina Sakaita gravado.').waitFor();
+    await cartao.getByText('Curso concluído').waitFor();
+    ok('coordenação lança estágio e TFC; curso concluído');
+    await p.screenshot({ path: `${OUT}/11-estagios.png`, fullPage: true });
+    await p.close();
+
+    // 7. Telemóvel (360 px): professora a lançar notas
     p = await novaPagina(browser, { viewport: { width: 360, height: 740 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
     await entrar(p, 'marta@hbo201.test');
     await p.screenshot({ path: `${OUT}/08-telemovel-inicio.png` });

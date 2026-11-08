@@ -38,6 +38,10 @@ export const rotas = [
   { path: '/turmas/:id/pautas', name: 'pautas', component: () => import('@/views/PautasView.vue'), props: true,
     meta: { perfis: TODOS, titulo: 'Pautas' } },
 
+  { path: '/estagios', name: 'estagios', component: () => import('@/views/EstagiosView.vue'),
+    meta: { perfis: ['director', 'secretaria', 'coordenador'], titulo: 'Estágios e TFC' } },
+  { path: '/painel', name: 'painel', component: () => import('@/views/PainelView.vue'),
+    meta: { perfis: ['director'], titulo: 'Painel' } },
   { path: '/auditoria', name: 'auditoria', component: () => import('@/views/AuditoriaView.vue'),
     meta: { perfis: ['director'], titulo: 'Auditoria' } },
 

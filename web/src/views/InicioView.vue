@@ -12,6 +12,7 @@ const turmas = usePedido(() => (ehPlataforma ? Promise.resolve([]) : api.get('/t
 const atalhos = computed(() => ({
   admin_plataforma: [{ to: { name: 'escolas' }, titulo: 'Escolas', texto: 'Registar escolas, activar ou desactivar, criar a conta do director.' }],
   director: [
+    { to: { name: 'painel' }, titulo: 'Painel', texto: 'Alunos, turmas e transição por classe no ano lectivo.' },
     { to: { name: 'configuracao' }, titulo: 'Configuração', texto: 'Ano lectivo, trimestres, classes, cursos, disciplinas e planos.' },
     { to: { name: 'utilizadores' }, titulo: 'Utilizadores', texto: 'Secretaria, coordenação e professores.' },
     { to: { name: 'turmas' }, titulo: 'Turmas e pautas', texto: 'Turmas, atribuições, pautas e publicação.' },

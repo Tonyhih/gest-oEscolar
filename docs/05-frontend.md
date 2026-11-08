@@ -9,9 +9,9 @@
 
 ## 1. O que está feito
 
-- **SPA em Vue 3, Vite, Vue Router, Pinia e Bootstrap 5.3**, com 15 ecrãs (mais 4 separadores na configuração) cobrindo todos os requisitos obrigatórios (M) do MVP.
+- **SPA em Vue 3, Vite, Vue Router, Pinia e Bootstrap 5.3**, com 18 ecrãs (mais 4 separadores na configuração) cobrindo todos os requisitos do MVP, incluindo os desejáveis: estágio, TFC e painel.
 - **12 testes unitários** (Vitest): cliente HTTP, guardas de rota e formatação.
-- **Teste no browser** (`web/e2e/fluxos.cjs`, Playwright) com **16 fluxos** reais: secretaria, professora, director de turma, director, administrador da plataforma e uma professora num telemóvel de 360 px. Todos passam, sem erros na consola.
+- **Teste no browser** (`web/e2e/fluxos.cjs`, Playwright) com **18 fluxos** reais: secretaria, professora, director de turma, director, administrador da plataforma e uma professora num telemóvel de 360 px. Todos passam, sem erros na consola.
 - **Primeira página leve:** cerca de 82 KB comprimidos (JS 50 KB + CSS 31 KB), bem abaixo dos 500 KB do RNF06. Cada ecrã é carregado só quando é aberto.
 
 ### Ecrãs por perfil
@@ -19,9 +19,9 @@
 | Perfil | Ecrãs |
 |---|---|
 | Administração da plataforma | Escolas (registar, activar/desactivar, criar a conta do director com palavra-passe provisória) |
-| Director(a) | Configuração (ano lectivo e trimestres abertos/fechados, classes e regras de avaliação, cursos, disciplinas, planos curriculares com disciplinas-chave), utilizadores, turmas e atribuições, pautas, publicação, correcção de notas, exportação CSV, faltas, auditoria |
-| Secretaria | Alunos (pesquisa, registo, ficha, encarregados, confirmação de matrícula), turmas (criar, matricular, mudar de turma, anular), lançamento de exames |
-| Coordenação | Cursos, disciplinas, planos curriculares, atribuição de professores, pautas |
+| Director(a) | Painel (alunos, turmas, transição por classe), configuração (ano lectivo e trimestres abertos/fechados, classes e regras de avaliação, cursos, disciplinas, planos curriculares com disciplinas-chave), utilizadores, turmas e atribuições, pautas, publicação, correcção de notas, exportação CSV, faltas, auditoria |
+| Secretaria | Registo de estágios, alunos (pesquisa, registo, ficha, encarregados, confirmação de matrícula), turmas (criar, matricular, mudar de turma, anular), lançamento de exames |
+| Coordenação | Cursos, disciplinas, planos curriculares, atribuição de professores, pautas, estágios e TFC (notas) |
 | Professor(a) | As minhas turmas, lançamento de notas (MAC/NPP/NPT) e exames, faltas por aula, avaliação descritiva na Iniciação |
 | Director(a) de turma | Além do professor: pautas, publicação do trimestre, resumo de faltas, justificação de faltas, fichas dos alunos da turma |
 
@@ -108,4 +108,4 @@ O workflow `.github/workflows/web.yml` testa e compila em cada push. A partir do
 
 ## 7. Por verificar
 - [ ] Testar com utilizadores reais (um professor e a secretaria) e recolher sugestões.
-- [ ] Ecrãs desejáveis: estágio e TFC, painel do director (dependem das rotas da API ainda por fazer).
+- [x] Ecrãs desejáveis: estágio e TFC, painel do director.

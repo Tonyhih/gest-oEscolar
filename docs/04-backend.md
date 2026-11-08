@@ -9,7 +9,7 @@
 
 ## 1. O que está feito
 
-- **63 rotas em `/api/v1`**, que cobrem todos os requisitos obrigatórios (M) do MVP.
+- **68 rotas em `/api/v1`**, que cobrem todos os requisitos do MVP: os obrigatórios (M) e também os desejáveis (D), ou seja, estágio, TFC e painel.
 - **86 testes automáticos:**
   - 8 unitários;
   - 23 da base de dados;
@@ -27,8 +27,12 @@
 | Avaliação | notas, exame, avaliações descritivas, publicar, correcções, pautas (JSON e CSV) | RF24–RF34 |
 | Assiduidade | faltas em lote, listagem, justificação, resumo | RF35–RF37 |
 | Auditoria | `/auditoria` | RF39 |
+| Estágio e TFC (13.ª) | `/estagios`, `/estagios/:id`, `/estagios/:id/tfc` | RF40–RF43 |
+| Painel do director | `/painel` | RF38 |
 
-**Ainda por fazer (desejáveis, D):** as rotas do estágio e do TFC (RF40–RF43) e o painel do director (RF38). A base de dados já os suporta, e a pauta da 13.ª classe já mostra o estágio e o TFC.
+**Estágio e TFC:** só na 13.ª classe e um por matrícula. A nota do estágio e o TFC são da coordenação (a secretaria regista o estágio). A nota da defesa exige a data da defesa.
+
+**Painel:** só números agregados, sem nomes de alunos. Usa as mesmas regras de transição da pauta final.
 
 ---
 
@@ -121,4 +125,4 @@ curl -s localhost:3000/api/v1/turmas -H "Authorization: Bearer $TOKEN"
 
 ## 7. Por verificar
 - [ ] Correr `npm run migrar`, `npm run seed` e `npm run dev` contra um PostgreSQL real (local ou Neon). Os testes usam o PGlite, que é PostgreSQL 16, mas ainda não houve uma execução contra um servidor real.
-- [ ] Rotas desejáveis: estágio e TFC (RF40–RF43) e painel (RF38).
+- [x] Rotas desejáveis: estágio e TFC (RF40–RF43) e painel (RF38), com 9 testes de integração.

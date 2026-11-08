@@ -123,10 +123,26 @@ export const queryData = z.object({ data });
 export const faltasLote = z.array(uuid).max(100);
 export const filtroFaltas = z.object({ aluno: uuid.optional(), trimestre: trimestre.optional() });
 
+// ---------------------------------------------------------------- Estágio e TFC (RF40–RF43) e painel (RF38)
+export const estagio = z.object({
+  matricula: uuid, entidade: texto(2, 200), orientadorEntidade: texto(2, 120).optional(),
+  orientadorEscola: uuid.optional(), inicio: data, fim: data.optional(),
+});
+export const actualizarEstagio = z.object({
+  entidade: texto(2, 200).optional(), orientadorEntidade: texto(2, 120).optional(), orientadorEscola: uuid.optional(),
+  inicio: data.optional(), fim: data.nullable().optional(), estado: z.enum(['a_decorrer', 'concluido']).optional(),
+  nota: nota.nullable().optional(),
+});
+export const tfc = z.object({
+  tema: texto(3, 300).optional(), orientador: uuid.optional(), dataDefesa: data.optional(),
+  juri: z.array(texto(2, 120)).max(5).optional(), nota: nota.nullable().optional(),
+});
+export const filtroAno = z.object({ anoLectivo: uuid.optional() });
+
 // ---------------------------------------------------------------- Auditoria
 export const filtroAuditoria = z.object({
   utilizador: uuid.optional(),
-  entidade: z.enum(['nota', 'matricula', 'falta', 'aluno', 'utilizador', 'classe', 'turma', 'escola', 'ano_lectivo', 'plano_curricular']).optional(),
+  entidade: z.enum(['nota', 'matricula', 'falta', 'aluno', 'utilizador', 'classe', 'turma', 'escola', 'ano_lectivo', 'plano_curricular', 'estagio']).optional(),
   de: data.optional(), ate: data.optional(),
   pagina: z.coerce.number().int().min(1).default(1), limite: z.coerce.number().int().min(1).max(100).default(20),
 });

@@ -11,6 +11,8 @@ import * as matriculas from '../services/matriculas.js';
 import * as notas from '../services/notas.js';
 import * as faltas from '../services/faltas.js';
 import * as auditoria from '../services/auditoria.js';
+import * as estagios from '../services/estagios.js';
+import * as painel from '../services/painel.js';
 
 /** Cria um controlador a partir de fn(req), que devolve o corpo da resposta. */
 const acao = (fn, estado = 200) => async (req, res) => {
@@ -120,6 +122,17 @@ export const faltasCtrl = {
   listar: acao((req, d, u) => faltas.listar(req.bd, u, d.params.id, d.query)),
   justificar: acao((req, d, u) => faltas.justificar(req.bd, u, d.params.id, d.body)),
   resumo: acao((req, d, u) => faltas.resumo(req.bd, u, d.params.id, d.query.trimestre)),
+};
+
+export const estagiosCtrl = {
+  listar: acao((req, d, u) => estagios.listar(req.bd, u, d.query)),
+  criar: acao((req, d, u) => estagios.criar(req.bd, u, d.body), 201),
+  actualizar: acao((req, d, u) => estagios.actualizar(req.bd, u, d.params.id, d.body)),
+  tfc: acao((req, d, u) => estagios.definirTfc(req.bd, u, d.params.id, d.body)),
+};
+
+export const painelCtrl = {
+  obter: acao((req, d, u) => painel.obter(req.bd, u, d.query)),
 };
 
 export const auditoriaCtrl = {

@@ -13,8 +13,12 @@ const menu = computed(() => {
   if (p === 'admin_plataforma') return [{ nome: 'escolas', texto: 'Escolas' }];
   const itens = [{ nome: 'turmas', texto: p === 'professor' ? 'As minhas turmas' : 'Turmas' }];
   if (['director', 'secretaria', 'coordenador'].includes(p)) itens.push({ nome: 'alunos', texto: 'Alunos' });
+  if (['director', 'secretaria', 'coordenador'].includes(p)) itens.push({ nome: 'estagios', texto: 'Estágios' });
   if (['director', 'coordenador'].includes(p)) itens.push({ nome: 'configuracao', texto: 'Configuração' });
-  if (p === 'director') itens.push({ nome: 'utilizadores', texto: 'Utilizadores' }, { nome: 'auditoria', texto: 'Auditoria' });
+  if (p === 'director') {
+    itens.unshift({ nome: 'painel', texto: 'Painel' });
+    itens.push({ nome: 'utilizadores', texto: 'Utilizadores' }, { nome: 'auditoria', texto: 'Auditoria' });
+  }
   return itens;
 });
 
@@ -26,7 +30,7 @@ function sair() {
 
 <template>
   <a class="visually-hidden-focusable position-absolute p-2 bg-body" href="#conteudo">Saltar para o conteúdo</a>
-  <nav v-if="auth.autenticado" class="navbar navbar-expand-md bg-success" data-bs-theme="dark" aria-label="Menu principal">
+  <nav v-if="auth.autenticado" class="navbar navbar-expand-lg bg-success" data-bs-theme="dark" aria-label="Menu principal">
     <div class="container-fluid">
       <RouterLink class="navbar-brand fw-semibold" :to="{ name: 'inicio' }">Gestão Escolar</RouterLink>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu"
@@ -39,10 +43,9 @@ function sair() {
             <RouterLink class="nav-link" active-class="active" :to="{ name: item.nome }">{{ item.texto }}</RouterLink>
           </li>
         </ul>
-        <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 text-white small">
-          <span>
-            <strong>{{ auth.utilizador.nome }}</strong>
-            · {{ NOMES_PERFIL[auth.perfil] }}<template v-if="auth.utilizador.escola"> · {{ auth.utilizador.escola.nome }}</template>
+        <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-2 text-white small text-nowrap">
+          <span :title="auth.utilizador.escola?.nome">
+            <strong>{{ auth.utilizador.nome }}</strong> · {{ NOMES_PERFIL[auth.perfil] }}
           </span>
           <RouterLink class="btn btn-sm btn-outline-light" :to="{ name: 'trocar-palavra-passe' }">Palavra-passe</RouterLink>
           <button type="button" class="btn btn-sm btn-light" @click="sair">Sair</button>
