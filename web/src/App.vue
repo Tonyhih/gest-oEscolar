@@ -12,6 +12,7 @@ const menu = computed(() => {
   if (!auth.autenticado || auth.trocaPendente) return [];
   if (p === 'admin_plataforma') return [{ nome: 'escolas', texto: 'Escolas' }];
   const itens = [{ nome: 'turmas', texto: p === 'professor' ? 'As minhas turmas' : 'Turmas' }];
+  if (['director', 'secretaria'].includes(p)) itens.push({ nome: 'matriculas', texto: 'Matrículas' });
   if (['director', 'secretaria', 'coordenador'].includes(p)) itens.push({ nome: 'alunos', texto: 'Alunos' });
   if (['director', 'secretaria', 'coordenador'].includes(p)) itens.push({ nome: 'estagios', texto: 'Estágios' });
   if (['director', 'coordenador'].includes(p)) itens.push({ nome: 'configuracao', texto: 'Configuração' });

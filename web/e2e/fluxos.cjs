@@ -139,6 +139,30 @@ async function entrar(page, email) {
     ok('administrador vê as escolas');
     await p.close();
 
+    // 5b. Secretaria: ficha de matrícula e importação de uma lista de teste
+    p = await novaPagina(browser);
+    await entrar(p, 'secretaria@lda101.test');
+    await p.getByRole('link', { name: 'Matrículas' }).first().click();
+    await p.getByLabel('Nome completo').fill('Kiala Novo');
+    await p.getByLabel('Data de nascimento').fill('2013-04-04');
+    await p.locator('#m-ee-nome').fill('Maria Novo');
+    await p.locator('#m-ee-tel').fill('+244 923 111 222');
+    await p.locator('#m-turma').selectOption(await p.locator('#m-turma option', { hasText: '7.ª A' }).getAttribute('value'));
+    await p.getByRole('button', { name: 'Matricular' }).click();
+    await p.getByText(/Kiala Novo\s*matriculado\(a\) na 7\.ª A/).waitFor();
+    ok('secretaria matricula um aluno novo com encarregado numa só ficha');
+    await p.getByRole('tab', { name: 'Importar lista' }).click();
+    await p.locator('#i-turma').selectOption(await p.locator('#i-turma option', { hasText: '9.ª A' }).getAttribute('value'));
+    await p.getByRole('button', { name: 'Preencher com 10 alunos de teste' }).click();
+    await p.getByRole('button', { name: 'Importar 10 alunos' }).click();
+    await p.getByText('10 alunos importados e matriculados na 9.ª A.').waitFor();
+    ok('secretaria importa 10 alunos de teste para uma turma');
+    await p.screenshot({ path: `${OUT}/12-importar.png`, fullPage: true });
+    await p.getByRole('tab', { name: 'Matrículas do ano' }).click();
+    await p.getByText('Adelino Chipenda (teste)').waitFor();
+    ok('lista de matrículas do ano mostra os importados');
+    await p.close();
+
     // 6. Painel do director e estágios (13.ª classe)
     p = await novaPagina(browser);
     await entrar(p, 'director@lda101.test');

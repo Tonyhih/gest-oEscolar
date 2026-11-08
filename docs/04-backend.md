@@ -23,7 +23,7 @@
 | Utilizadores | `/utilizadores`, `…/:id`, `…/:id/repor-palavra-passe` | RF07–RF09 |
 | Estrutura | `/anos-lectivos`, `/catalogo/classes`, `/classes`, `/cursos`, `/disciplinas`, `/planos-curriculares` | RF10–RF14 |
 | Pessoas | `/alunos`, `/alunos/:id/encarregados`, `/encarregados`, `/professores` | RF15–RF18 |
-| Turmas e matrículas | `/turmas`, `/turmas/:id/atribuicoes`, `/matriculas`, `/matriculas/confirmacoes`, `…/mudar-turma`, `…/anular` | RF19–RF23 |
+| Turmas e matrículas | `/turmas`, `/turmas/:id/atribuicoes`, `/matriculas`, `/matriculas/novas`, `/matriculas/importacao`, `/matriculas/confirmacoes`, `…/mudar-turma`, `…/anular` | RF19–RF23, RF44, RF45 |
 | Avaliação | notas, exame, avaliações descritivas, publicar, correcções, pautas (JSON e CSV) | RF24–RF34 |
 | Assiduidade | faltas em lote, listagem, justificação, resumo | RF35–RF37 |
 | Auditoria | `/auditoria` | RF39 |

@@ -798,6 +798,78 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
         '422': { $ref: '#/components/responses/Regra' }
+  /matriculas/novas:
+    post:
+      tags: [Turmas e matrículas]
+      summary: Ficha de matrícula de um aluno novo, numa só operação (RF44) – SE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [aluno, turma]
+              properties:
+                aluno: { $ref: '#/components/schemas/AlunoEntrada' }
+                encarregado:
+                  type: object
+                  required: [nome, telefone]
+                  properties:
+                    nome: { type: string }
+                    telefone: { type: string }
+                    parentesco: { type: string, default: Encarregado(a) }
+                turma: { $ref: '#/components/schemas/Uuid' }
+      responses:
+        '201':
+          description: Aluno, encarregado e matrícula criados
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Matricula' }
+        '400': { $ref: '#/components/responses/Invalido' }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /matriculas/importacao:
+    post:
+      tags: [Turmas e matrículas]
+      summary: Importar uma lista de alunos novos para uma turma, tudo ou nada (RF45) – SE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [turma, alunos]
+              properties:
+                turma: { $ref: '#/components/schemas/Uuid' }
+                alunos:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items:
+                    type: object
+                    required: [nome, dataNascimento, sexo]
+                    properties:
+                      nome: { type: string }
+                      dataNascimento: { type: string, format: date }
+                      sexo: { type: string, enum: [M, F] }
+                      encarregadoNome: { type: string }
+                      encarregadoTelefone: { type: string }
+                      parentesco: { type: string }
+      responses:
+        '201':
+          description: Importados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  importados: { type: integer }
+                  matriculas: { type: array, items: { $ref: '#/components/schemas/Matricula' } }
+        '400': { $ref: '#/components/responses/Invalido' }
+        '409':
+          description: A turma não tem vagas para todos
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
   /matriculas/confirmacoes:
     post:
       tags: [Turmas e matrículas]
@@ -1621,6 +1693,8 @@ components:
         id: { $ref: '#/components/schemas/Uuid' }
         aluno: { $ref: '#/components/schemas/AlunoResumo' }
         turma: { $ref: '#/components/schemas/Uuid' }
+        turmaDesignacao: { type: string, example: 7.ª A }
+        turno: { $ref: '#/components/schemas/Turno' }
         anoLectivo: { $ref: '#/components/schemas/Uuid' }
         tipo: { type: string, enum: [matricula, confirmacao] }
         estado: { type: string, enum: [activa, anulada, transferida, concluida] }
