@@ -51,7 +51,8 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          # Se o Render der outro nome ao serviço, crie a variável VITE_API_URL no repositório
+          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://gestao-escolar-api.onrender.com/api/v1' }}
           VITE_BASE: /${{ github.event.repository.name }}/
       - uses: actions/upload-pages-artifact@v3
         with:

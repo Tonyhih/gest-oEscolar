@@ -10,7 +10,8 @@
     "migrar": "node --env-file=.env scripts/migrar.js",
     "dev:memoria": "node scripts/dev-memoria.js",
     "migrar:producao": "node scripts/migrar.js",
-    "criar-admin": "node scripts/criar-admin.js"
+    "criar-admin": "node scripts/criar-admin.js",
+    "primeiro-admin": "node scripts/primeiro-admin.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

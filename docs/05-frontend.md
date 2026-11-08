@@ -102,7 +102,7 @@ Utilizadores de teste (palavra-passe `Teste#2026`):
 
 O workflow `.github/workflows/web.yml` testa e compila em cada push. A partir do `main`, também publica no GitHub Pages. Antes, é preciso:
 1. Em **Settings → Pages**, escolher **GitHub Actions** como origem.
-2. Em **Settings → Secrets and variables → Actions → Variables**, criar `VITE_API_URL` com o endereço da API no Render (Fase 6).
+2. Só se o serviço no Render tiver outro nome: em **Settings → Secrets and variables → Actions → Variables**, criar `VITE_API_URL`. Por omissão, usa-se `https://gestao-escolar-api.onrender.com/api/v1` (Fase 6).
 
 ---
 
