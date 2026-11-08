@@ -24,8 +24,8 @@ Projecto final de Desenvolvimento Web Avançado. É uma plataforma web para **v�
 | 0. Enquadramento | [docs/00-enquadramento.md](docs/00-enquadramento.md) | Aprovado |
 | 1. Requisitos | [docs/01-requisitos.md](docs/01-requisitos.md) | Aprovado |
 | 2. Arquitectura e contrato | [docs/02-arquitetura.md](docs/02-arquitetura.md) · [docs/openapi.yaml](docs/openapi.yaml) | Aprovado |
-| 3. Dados (PostgreSQL) | [docs/03-dados.md](docs/03-dados.md) | Em revisão |
-| 4. Back-end | — | Por fazer |
+| 3. Dados (PostgreSQL) | [docs/03-dados.md](docs/03-dados.md) | Aprovado |
+| 4. Back-end | [docs/04-backend.md](docs/04-backend.md) | Em revisão |
 | 5. Front-end | — | Por fazer |
 | 6. Publicação | — | Por fazer |
 
@@ -37,7 +37,8 @@ npm install
 cp .env.example .env     # preencher DATABASE_URL
 npm run migrar           # cria as tabelas
 npm run seed             # dados fictícios de teste (só em desenvolvimento)
-npm test                 # testes (não precisam de servidor PostgreSQL)
+npm run dev              # API em http://localhost:3000/api/v1
+npm test                 # 86 testes (não precisam de servidor PostgreSQL)
 ```
 
 ## Regras de avaliação
