@@ -1,0 +1,1722 @@
+openapi: 3.1.0
+info:
+  title: Sistema de Gestão Escolar (Angola)
+  version: 0.1.0
+  description: |
+    API REST de uma plataforma de gestão escolar para várias escolas, segundo o sistema de ensino angolano
+    (Iniciação a 13.ª classe). A escola de cada pedido é sempre a do utilizador autenticado.
+    Um recurso de outra escola responde 404.
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Desenvolvimento
+  - url: https://exemplo.onrender.com/api/v1
+    description: Produção (Render)
+security:
+  - bearer: []
+tags:
+  - name: Sistema
+  - name: Autenticação
+  - name: Plataforma
+  - name: Utilizadores
+  - name: Estrutura de ensino
+  - name: Pessoas
+  - name: Turmas e matrículas
+  - name: Avaliação
+  - name: Assiduidade
+  - name: Estágio
+  - name: Auditoria
+
+paths:
+  /saude:
+    get:
+      tags: [Sistema]
+      summary: Verificação do estado da API
+      security: []
+      responses:
+        '200':
+          description: API a funcionar
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  estado: { type: string, example: ok }
+
+  # ---------- Autenticação ----------
+  /auth/login:
+    post:
+      tags: [Autenticação]
+      summary: Iniciar sessão (RF05)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, palavraPasse]
+              additionalProperties: false
+              properties:
+                email: { type: string, format: email }
+                palavraPasse: { type: string, minLength: 1 }
+      responses:
+        '200':
+          description: Sessão iniciada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  utilizador: { $ref: '#/components/schemas/UtilizadorSessao' }
+        '400': { $ref: '#/components/responses/Invalido' }
+        '401': { $ref: '#/components/responses/NaoAutenticado' }
+        '429': { $ref: '#/components/responses/Limite' }
+  /auth/eu:
+    get:
+      tags: [Autenticação]
+      summary: Dados do utilizador autenticado
+      responses:
+        '200':
+          description: Utilizador
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UtilizadorSessao' }
+        '401': { $ref: '#/components/responses/NaoAutenticado' }
+  /auth/palavra-passe:
+    post:
+      tags: [Autenticação]
+      summary: Alterar a própria palavra-passe (RF06)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [actual, nova]
+              properties:
+                actual: { type: string }
+                nova: { type: string, minLength: 8 }
+      responses:
+        '204': { description: Alterada }
+        '400': { $ref: '#/components/responses/Invalido' }
+        '401': { $ref: '#/components/responses/NaoAutenticado' }
+        '422': { $ref: '#/components/responses/Regra' }
+
+  # ---------- Plataforma ----------
+  /plataforma/escolas:
+    get:
+      tags: [Plataforma]
+      summary: Listar escolas (RF01, RF04) – só AP
+      parameters:
+        - $ref: '#/components/parameters/Pagina'
+        - $ref: '#/components/parameters/Limite'
+      responses:
+        '200':
+          description: Escolas
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Pagina'
+                  - type: object
+                    properties:
+                      dados: { type: array, items: { $ref: '#/components/schemas/Escola' } }
+        '403': { $ref: '#/components/responses/Proibido' }
+    post:
+      tags: [Plataforma]
+      summary: Registar escola (RF01) – só AP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EscolaEntrada' }
+      responses:
+        '201':
+          description: Criada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Escola' }
+        '400': { $ref: '#/components/responses/Invalido' }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /plataforma/escolas/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    patch:
+      tags: [Plataforma]
+      summary: Activar ou desactivar escola (RF03) – só AP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estado: { $ref: '#/components/schemas/Estado' }
+      responses:
+        '200':
+          description: Actualizada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Escola' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+  /plataforma/escolas/{id}/director:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Plataforma]
+      summary: Criar a conta do director da escola (RF02) – só AP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nome, email]
+              properties:
+                nome: { type: string }
+                email: { type: string, format: email }
+      responses:
+        '201':
+          description: Director criado; a palavra-passe provisória é devolvida uma única vez
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  utilizador: { $ref: '#/components/schemas/Utilizador' }
+                  palavraPasseProvisoria: { type: string }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '409': { $ref: '#/components/responses/Conflito' }
+
+  # ---------- Utilizadores ----------
+  /utilizadores:
+    get:
+      tags: [Utilizadores]
+      summary: Listar utilizadores da escola (RF07) – DE
+      parameters:
+        - name: perfil
+          in: query
+          schema: { $ref: '#/components/schemas/Perfil' }
+        - $ref: '#/components/parameters/Pagina'
+      responses:
+        '200':
+          description: Utilizadores
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Pagina'
+                  - type: object
+                    properties:
+                      dados: { type: array, items: { $ref: '#/components/schemas/Utilizador' } }
+    post:
+      tags: [Utilizadores]
+      summary: Criar utilizador da escola (RF07) – DE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nome, email, perfil]
+              additionalProperties: false
+              properties:
+                nome: { type: string }
+                email: { type: string, format: email }
+                perfil:
+                  type: string
+                  enum: [secretaria, coordenador, professor]
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  utilizador: { $ref: '#/components/schemas/Utilizador' }
+                  palavraPasseProvisoria: { type: string }
+        '400': { $ref: '#/components/responses/Invalido' }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /utilizadores/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    patch:
+      tags: [Utilizadores]
+      summary: Actualizar ou desactivar utilizador (RF09) – DE
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome: { type: string }
+                estado: { $ref: '#/components/schemas/Estado' }
+      responses:
+        '200':
+          description: Actualizado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Utilizador' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+  /utilizadores/{id}/repor-palavra-passe:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Utilizadores]
+      summary: Repor palavra-passe (RF08) – DE
+      responses:
+        '200':
+          description: Nova palavra-passe provisória
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  palavraPasseProvisoria: { type: string }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+
+  # ---------- Estrutura de ensino ----------
+  /anos-lectivos:
+    get:
+      tags: [Estrutura de ensino]
+      summary: Listar anos lectivos (RF10)
+      responses:
+        '200':
+          description: Anos lectivos
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/AnoLectivo' } }
+    post:
+      tags: [Estrutura de ensino]
+      summary: Criar ano lectivo com os 3 trimestres (RF10) – DE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AnoLectivoEntrada' }
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnoLectivo' }
+        '400': { $ref: '#/components/responses/Invalido' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /anos-lectivos/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    patch:
+      tags: [Estrutura de ensino]
+      summary: Alterar datas ou abrir/fechar trimestres (RF10) – DE
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AnoLectivoEntrada' }
+      responses:
+        '200':
+          description: Actualizado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnoLectivo' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /anos-lectivos/{id}/activar:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Estrutura de ensino]
+      summary: Tornar o ano lectivo activo (só um por escola) – DE
+      responses:
+        '200':
+          description: Activado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnoLectivo' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /catalogo/classes:
+    get:
+      tags: [Estrutura de ensino]
+      summary: Catálogo nacional de classes (Iniciação a 13.ª) (RF11)
+      responses:
+        '200':
+          description: Catálogo
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/ClasseCatalogo' } }
+  /classes:
+    get:
+      tags: [Estrutura de ensino]
+      summary: Classes oferecidas pela escola (RF11)
+      responses:
+        '200':
+          description: Classes
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Classe' } }
+    post:
+      tags: [Estrutura de ensino]
+      summary: Oferecer uma classe do catálogo e configurar a avaliação (RF11, RF14) – DE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClasseEntrada' }
+      responses:
+        '201':
+          description: Criada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Classe' }
+        '409': { $ref: '#/components/responses/Conflito' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /classes/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    patch:
+      tags: [Estrutura de ensino]
+      summary: Alterar a configuração de avaliação (RF14) – DE
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ConfiguracaoAvaliacao' }
+      responses:
+        '200':
+          description: Actualizada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Classe' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /cursos:
+    get:
+      tags: [Estrutura de ensino]
+      summary: Listar cursos e áreas do II Ciclo (RF12)
+      responses:
+        '200':
+          description: Cursos
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Curso' } }
+    post:
+      tags: [Estrutura de ensino]
+      summary: Criar curso (RF12) – DE, CO
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CursoEntrada' }
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Curso' }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /cursos/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    patch:
+      tags: [Estrutura de ensino]
+      summary: Actualizar ou desactivar curso (RF12) – DE, CO
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CursoEntrada' }
+      responses:
+        '200':
+          description: Actualizado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Curso' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+  /disciplinas:
+    get:
+      tags: [Estrutura de ensino]
+      summary: Listar disciplinas (RF13)
+      responses:
+        '200':
+          description: Disciplinas
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Disciplina' } }
+    post:
+      tags: [Estrutura de ensino]
+      summary: Criar disciplina (RF13) – DE, CO
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DisciplinaEntrada' }
+      responses:
+        '201':
+          description: Criada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Disciplina' }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /disciplinas/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    patch:
+      tags: [Estrutura de ensino]
+      summary: Actualizar ou desactivar disciplina (RF13) – DE, CO
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DisciplinaEntrada' }
+      responses:
+        '200':
+          description: Actualizada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Disciplina' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+  /planos-curriculares:
+    get:
+      tags: [Estrutura de ensino]
+      summary: Plano curricular de uma classe e curso (RF13)
+      parameters:
+        - { name: classe, in: query, required: true, schema: { $ref: '#/components/schemas/Uuid' } }
+        - { name: curso, in: query, schema: { $ref: '#/components/schemas/Uuid' } }
+      responses:
+        '200':
+          description: Planos
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/PlanoCurricular' } }
+    post:
+      tags: [Estrutura de ensino]
+      summary: Criar plano curricular (RF13) – DE, CO
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PlanoCurricularEntrada' }
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlanoCurricular' }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /planos-curriculares/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    put:
+      tags: [Estrutura de ensino]
+      summary: Substituir as disciplinas do plano, incluindo as disciplinas-chave (RF13) – DE, CO
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PlanoCurricularEntrada' }
+      responses:
+        '200':
+          description: Substituído
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlanoCurricular' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '422': { $ref: '#/components/responses/Regra' }
+
+  # ---------- Pessoas ----------
+  /alunos:
+    get:
+      tags: [Pessoas]
+      summary: Pesquisar alunos (RF17)
+      parameters:
+        - { name: pesquisa, in: query, description: Nome ou número de processo, schema: { type: string } }
+        - { name: turma, in: query, schema: { $ref: '#/components/schemas/Uuid' } }
+        - $ref: '#/components/parameters/Pagina'
+        - $ref: '#/components/parameters/Limite'
+      responses:
+        '200':
+          description: Alunos
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Pagina'
+                  - type: object
+                    properties:
+                      dados: { type: array, items: { $ref: '#/components/schemas/AlunoResumo' } }
+    post:
+      tags: [Pessoas]
+      summary: Registar aluno (RF15) – SE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AlunoEntrada' }
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Aluno' }
+        '400': { $ref: '#/components/responses/Invalido' }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /alunos/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Pessoas]
+      summary: Processo do aluno (RF15)
+      responses:
+        '200':
+          description: Aluno
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Aluno' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+    patch:
+      tags: [Pessoas]
+      summary: Actualizar aluno (RF15) – SE
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AlunoEntrada' }
+      responses:
+        '200':
+          description: Actualizado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Aluno' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /alunos/{id}/encarregados:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    put:
+      tags: [Pessoas]
+      summary: Definir os encarregados do aluno (RF16) – SE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                required: [encarregado, parentesco]
+                properties:
+                  encarregado: { $ref: '#/components/schemas/Uuid' }
+                  parentesco: { type: string, example: Mãe }
+                  principal: { type: boolean }
+      responses:
+        '200':
+          description: Actualizado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Aluno' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+  /encarregados:
+    get:
+      tags: [Pessoas]
+      summary: Pesquisar encarregados (RF16) – SE
+      parameters:
+        - { name: pesquisa, in: query, schema: { type: string } }
+      responses:
+        '200':
+          description: Encarregados
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Encarregado' } }
+    post:
+      tags: [Pessoas]
+      summary: Registar encarregado (RF16) – SE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EncarregadoEntrada' }
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Encarregado' }
+        '400': { $ref: '#/components/responses/Invalido' }
+  /professores:
+    get:
+      tags: [Pessoas]
+      summary: Listar professores (RF18)
+      responses:
+        '200':
+          description: Professores
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Professor' } }
+    post:
+      tags: [Pessoas]
+      summary: Registar professor (RF18) – DE, SE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProfessorEntrada' }
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Professor' }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /professores/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    patch:
+      tags: [Pessoas]
+      summary: Actualizar professor (RF18) – DE, SE
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProfessorEntrada' }
+      responses:
+        '200':
+          description: Actualizado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Professor' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+
+  # ---------- Turmas e matrículas ----------
+  /turmas:
+    get:
+      tags: [Turmas e matrículas]
+      summary: Listar turmas (o professor só vê as suas) (RF19)
+      parameters:
+        - { name: anoLectivo, in: query, schema: { $ref: '#/components/schemas/Uuid' } }
+        - { name: classe, in: query, schema: { $ref: '#/components/schemas/Uuid' } }
+        - { name: turno, in: query, schema: { $ref: '#/components/schemas/Turno' } }
+      responses:
+        '200':
+          description: Turmas
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Turma' } }
+    post:
+      tags: [Turmas e matrículas]
+      summary: Criar turma (RF19) – DE, SE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TurmaEntrada' }
+      responses:
+        '201':
+          description: Criada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Turma' }
+        '409': { $ref: '#/components/responses/Conflito' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /turmas/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Turmas e matrículas]
+      summary: Detalhe da turma com a lista de alunos (RF19)
+      responses:
+        '200':
+          description: Turma
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Turma'
+                  - type: object
+                    properties:
+                      alunos: { type: array, items: { $ref: '#/components/schemas/AlunoResumo' } }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+    patch:
+      tags: [Turmas e matrículas]
+      summary: Actualizar turma (RF19) – DE, SE
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TurmaEntrada' }
+      responses:
+        '200':
+          description: Actualizada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Turma' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /turmas/{id}/atribuicoes:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Turmas e matrículas]
+      summary: Professores atribuídos a cada disciplina da turma (RF20)
+      responses:
+        '200':
+          description: Atribuições
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Atribuicao' } }
+    put:
+      tags: [Turmas e matrículas]
+      summary: Definir as atribuições da turma (RF20) – DE, CO
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: array, items: { $ref: '#/components/schemas/Atribuicao' } }
+      responses:
+        '200':
+          description: Actualizadas
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Atribuicao' } }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /matriculas:
+    get:
+      tags: [Turmas e matrículas]
+      summary: Listar matrículas (RF21)
+      parameters:
+        - { name: anoLectivo, in: query, schema: { $ref: '#/components/schemas/Uuid' } }
+        - { name: turma, in: query, schema: { $ref: '#/components/schemas/Uuid' } }
+      responses:
+        '200':
+          description: Matrículas
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Matricula' } }
+    post:
+      tags: [Turmas e matrículas]
+      summary: Matricular aluno numa turma (RF21) – SE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [aluno, turma]
+              properties:
+                aluno: { $ref: '#/components/schemas/Uuid' }
+                turma: { $ref: '#/components/schemas/Uuid' }
+      responses:
+        '201':
+          description: Criada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Matricula' }
+        '409':
+          description: Já existe matrícula activa no ano lectivo, ou a turma está cheia (RN06, RN07)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /matriculas/confirmacoes:
+    post:
+      tags: [Turmas e matrículas]
+      summary: Confirmar a matrícula no novo ano lectivo (RF22) – SE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [matriculaAnterior, turma]
+              properties:
+                matriculaAnterior: { $ref: '#/components/schemas/Uuid' }
+                turma: { $ref: '#/components/schemas/Uuid' }
+      responses:
+        '201':
+          description: Confirmada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Matricula' }
+        '409': { $ref: '#/components/responses/Conflito' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /matriculas/{id}/mudar-turma:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Turmas e matrículas]
+      summary: Mudar de turma (RF23) – SE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [turma, motivo]
+              properties:
+                turma: { $ref: '#/components/schemas/Uuid' }
+                motivo: { type: string, minLength: 3 }
+      responses:
+        '200':
+          description: Alterada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Matricula' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /matriculas/{id}/anular:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Turmas e matrículas]
+      summary: Anular matrícula (RF23) – SE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [motivo]
+              properties:
+                motivo: { type: string, minLength: 3 }
+      responses:
+        '200':
+          description: Anulada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Matricula' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '422': { $ref: '#/components/responses/Regra' }
+
+  # ---------- Avaliação ----------
+  /turmas/{id}/disciplinas/{disciplinaId}/notas:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/DisciplinaId'
+      - $ref: '#/components/parameters/Trimestre'
+    get:
+      tags: [Avaliação]
+      summary: Grelha de notas da turma numa disciplina e trimestre (RF24, RF25)
+      responses:
+        '200':
+          description: Notas com a MT calculada
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/NotaTrimestre' } }
+        '403': { $ref: '#/components/responses/Proibido' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+    put:
+      tags: [Avaliação]
+      summary: Lançar as notas da turma em lote (RF24) – professor atribuído
+      description: Só no trimestre aberto, antes da publicação. Valores dentro da escala da classe (RN05).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                required: [matricula]
+                properties:
+                  matricula: { $ref: '#/components/schemas/Uuid' }
+                  mac: { type: [number, 'null'], minimum: 0, maximum: 20 }
+                  npp: { type: [number, 'null'], minimum: 0, maximum: 20 }
+                  npt: { type: [number, 'null'], minimum: 0, maximum: 20 }
+      responses:
+        '200':
+          description: Gravadas
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/NotaTrimestre' } }
+        '403': { $ref: '#/components/responses/Proibido' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /turmas/{id}/disciplinas/{disciplinaId}/exame:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/DisciplinaId'
+    put:
+      tags: [Avaliação]
+      summary: Lançar as notas da prova de exame (RF27) – só 6.ª, 9.ª e 12.ª
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                required: [matricula, exame]
+                properties:
+                  matricula: { $ref: '#/components/schemas/Uuid' }
+                  exame: { type: number, minimum: 0, maximum: 20 }
+      responses:
+        '200':
+          description: Gravadas, com a CF calculada (RF28)
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/NotaFinal' } }
+        '403': { $ref: '#/components/responses/Proibido' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /turmas/{id}/avaliacoes-descritivas:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/Trimestre'
+    put:
+      tags: [Avaliação]
+      summary: Avaliação descritiva na Iniciação (RF33)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                required: [matricula, texto]
+                properties:
+                  matricula: { $ref: '#/components/schemas/Uuid' }
+                  texto: { type: string, maxLength: 2000 }
+      responses:
+        '200': { description: Gravadas }
+        '403': { $ref: '#/components/responses/Proibido' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /turmas/{id}/trimestres/{n}/publicar:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - { name: n, in: path, required: true, schema: { type: integer, enum: [1, 2, 3] } }
+    post:
+      tags: [Avaliação]
+      summary: Fechar e publicar as notas do trimestre (RF30) – DT, DE
+      responses:
+        '200': { description: Publicadas }
+        '403': { $ref: '#/components/responses/Proibido' }
+        '422':
+          description: Faltam notas por lançar
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+  /notas/{id}/correccoes:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Avaliação]
+      summary: Corrigir uma nota publicada (RF31) – DE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [campo, valor, justificacao]
+              properties:
+                trimestre: { type: integer, enum: [1, 2, 3] }
+                campo: { type: string, enum: [mac, npp, npt, exame] }
+                valor: { type: number, minimum: 0, maximum: 20 }
+                justificacao: { type: string, minLength: 10 }
+      responses:
+        '200':
+          description: Corrigida e registada na auditoria
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotaFinal' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /turmas/{id}/pautas/trimestres/{n}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - { name: n, in: path, required: true, schema: { type: integer, enum: [1, 2, 3] } }
+    get:
+      tags: [Avaliação]
+      summary: Pauta trimestral (RF32)
+      responses:
+        '200':
+          description: Pauta
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Pauta' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+  /turmas/{id}/pautas/final:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - { name: formato, in: query, schema: { type: string, enum: [json, csv], default: json } }
+    get:
+      tags: [Avaliação]
+      summary: Pauta final com MFD/CF e situação de transição (RF26, RF28, RF29, RF32, RF34)
+      responses:
+        '200':
+          description: Pauta final
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Pauta' }
+            text/csv:
+              schema: { type: string }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+
+  # ---------- Assiduidade ----------
+  /turmas/{id}/disciplinas/{disciplinaId}/faltas:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/DisciplinaId'
+      - { name: data, in: query, required: true, schema: { type: string, format: date } }
+    put:
+      tags: [Assiduidade]
+      summary: Registar as faltas de uma aula em lote (RF35) – professor atribuído
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              description: Matrículas dos alunos que faltaram; os restantes ficam presentes
+              items: { $ref: '#/components/schemas/Uuid' }
+      responses:
+        '200':
+          description: Gravadas
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Falta' } }
+        '403': { $ref: '#/components/responses/Proibido' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /turmas/{id}/faltas:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - { name: aluno, in: query, schema: { $ref: '#/components/schemas/Uuid' } }
+      - { name: trimestre, in: query, schema: { type: integer, enum: [1, 2, 3] } }
+    get:
+      tags: [Assiduidade]
+      summary: Listar faltas da turma (RF37)
+      responses:
+        '200':
+          description: Faltas
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Falta' } }
+  /turmas/{id}/faltas/resumo:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/Trimestre'
+    get:
+      tags: [Assiduidade]
+      summary: Resumo de faltas por aluno e disciplina (RF37) – DT, DE
+      responses:
+        '200':
+          description: Resumo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    aluno: { $ref: '#/components/schemas/AlunoResumo' }
+                    porDisciplina:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          disciplina: { type: string }
+                          justificadas: { type: integer }
+                          injustificadas: { type: integer }
+  /faltas/{id}/justificar:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Assiduidade]
+      summary: Justificar falta (RF36) – DT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [motivo]
+              properties:
+                motivo: { type: string, minLength: 3 }
+      responses:
+        '200':
+          description: Justificada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Falta' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '422': { $ref: '#/components/responses/Regra' }
+
+  # ---------- Estágio (desejável) ----------
+  /estagios:
+    get:
+      tags: [Estágio]
+      summary: Listar estágios da 13.ª classe (RF40)
+      parameters:
+        - { name: anoLectivo, in: query, schema: { $ref: '#/components/schemas/Uuid' } }
+      responses:
+        '200':
+          description: Estágios
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Estagio' } }
+    post:
+      tags: [Estágio]
+      summary: Registar estágio (RF40) – SE, CO
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EstagioEntrada' }
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Estagio' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /estagios/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    patch:
+      tags: [Estágio]
+      summary: Actualizar estágio ou lançar a nota (RF40, RF41)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/EstagioEntrada'
+                - type: object
+                  properties:
+                    nota: { type: number, minimum: 0, maximum: 20 }
+      responses:
+        '200':
+          description: Actualizado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Estagio' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /estagios/{id}/tfc:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    patch:
+      tags: [Estágio]
+      summary: Registar o TFC e a nota da defesa (RF42, RF43) – CO
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Tfc' }
+      responses:
+        '200':
+          description: Actualizado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Estagio' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '422': { $ref: '#/components/responses/Regra' }
+
+  # ---------- Painel e auditoria ----------
+  /painel:
+    get:
+      tags: [Auditoria]
+      summary: Painel do director (RF38) – DE
+      parameters:
+        - { name: anoLectivo, in: query, schema: { $ref: '#/components/schemas/Uuid' } }
+      responses:
+        '200':
+          description: Indicadores
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alunosPorClasse:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        classe: { type: string }
+                        turno: { $ref: '#/components/schemas/Turno' }
+                        total: { type: integer }
+                  aprovacaoPorClasse:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        classe: { type: string }
+                        percentagem: { type: number }
+  /auditoria:
+    get:
+      tags: [Auditoria]
+      summary: Registo de auditoria (RF39) – DE
+      parameters:
+        - { name: utilizador, in: query, schema: { $ref: '#/components/schemas/Uuid' } }
+        - { name: entidade, in: query, schema: { type: string, enum: [nota, matricula, falta, aluno, utilizador, classe] } }
+        - { name: de, in: query, schema: { type: string, format: date } }
+        - { name: ate, in: query, schema: { type: string, format: date } }
+        - $ref: '#/components/parameters/Pagina'
+      responses:
+        '200':
+          description: Registos
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Pagina'
+                  - type: object
+                    properties:
+                      dados: { type: array, items: { $ref: '#/components/schemas/RegistoAuditoria' } }
+
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { $ref: '#/components/schemas/Uuid' }
+    DisciplinaId:
+      name: disciplinaId
+      in: path
+      required: true
+      schema: { $ref: '#/components/schemas/Uuid' }
+    Trimestre:
+      name: trimestre
+      in: query
+      required: true
+      schema: { type: integer, enum: [1, 2, 3] }
+    Pagina:
+      name: pagina
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    Limite:
+      name: limite
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+
+  responses:
+    Invalido:
+      description: Dados com formato inválido
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+    NaoAutenticado:
+      description: Sem token, token inválido ou credenciais erradas
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+    Proibido:
+      description: Sem permissão para este recurso
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+    NaoEncontrado:
+      description: Não existe ou pertence a outra escola
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+    Conflito:
+      description: Conflito com dados existentes
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+    Regra:
+      description: Viola uma regra de negócio
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+    Limite:
+      description: Demasiados pedidos
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+
+  schemas:
+    Uuid:
+      type: string
+      format: uuid
+      example: 3f2b8c1e-5d4a-4e7b-9c2f-1a2b3c4d5e6f
+    Estado:
+      type: string
+      enum: [activo, inactivo]
+    Perfil:
+      type: string
+      enum: [admin_plataforma, director, secretaria, coordenador, professor]
+    Turno:
+      type: string
+      enum: [manha, tarde, noite]
+    Ramo:
+      type: string
+      enum: [geral, tecnico_profissional]
+    Erro:
+      type: object
+      required: [mensagem, codigo]
+      properties:
+        mensagem: { type: string, example: Dados inválidos. }
+        codigo: { type: string, example: VALIDACAO }
+        detalhes:
+          type: array
+          items:
+            type: object
+            properties:
+              campo: { type: string }
+              mensagem: { type: string }
+    Pagina:
+      type: object
+      properties:
+        pagina: { type: integer }
+        limite: { type: integer }
+        total: { type: integer }
+
+    UtilizadorSessao:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        nome: { type: string }
+        email: { type: string }
+        perfil: { $ref: '#/components/schemas/Perfil' }
+        escola:
+          type: [object, 'null']
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+            nome: { type: string }
+        trocarPalavraPasse: { type: boolean, description: Primeiro acesso ou palavra-passe reposta }
+        turmasDirigidas: { type: array, items: { $ref: '#/components/schemas/Uuid' } }
+    Utilizador:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        nome: { type: string }
+        email: { type: string }
+        perfil: { $ref: '#/components/schemas/Perfil' }
+        estado: { $ref: '#/components/schemas/Estado' }
+
+    EscolaEntrada:
+      type: object
+      required: [nome, codigo, provincia, municipio, natureza, ciclos]
+      additionalProperties: false
+      properties:
+        nome: { type: string, example: Escola Secundária n.º 1234 }
+        codigo: { type: string, example: LDA-1234 }
+        provincia: { type: string, example: Luanda }
+        municipio: { type: string, example: Viana }
+        natureza: { type: string, enum: [publica, privada, comparticipada] }
+        ciclos:
+          type: array
+          items: { type: string, enum: [primario, i_ciclo, ii_ciclo_geral, ii_ciclo_tecnico] }
+    Escola:
+      allOf:
+        - $ref: '#/components/schemas/EscolaEntrada'
+        - type: object
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+            estado: { $ref: '#/components/schemas/Estado' }
+
+    Trimestre:
+      type: object
+      required: [numero, inicio, fim]
+      properties:
+        numero: { type: integer, enum: [1, 2, 3] }
+        inicio: { type: string, format: date }
+        fim: { type: string, format: date }
+        aberto: { type: boolean, description: Permite o lançamento de notas }
+    AnoLectivoEntrada:
+      type: object
+      required: [designacao, trimestres]
+      properties:
+        designacao: { type: string, example: 2026/2027 }
+        trimestres:
+          type: array
+          minItems: 3
+          maxItems: 3
+          items: { $ref: '#/components/schemas/Trimestre' }
+    AnoLectivo:
+      allOf:
+        - $ref: '#/components/schemas/AnoLectivoEntrada'
+        - type: object
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+            activo: { type: boolean }
+
+    ClasseCatalogo:
+      type: object
+      properties:
+        codigo: { type: string, enum: [INI, '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'] }
+        designacao: { type: string, example: 7.ª classe }
+        ciclo: { type: string, enum: [primario, i_ciclo, ii_ciclo] }
+        ramos: { type: array, items: { $ref: '#/components/schemas/Ramo' } }
+    ConfiguracaoAvaliacao:
+      type: object
+      description: Regras de avaliação da classe na escola (RF14)
+      properties:
+        escalaMaxima: { type: integer, enum: [10, 20] }
+        notaMinimaAprovacao: { type: number, example: 10 }
+        classeDeExame: { type: boolean, description: '6.ª, 9.ª e 12.ª' }
+        avaliacaoQualitativa: { type: boolean, description: Iniciação }
+        apenasEstagio: { type: boolean, description: 13.ª do técnico-profissional }
+        maxNegativas: { type: integer, example: 2, description: Ignorado nas classes de exame (exigem 0) }
+        minimoNegativa: { type: number, example: 7, description: 'A negativa tem de ser superior a este valor (7 ou 3,5)' }
+    ClasseEntrada:
+      allOf:
+        - type: object
+          required: [codigo, ramo]
+          properties:
+            codigo: { type: string, example: '10' }
+            ramo: { $ref: '#/components/schemas/Ramo' }
+        - $ref: '#/components/schemas/ConfiguracaoAvaliacao'
+    Classe:
+      allOf:
+        - $ref: '#/components/schemas/ClasseEntrada'
+        - type: object
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+            designacao: { type: string, example: 10.ª classe – Técnico-Profissional }
+
+    CursoEntrada:
+      type: object
+      required: [nome, ramo]
+      properties:
+        nome: { type: string, example: Técnico de Informática }
+        sigla: { type: string, example: TI }
+        ramo: { $ref: '#/components/schemas/Ramo' }
+        coordenador: { $ref: '#/components/schemas/Uuid' }
+        estado: { $ref: '#/components/schemas/Estado' }
+    Curso:
+      allOf:
+        - $ref: '#/components/schemas/CursoEntrada'
+        - type: object
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+
+    DisciplinaEntrada:
+      type: object
+      required: [nome, sigla]
+      properties:
+        nome: { type: string, example: Língua Portuguesa }
+        sigla: { type: string, example: LP }
+        estado: { $ref: '#/components/schemas/Estado' }
+    Disciplina:
+      allOf:
+        - $ref: '#/components/schemas/DisciplinaEntrada'
+        - type: object
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+
+    PlanoCurricularEntrada:
+      type: object
+      required: [classe, disciplinas]
+      properties:
+        classe: { $ref: '#/components/schemas/Uuid' }
+        curso: { $ref: '#/components/schemas/Uuid' }
+        disciplinas:
+          type: array
+          items:
+            type: object
+            required: [disciplina]
+            properties:
+              disciplina: { $ref: '#/components/schemas/Uuid' }
+              cargaHorariaSemanal: { type: integer, minimum: 1 }
+              chave: { type: boolean, default: false, description: Disciplina-chave (nuclear) }
+    PlanoCurricular:
+      allOf:
+        - $ref: '#/components/schemas/PlanoCurricularEntrada'
+        - type: object
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+
+    AlunoEntrada:
+      type: object
+      required: [nome, dataNascimento, sexo]
+      additionalProperties: false
+      properties:
+        numeroProcesso: { type: string, description: Gerado se não for enviado }
+        nome: { type: string }
+        dataNascimento: { type: string, format: date }
+        sexo: { type: string, enum: [M, F] }
+        documento:
+          type: object
+          properties:
+            tipo: { type: string, enum: [bi, cedula, passaporte] }
+            numero: { type: string }
+        naturalidade: { type: string }
+        morada: { type: string }
+        telefone: { type: string, example: '+244 923 000 000' }
+    AlunoResumo:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        numeroProcesso: { type: string }
+        nome: { type: string }
+        turma: { type: [string, 'null'], example: 10.ª A }
+    Aluno:
+      allOf:
+        - $ref: '#/components/schemas/AlunoEntrada'
+        - type: object
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+            estado: { $ref: '#/components/schemas/Estado' }
+            encarregados:
+              type: array
+              items:
+                type: object
+                properties:
+                  encarregado: { $ref: '#/components/schemas/Encarregado' }
+                  parentesco: { type: string }
+                  principal: { type: boolean }
+
+    EncarregadoEntrada:
+      type: object
+      required: [nome, telefone]
+      properties:
+        nome: { type: string }
+        telefone: { type: string }
+        email: { type: string, format: email }
+        documento: { type: string }
+        profissao: { type: string }
+    Encarregado:
+      allOf:
+        - $ref: '#/components/schemas/EncarregadoEntrada'
+        - type: object
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+
+    ProfessorEntrada:
+      type: object
+      required: [utilizador]
+      properties:
+        utilizador: { $ref: '#/components/schemas/Uuid' }
+        numeroAgente: { type: string }
+        habilitacoes: { type: string }
+        disciplinas: { type: array, items: { $ref: '#/components/schemas/Uuid' } }
+    Professor:
+      allOf:
+        - $ref: '#/components/schemas/ProfessorEntrada'
+        - type: object
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+            nome: { type: string }
+
+    TurmaEntrada:
+      type: object
+      required: [anoLectivo, classe, nome, turno, capacidade]
+      properties:
+        anoLectivo: { $ref: '#/components/schemas/Uuid' }
+        classe: { $ref: '#/components/schemas/Uuid' }
+        curso: { $ref: '#/components/schemas/Uuid' }
+        nome: { type: string, example: A }
+        turno: { $ref: '#/components/schemas/Turno' }
+        sala: { type: string }
+        capacidade: { type: integer, minimum: 1, maximum: 80 }
+        directorTurma: { $ref: '#/components/schemas/Uuid' }
+    Turma:
+      allOf:
+        - $ref: '#/components/schemas/TurmaEntrada'
+        - type: object
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+            designacao: { type: string, example: 10.ª A – TI – Manhã }
+            totalAlunos: { type: integer }
+    Atribuicao:
+      type: object
+      required: [disciplina, professor]
+      properties:
+        disciplina: { $ref: '#/components/schemas/Uuid' }
+        professor: { $ref: '#/components/schemas/Uuid' }
+
+    Matricula:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        aluno: { $ref: '#/components/schemas/AlunoResumo' }
+        turma: { $ref: '#/components/schemas/Uuid' }
+        anoLectivo: { $ref: '#/components/schemas/Uuid' }
+        tipo: { type: string, enum: [matricula, confirmacao] }
+        estado: { type: string, enum: [activa, anulada, transferida, concluida] }
+        historico:
+          type: array
+          items:
+            type: object
+            properties:
+              data: { type: string, format: date-time }
+              accao: { type: string }
+              motivo: { type: string }
+
+    NotaTrimestre:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        matricula: { $ref: '#/components/schemas/Uuid' }
+        aluno: { $ref: '#/components/schemas/AlunoResumo' }
+        trimestre: { type: integer }
+        mac: { type: [number, 'null'] }
+        npp: { type: [number, 'null'] }
+        npt: { type: [number, 'null'] }
+        mt: { type: [number, 'null'], description: '(MAC + NPP + NPT) / 3, sem arredondar' }
+        publicada: { type: boolean }
+    NotaFinal:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        matricula: { $ref: '#/components/schemas/Uuid' }
+        disciplina: { $ref: '#/components/schemas/Uuid' }
+        mts: { type: array, items: { type: [number, 'null'] } }
+        mfd: { type: [number, 'null'], description: Média das 3 MT (arredondada nas classes normais) }
+        exame: { type: [number, 'null'] }
+        cf: { type: [number, 'null'], description: 'MFD × 0,4 + exame × 0,6, arredondada (classes de exame)' }
+        notaFinal: { type: [integer, 'null'] }
+        aprovado: { type: [boolean, 'null'] }
+    Pauta:
+      type: object
+      properties:
+        turma: { $ref: '#/components/schemas/Turma' }
+        trimestre: { type: [integer, 'null'], description: null na pauta final }
+        disciplinas:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { $ref: '#/components/schemas/Uuid' }
+              sigla: { type: string }
+              chave: { type: boolean }
+        linhas:
+          type: array
+          items:
+            type: object
+            properties:
+              aluno: { $ref: '#/components/schemas/AlunoResumo' }
+              notas:
+                type: object
+                additionalProperties: { type: [number, 'null'] }
+                description: Nota por sigla de disciplina (MT na pauta trimestral, nota final na pauta final)
+              negativas: { type: integer }
+              situacao: { type: [string, 'null'], enum: [transita, nao_transita, aprovado, reprovado, null] }
+
+    Falta:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        matricula: { $ref: '#/components/schemas/Uuid' }
+        disciplina: { $ref: '#/components/schemas/Uuid' }
+        data: { type: string, format: date }
+        trimestre: { type: integer }
+        estado: { type: string, enum: [injustificada, justificada] }
+        motivo: { type: [string, 'null'] }
+
+    EstagioEntrada:
+      type: object
+      required: [matricula, entidade, inicio]
+      properties:
+        matricula: { $ref: '#/components/schemas/Uuid' }
+        entidade: { type: string, example: 'Empresa XYZ, Lda.' }
+        orientadorEntidade: { type: string }
+        orientadorEscola: { $ref: '#/components/schemas/Uuid' }
+        inicio: { type: string, format: date }
+        fim: { type: string, format: date }
+        estado: { type: string, enum: [a_decorrer, concluido] }
+    Tfc:
+      type: object
+      properties:
+        tema: { type: string }
+        orientador: { $ref: '#/components/schemas/Uuid' }
+        dataDefesa: { type: string, format: date }
+        juri: { type: array, items: { type: string } }
+        nota: { type: number, minimum: 0, maximum: 20 }
+    Estagio:
+      allOf:
+        - $ref: '#/components/schemas/EstagioEntrada'
+        - type: object
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+            nota: { type: [number, 'null'] }
+            tfc: { $ref: '#/components/schemas/Tfc' }
+            cursoConcluido: { type: boolean, description: Estágio e TFC com nota ≥ 10 }
+
+    RegistoAuditoria:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        data: { type: string, format: date-time }
+        utilizador: { type: string }
+        entidade: { type: string }
+        entidadeId: { $ref: '#/components/schemas/Uuid' }
+        accao: { type: string, example: corrigir_nota }
+        antes: { type: object }
+        depois: { type: object }
+        justificacao: { type: [string, 'null'] }
