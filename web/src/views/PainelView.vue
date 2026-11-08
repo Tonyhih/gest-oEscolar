@@ -7,6 +7,7 @@ import EstadoPedido from '@/components/EstadoPedido.vue';
 
 // RF38: indicadores do ano lectivo (só números agregados)
 const { dados, carregando, erro, executar } = usePedido(() => api.get('/painel'));
+const semAnoActivo = computed(() => erro.value?.codigo === 'REGRA' && /ano lectivo activo/.test(erro.value.message));
 const pct = new Intl.NumberFormat('pt-AO', { maximumFractionDigits: 1 });
 
 const global = computed(() => {
@@ -31,7 +32,22 @@ const tabela = computed(() => {
 </script>
 
 <template>
-  <EstadoPedido :carregando="carregando" :erro="erro" @repetir="executar()">
+  <!-- Escola nova, sem ano lectivo activo: não é um erro, é o primeiro passo da configuração -->
+  <div v-if="semAnoActivo" class="card shadow-sm">
+    <div class="card-body p-4">
+      <h1 class="h4">Bem-vindo(a) ao painel</h1>
+      <p class="mb-3">A escola ainda não tem um <strong>ano lectivo activo</strong>. O painel mostra os números do ano activo,
+        por isso comece por configurar a escola:</p>
+      <ol class="mb-3">
+        <li>criar o ano lectivo (por exemplo, 2026/2027) e as datas dos trimestres, e carregar em <strong>Tornar activo</strong>;</li>
+        <li>adicionar as classes que a escola oferece;</li>
+        <li>criar as disciplinas e os planos curriculares;</li>
+        <li>criar os utilizadores e as turmas.</li>
+      </ol>
+      <RouterLink :to="{ name: 'configuracao' }" class="btn btn-primary">Ir para a configuração</RouterLink>
+    </div>
+  </div>
+  <EstadoPedido v-else :carregando="carregando" :erro="erro" @repetir="executar()">
     <template v-if="dados">
       <h1 class="h4 mb-3">Painel · {{ dados.anoLectivo.designacao }}</h1>
 
