@@ -52,7 +52,17 @@ export async function obterAluno(bd, u, id) {
                        'parentesco', ae.parentesco, 'principal', ae.principal) ORDER BY ae.principal DESC, e.nome)
                      FROM aluno_encarregados ae JOIN encarregados e ON e.id = ae.encarregado_id
                      WHERE ae.aluno_id = a.id), '[]') AS encarregados,
-           coalesce((SELECT array_agg(m.turma_id::text) FROM matriculas m WHERE m.aluno_id = a.id), '{}') AS turmas
+           coalesce((SELECT array_agg(m.turma_id::text) FROM matriculas m WHERE m.aluno_id = a.id), '{}') AS turmas,
+           coalesce((SELECT json_agg(json_build_object(
+                       'id', m.id, 'turma', m.turma_id, 'turmaDesignacao', ${SQL_DESIGNACAO_TURMA},
+                       'anoLectivo', al.id, 'anoLectivoDesignacao', al.designacao, 'tipo', m.tipo, 'estado', m.estado)
+                       ORDER BY al.designacao DESC, m.criado_em DESC)
+                     FROM matriculas m
+                     JOIN turmas t ON t.id = m.turma_id
+                     JOIN classes c ON c.id = t.classe_id
+                     JOIN classes_catalogo cc ON cc.codigo = c.codigo
+                     JOIN anos_lectivos al ON al.id = m.ano_lectivo_id
+                     WHERE m.aluno_id = a.id), '[]') AS matriculas
     FROM alunos a WHERE a.id = $1 AND a.escola_id = $2`, [id, u.escolaId]);
   const aluno = rows[0];
   if (!aluno) throw naoEncontrado('Aluno');

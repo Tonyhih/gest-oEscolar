@@ -25,11 +25,20 @@ Projecto final de Desenvolvimento Web Avançado. É uma plataforma web para **v�
 | 1. Requisitos | [docs/01-requisitos.md](docs/01-requisitos.md) | Aprovado |
 | 2. Arquitectura e contrato | [docs/02-arquitetura.md](docs/02-arquitetura.md) · [docs/openapi.yaml](docs/openapi.yaml) | Aprovado |
 | 3. Dados (PostgreSQL) | [docs/03-dados.md](docs/03-dados.md) | Aprovado |
-| 4. Back-end | [docs/04-backend.md](docs/04-backend.md) | Em revisão |
-| 5. Front-end | — | Por fazer |
+| 4. Back-end | [docs/04-backend.md](docs/04-backend.md) | Aprovado |
+| 5. Front-end | [docs/05-frontend.md](docs/05-frontend.md) | Em revisão |
 | 6. Publicação | — | Por fazer |
 
-## Começar (API)
+## Experimentar já (sem instalar o PostgreSQL)
+
+```bash
+cd api && npm install && npm run dev:memoria     # terminal 1: API com dados fictícios
+cd web && npm install && npm run dev             # terminal 2: http://localhost:5173
+```
+
+Entre com `director@lda101.test`, `secretaria@lda101.test`, `adao@lda101.test` ou `lurdes@lda101.test` (palavra-passe `Teste#2026`).
+
+## Começar (API com PostgreSQL)
 
 ```bash
 cd api

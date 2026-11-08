@@ -1,0 +1,61 @@
+/* Ajustes ao Bootstrap. Cores do Bootstrap 5.3, que tem tema claro e escuro. */
+
+:root {
+  --bs-primary: #198754;
+  --bs-primary-rgb: 25, 135, 84;
+  --bs-link-color: #157347;
+  --bs-link-color-rgb: 21, 115, 71;
+}
+[data-bs-theme='dark'] {
+  --bs-link-color: #75b798;
+  --bs-link-color-rgb: 117, 183, 152;
+}
+.btn-primary {
+  --bs-btn-bg: #198754;
+  --bs-btn-border-color: #198754;
+  --bs-btn-hover-bg: #157347;
+  --bs-btn-hover-border-color: #146c43;
+  --bs-btn-active-bg: #146c43;
+  --bs-btn-disabled-bg: #198754;
+  --bs-btn-disabled-border-color: #198754;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: #157347;
+  --bs-btn-border-color: #198754;
+  --bs-btn-hover-bg: #198754;
+  --bs-btn-hover-border-color: #198754;
+  --bs-btn-active-bg: #198754;
+  --bs-btn-active-border-color: #198754;
+  --bs-btn-disabled-color: #198754;
+  --bs-btn-disabled-border-color: #198754;
+}
+[data-bs-theme='dark'] .btn-outline-primary { --bs-btn-color: #75b798; }
+.form-check-input:checked { background-color: #198754; border-color: #198754; }
+
+body { background: var(--bs-tertiary-bg); }
+main { min-height: calc(100vh - 56px); }
+
+/* Foco visível para quem navega com o teclado (WCAG 2.2) */
+:focus-visible { outline: 3px solid #ffc107; outline-offset: 2px; }
+
+/* Grelha de notas: utilizável num telemóvel de 360 px (RNF07) */
+.grelha-notas input { width: 4.2rem; text-align: center; }
+.grelha-notas td, .grelha-notas th { vertical-align: middle; white-space: nowrap; }
+.grelha-notas .nome { white-space: normal; min-width: 9rem; }
+@media (max-width: 575.98px) {
+  .grelha-notas { font-size: 0.875rem; }
+  .grelha-notas input { width: 3.1rem; padding-left: 0.15rem; padding-right: 0.15rem; }
+  .grelha-notas .nome { min-width: 6rem; }
+  .grelha-notas td, .grelha-notas th { padding-left: 0.2rem; padding-right: 0.2rem; }
+}
+.negativa { color: var(--bs-danger); font-weight: 600; }
+
+/* Pauta: cabeçalho fixo e impressão em A4 horizontal */
+.tabela-pauta thead th { position: sticky; top: 0; background: var(--bs-body-bg); }
+@media print {
+  @page { size: A4 landscape; margin: 12mm; }
+  nav, .nao-imprimir { display: none !important; }
+  body { background: #fff; }
+  .card { border: 0 !important; box-shadow: none !important; }
+}

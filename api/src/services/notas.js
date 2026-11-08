@@ -69,10 +69,11 @@ async function grelhaNotas(bd, turma, disciplinaId, trimestre) {
   const { rows } = await bd.query(`
     SELECT n.id, m.id AS matricula,
            json_build_object('id', a.id, 'numeroProcesso', a.numero_processo, 'nome', a.nome) AS aluno,
-           $3::int AS trimestre, n.mac, n.npp, n.npt, n.mt
+           $3::int AS trimestre, n.mac, n.npp, n.npt, n.mt, e.nota AS exame
     FROM matriculas m
     JOIN alunos a ON a.id = m.aluno_id
     LEFT JOIN notas n ON n.matricula_id = m.id AND n.disciplina_id = $2 AND n.trimestre = $3
+    LEFT JOIN exames e ON e.matricula_id = m.id AND e.disciplina_id = $2
     WHERE m.turma_id = $1 AND m.estado = 'activa'
     ORDER BY a.nome`, [turma.id, disciplinaId, trimestre]);
   return camel(rows).map((r) => ({ ...r, publicada: publicado }));

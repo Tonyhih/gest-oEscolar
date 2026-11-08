@@ -79,7 +79,7 @@ export function sessao(u) {
   return {
     id: u.id, nome: u.nome, email: u.email, perfil: u.perfil,
     escola: u.escola ? { id: u.escola.id, nome: u.escola.nome } : null,
-    trocarPalavraPasse: u.trocarPalavraPasse, turmasDirigidas: u.turmasDirigidas,
+    trocarPalavraPasse: u.trocarPalavraPasse, turmasDirigidas: u.turmasDirigidas, professorId: u.professorId ?? null,
   };
 }
 
