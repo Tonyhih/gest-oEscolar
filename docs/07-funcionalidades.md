@@ -46,6 +46,7 @@ Estas regras vêm por omissão, e o director pode ajustá-las.
 - **Importação de listas:** colar do Excel e matricular até 100 alunos de uma vez. Mostra uma pré-visualização com os erros de cada linha e o controlo das vagas. É tudo ou nada.
 - **Confirmação de matrícula** no ano seguinte, **mudança de turma** e **anulação** com motivo. O histórico fica guardado.
 - **Ficha do aluno** com filiação, B.I., naturalidade, encarregados e todas as matrículas.
+- **Histórico escolar:** notas finais de classes feitas antes de a escola usar o sistema, ou noutra escola, para os certificados saírem completos.
 
 ### Notas e avaliação (os cálculos são feitos pelo sistema)
 - **Média trimestral (MT)** = (MAC + NPP + NPT) / 3.
@@ -131,5 +132,4 @@ Os testes correm sozinhos no GitHub Actions a cada alteração.
 - **Portal do encarregado e do aluno.**
 - **Horários.**
 - **Declarações e certificados** do II Ciclo, que precisam do modelo oficial.
-- **Notas de anos anteriores** ao uso do sistema, que são necessárias para os certificados completos.
 - **Envio de emails ou SMS.**

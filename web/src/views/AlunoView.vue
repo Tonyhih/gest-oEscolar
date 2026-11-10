@@ -7,6 +7,7 @@ import { data as fData } from '@/util/formatar.js';
 import EstadoPedido from '@/components/EstadoPedido.vue';
 import MensagemAccao from '@/components/MensagemAccao.vue';
 import DocumentosAluno from '@/components/DocumentosAluno.vue';
+import HistoricoAluno from '@/components/HistoricoAluno.vue';
 
 const props = defineProps({ id: { type: String, required: true } });
 const auth = useAutenticacao();
@@ -167,7 +168,10 @@ async function confirmar() {
           </div>
         </section>
       </div>
-      <DocumentosAluno v-if="auth.temPerfil('secretaria', 'director')" :aluno="aluno" />
+      <template v-if="auth.temPerfil('secretaria', 'director')">
+        <HistoricoAluno :aluno="aluno" />
+        <DocumentosAluno :aluno="aluno" />
+      </template>
     </template>
   </EstadoPedido>
 </template>

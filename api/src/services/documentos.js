@@ -6,6 +6,7 @@ import { obterNotas, pautaFinal, pautaTrimestral } from './notas.js';
 import { disciplinasDaTurma, obterTurmaAcessivel } from './turmas.js';
 import { obterAluno, SQL_DESIGNACAO_TURMA } from './pessoas.js';
 import * as pdf from '../pdf/documentos.js';
+import { notasDaClasse } from './historico.js';
 
 const TURNOS = { manha: 'Manhã', tarde: 'Tarde', noite: 'Noite' };
 const hoje = () => new Date().toISOString().slice(0, 10);
@@ -174,6 +175,18 @@ export async function previaCertificado(bd, u, alunoId, ciclo) {
     for (const d of await disciplinasDaTurma(bd, turma)) if (!ordem.has(d.id)) ordem.set(d.id, d.nome);
     for (const n of res.rows) notas.set(`${n.id}|${codigo}`, n.nota_final);
   }
+  // Classes que não estão no sistema: notas do histórico escolar (anos anteriores ou outra escola)
+  const doHistorico = new Map();
+  for (const codigo of [...codigos].reverse()) {
+    if (porClasse.has(codigo)) continue;
+    const h = await notasDaClasse(bd, alunoId, codigo);
+    if (!h.notas.length) continue;
+    doHistorico.set(codigo, h.ano);
+    for (const n of h.notas) {
+      if (!ordem.has(n.disciplina_id)) ordem.set(n.disciplina_id, n.nome);
+      notas.set(`${n.disciplina_id}|${codigo}`, n.nota_final);
+    }
+  }
   const disciplinas = [...ordem].map(([id, nome]) => {
     const valores = codigos.map((c) => notas.get(`${id}|${c}`) ?? null);
     const presentes = valores.filter((v) => v !== null);
@@ -183,13 +196,19 @@ export async function previaCertificado(bd, u, alunoId, ciclo) {
   const mediaGeral = completas ? arredondar(disciplinas.reduce((s, d) => s + d.media, 0) / disciplinas.length) : null;
 
   const emFalta = [];
-  for (const c of codigos) if (!porClasse.has(c)) emFalta.push(`matrícula na ${c}.ª classe`);
-  if (!completas && porClasse.size === codigos.length) emFalta.push('notas finais de todas as disciplinas');
+  for (const c of codigos) {
+    if (!porClasse.has(c) && !doHistorico.has(c)) emFalta.push(`notas da ${c}.ª classe (matrícula no sistema ou histórico escolar)`);
+  }
+  if (!completas && emFalta.length === 0) emFalta.push('notas finais de todas as disciplinas, em todas as classes do ciclo');
   const dadosEmFalta = Object.entries(CAMPOS_ALUNO).filter(([k]) => !aluno[k]).map(([, v]) => v);
   const ultima = porClasse.get(codigos.at(-1));
 
   return {
-    ciclo, aluno, classes: codigos.map((codigo) => ({ codigo, ano: porClasse.get(codigo)?.ano ?? null })),
+    ciclo, aluno,
+    classes: codigos.map((codigo) => ({
+      codigo, ano: porClasse.get(codigo)?.ano ?? doHistorico.get(codigo) ?? null,
+      origem: porClasse.has(codigo) ? 'sistema' : doHistorico.has(codigo) ? 'historico' : null,
+    })),
     disciplinas, mediaGeral, anoConclusao: ultima?.ano ?? null,
     emFalta, dadosEmFalta, completo: emFalta.length === 0 && dadosEmFalta.length === 0,
   };

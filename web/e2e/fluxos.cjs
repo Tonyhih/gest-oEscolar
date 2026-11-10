@@ -205,6 +205,27 @@ async function entrar(page, email) {
     await p.screenshot({ path: `${OUT}/13-documentos.png`, fullPage: true });
     await p.close();
 
+    // 5d. Histórico escolar: notas da 7.ª e da 8.ª de um aluno que só tem a 9.ª no sistema
+    p = await novaPagina(browser);
+    await entrar(p, 'secretaria@lda101.test');
+    await p.getByRole('link', { name: 'Alunos', exact: true }).click();
+    await p.getByPlaceholder('Pesquisar').fill('Osvaldo');
+    await p.getByText('Osvaldo Tchinguali').click();
+    for (const [classe, ano, nota] of [['7', '2024/2025', '13'], ['8', '2025/2026', '15']]) {
+      await p.getByRole('button', { name: 'Acrescentar classe' }).click();
+      await p.locator('#h-classe').selectOption(classe);
+      await p.locator('#h-ano').fill(ano);
+      for (const d of ['Língua Portuguesa', 'Matemática', 'Física', 'Geografia', 'História']) await p.getByLabel(d, { exact: true }).fill(nota);
+      await p.getByRole('button', { name: 'Gravar', exact: true }).click();
+      await p.getByText(`Notas da ${classe}.ª classe gravadas.`).waitFor();
+    }
+    await p.getByRole('button', { name: 'Verificar dados' }).click();
+    await p.getByText('2024/2025 (histórico)').waitFor();
+    await p.locator('tr', { hasText: 'Matemática' }).getByText('13', { exact: true }).first().waitFor();
+    ok('secretaria lança o histórico escolar e o certificado passa a ter as três classes');
+    await p.screenshot({ path: `${OUT}/14-historico.png`, fullPage: true });
+    await p.close();
+
     // 6. Painel do director e estágios (13.ª classe)
     p = await novaPagina(browser);
     await entrar(p, 'director@lda101.test');

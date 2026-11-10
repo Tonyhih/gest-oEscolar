@@ -54,7 +54,10 @@ describe('Certificados (modelos do MED)', () => {
     const r = await ctx.como(A.secretaria).get(`/alunos/${graca.id}/certificados/previa?ciclo=i_ciclo`);
     expect(r.status).toBe(200);
     expect(r.body.completo).toBe(false);
-    expect(r.body.emFalta).toEqual(['matrícula na 8.ª classe', 'matrícula na 9.ª classe']);
+    expect(r.body.emFalta).toEqual([
+      'notas da 8.ª classe (matrícula no sistema ou histórico escolar)',
+      'notas da 9.ª classe (matrícula no sistema ou histórico escolar)',
+    ]);
     expect(r.body.dadosEmFalta).toContain('nome do pai');
   });
 

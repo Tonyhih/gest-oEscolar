@@ -139,6 +139,9 @@ export function criarRotas(config) {
   r.get('/alunos/:id/certificados/previa', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId, query: E.queryCiclo }), D.previa);
   r.post('/alunos/:id/certificados', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId, body: E.certificado }), D.emitir);
   r.get('/alunos/:id/documentos', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId }), D.listar);
+  r.get('/alunos/:id/historico', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId }), C.historicoCtrl.listar);
+  r.put('/alunos/:id/historico/:classe', auth, perfil(...SECRETARIA_DIRECCAO),
+    v({ params: E.paramsHistorico, body: E.historicoClasse }), C.historicoCtrl.definir);
   r.get('/documentos/:id/pdf', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId }), D.pdf);
 
   // ---------------------------------------------------------- Auditoria

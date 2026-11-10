@@ -68,7 +68,7 @@ const reimprimir = (d) => accao.correr(() => descarregar(`/documentos/${d.id}/pd
         <div v-if="!previa.completo" class="alert alert-warning small mt-2 mb-2" role="status">
           <strong>Ainda não se pode emitir:</strong>
           <ul class="mb-0">
-            <li v-for="f in previa.emFalta" :key="f">falta a {{ f }}</li>
+            <li v-for="f in previa.emFalta" :key="f">faltam as {{ f }}</li>
             <li v-for="f in previa.dadosEmFalta" :key="f">falta o {{ f }} (edite os dados do aluno acima)</li>
           </ul>
           Pode gerar um <strong>rascunho</strong> para conferir, sem número e sem valor legal.
@@ -78,7 +78,7 @@ const reimprimir = (d) => accao.correr(() => descarregar(`/documentos/${d.id}/pd
         </div>
         <div v-if="previa.disciplinas.length" class="table-responsive">
           <table class="table table-sm table-bordered text-center small mb-2">
-            <thead><tr><th class="text-start">Disciplina</th><th v-for="c in previa.classes" :key="c.codigo">{{ c.codigo }}.ª<br /><span class="fw-normal">{{ c.ano ?? '—' }}</span></th><th>Média</th></tr></thead>
+            <thead><tr><th class="text-start">Disciplina</th><th v-for="c in previa.classes" :key="c.codigo">{{ c.codigo }}.ª<br /><span class="fw-normal">{{ c.ano ?? '—' }}<template v-if="c.origem === 'historico'"> (histórico)</template></span></th><th>Média</th></tr></thead>
             <tbody>
               <tr v-for="d in previa.disciplinas" :key="d.id">
                 <td class="text-start">{{ d.nome }}</td><td v-for="(n, i) in d.notas" :key="i">{{ n ?? '—' }}</td><td class="fw-semibold">{{ d.media ?? '—' }}</td>

@@ -14,6 +14,7 @@ import * as auditoria from '../services/auditoria.js';
 import * as estagios from '../services/estagios.js';
 import * as painel from '../services/painel.js';
 import * as documentos from '../services/documentos.js';
+import * as historico from '../services/historico.js';
 
 /** Cria um controlador a partir de fn(req), que devolve o corpo da resposta. */
 const acao = (fn, estado = 200) => async (req, res) => {
@@ -170,6 +171,11 @@ export const estagiosCtrl = {
 
 export const painelCtrl = {
   obter: acao((req, d, u) => painel.obter(req.bd, u, d.query)),
+};
+
+export const historicoCtrl = {
+  listar: acao((req, d, u) => historico.listar(req.bd, u, d.params.id)),
+  definir: acao((req, d, u) => historico.definirClasse(req.bd, u, d.params.id, d.params.classe, d.body)),
 };
 
 export const auditoriaCtrl = {
