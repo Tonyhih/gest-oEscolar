@@ -27,7 +27,8 @@ Projecto final de Desenvolvimento Web Avançado. É uma plataforma web para **v�
 | 3. Dados (PostgreSQL) | [docs/03-dados.md](docs/03-dados.md) | Aprovado |
 | 4. Back-end | [docs/04-backend.md](docs/04-backend.md) | Aprovado |
 | 5. Front-end | [docs/05-frontend.md](docs/05-frontend.md) | Aprovado |
-| 6. Publicação | [docs/06-publicacao.md](docs/06-publicacao.md) | Pronto a publicar |
+| 6. Publicação | [docs/06-publicacao.md](docs/06-publicacao.md) | Publicado |
+| Resumo do MVP | [docs/07-funcionalidades.md](docs/07-funcionalidades.md) | Actualizado |
 
 ## Experimentar já (sem instalar o PostgreSQL)
 
