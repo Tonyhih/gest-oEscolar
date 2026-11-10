@@ -162,6 +162,12 @@ export const tfc = z.object({
   juri: z.array(texto(2, 120)).max(5).optional(), nota: nota.nullable().optional(),
 });
 export const filtroAno = z.object({ anoLectivo: uuid.optional() });
+export const paramsHistorico = z.object({ id: uuid, classe: z.enum(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']) });
+export const historicoClasse = z.object({
+  anoLectivo: z.string().regex(/^\d{4}\/\d{4}$/, 'Formato 2024/2025.'),
+  escolaOrigem: texto(3, 200).optional(),
+  notas: z.array(z.object({ disciplina: uuid, notaFinal: z.number().int('Nota final inteira.').min(0).max(20) })).min(1).max(30),
+});
 
 // ---------------------------------------------------------------- Auditoria
 export const filtroAuditoria = z.object({

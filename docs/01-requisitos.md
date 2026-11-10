@@ -72,6 +72,7 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 | RF45 | Importar uma lista de alunos para uma turma | SE | D | Até 100 por vez; colar do Excel ou CSV; tudo ou nada; avisa as vagas e as linhas com erros |
 | RF46 | Mini-pauta e pautas (trimestral e final) em PDF | PR, DT, DE, SE, CO | M | Cabeçalho oficial (República, Governo da Província, escola); assinaturas; negativas a negrito |
 | RF47 | Termo de frequência e aproveitamento em PDF | SE, DE | M | Modelo da escola: dois anos lado a lado, Ct/F por trimestre, CAP, CPE, CF, OBS |
+| RF49 | Histórico escolar: notas finais de classes anteriores ao sistema ou feitas noutra escola | SE, DE | M | Por classe, com ano lectivo e escola de origem; escala da classe; não substitui classes que estão no sistema; usado nos certificados; fica na auditoria |
 | RF48 | Certificado do Ensino Primário e do I Ciclo em PDF | SE, DE | M | Modelos do MED; numeração seguida por ano (N.º x/aaaa); só com notas e dados completos (ou rascunho sem número); reimpressão igual; nunca se apaga |
 
 ### M6. Avaliação e pautas
