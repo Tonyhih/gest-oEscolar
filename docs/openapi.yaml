@@ -120,9 +120,9 @@ paths:
           application/json:
             schema:
               type: object
-              required: [decretoCriacao]
               properties:
                 decretoCriacao: { type: string, example: '123/2015, de 10 de Março' }
+                limiteAvisoFaltas: { type: integer, minimum: 1, maximum: 30, description: 'Faltas injustificadas para o aviso no portal (RF68)' }
       responses:
         '200': { description: Actualizada }
         '403': { $ref: '#/components/responses/Proibido' }
@@ -1563,6 +1563,58 @@ paths:
                           disciplina: { type: string }
                           justificadas: { type: integer }
                           injustificadas: { type: integer }
+  /turmas/{id}/disciplinas/{disciplinaId}/faltas-disciplinares:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - { name: disciplinaId, in: path, required: true, schema: { $ref: '#/components/schemas/Uuid' } }
+    post:
+      tags: [Assiduidade]
+      summary: Marcar falta vermelha (disciplinar) com a ocorrência; avisa o encarregado (RF64) – PR da disciplina
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [matricula, data, ocorrencia]
+              properties:
+                matricula: { $ref: '#/components/schemas/Uuid' }
+                data: { type: string, format: date }
+                ocorrencia: { type: string, minLength: 3 }
+      responses:
+        '201': { description: Falta registada }
+        '403': { $ref: '#/components/responses/Proibido' }
+        '409': { $ref: '#/components/responses/Conflito' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /faltas/{id}/anular:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Assiduidade]
+      summary: Anular falta vermelha (RF65) – DE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [motivo], properties: { motivo: { type: string, minLength: 3 } } }
+      responses:
+        '200': { description: Anulada }
+        '422': { $ref: '#/components/responses/Regra' }
+  /portal/avisos:
+    get:
+      tags: [Pessoas]
+      summary: Avisos dos educandos, com o estado de leitura (RF66) – encarregado, aluno
+      responses:
+        '200': { description: '{ naoLidos, avisos }' }
+  /portal/avisos/lidos:
+    post:
+      tags: [Pessoas]
+      summary: Marcar avisos como lidos; sem lista marca todos (RF67) – encarregado, aluno
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object, properties: { avisos: { type: array, items: { $ref: '#/components/schemas/Uuid' } } } }
+      responses:
+        '200': { description: '{ naoLidos, avisos }' }
   /faltas/{id}/justificar:
     parameters: [{ $ref: '#/components/parameters/Id' }]
     post:

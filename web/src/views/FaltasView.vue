@@ -25,13 +25,16 @@ watch(minhas, (l) => { if (!disciplina.value && l.length === 1) disciplina.value
 watch(disciplina, (d) => router.replace({ query: d ? { disciplina: d } : {} }));
 const dia = ref(hoje());
 const faltaram = ref(new Set());
+const vermelhas = ref(new Map()); // matrícula → falta vermelha da aula
 const carregandoDia = ref(false);
 async function carregarDia() {
   if (!disciplina.value) return;
   carregandoDia.value = true;
   try {
     const todas = await api.get(`/turmas/${props.id}/faltas`);
-    faltaram.value = new Set(todas.filter((f) => f.disciplina === disciplina.value && f.data === dia.value).map((f) => f.matricula));
+    const doDia = todas.filter((f) => f.disciplina === disciplina.value && f.data === dia.value);
+    faltaram.value = new Set(doDia.filter((f) => f.tipo !== 'disciplinar').map((f) => f.matricula));
+    vermelhas.value = new Map(doDia.filter((f) => f.tipo === 'disciplinar').map((f) => [f.matricula, f]));
   } catch (e) {
     accao.erro.value = e;
   } finally {
@@ -45,9 +48,17 @@ function alternar(m) {
   faltaram.value = s;
 }
 async function gravarFaltas() {
-  const r = await accao.correr(() => api.put(`/turmas/${props.id}/disciplinas/${disciplina.value}/faltas`, [...faltaram.value], { data: dia.value }),
+  const lista = [...faltaram.value].filter((m) => !vermelhas.value.has(m));
+  const r = await accao.correr(() => api.put(`/turmas/${props.id}/disciplinas/${disciplina.value}/faltas`, lista, { data: dia.value }),
     `Faltas de ${fData(dia.value)} gravadas.`);
-  if (r) { faltaram.value = new Set(r.map((f) => f.matricula)); if (verResumo.value) resumo.executar(); }
+  if (r) { faltaram.value = new Set(r.filter((f) => f.tipo !== 'disciplinar').map((f) => f.matricula)); if (verResumo.value) resumo.executar(); }
+}
+async function faltaVermelha(a) {
+  const ocorrencia = prompt(`Falta vermelha (disciplinar) de ${a.nome} em ${fData(dia.value)}.\nDescreva a ocorrência (o encarregado é avisado no portal):`);
+  if (!ocorrencia || ocorrencia.trim().length < 3) return;
+  const f = await accao.correr(() => api.post(`/turmas/${props.id}/disciplinas/${disciplina.value}/faltas-disciplinares`,
+    { matricula: a.matricula, data: dia.value, ocorrencia: ocorrencia.trim() }), `Falta vermelha registada para ${a.nome}.`);
+  if (f) { await carregarDia(); if (verResumo.value) { resumo.executar(); disciplinares.executar(); } }
 }
 
 // ---------------------------------------------------------------- Resumo e justificação (director de turma e director)
@@ -55,8 +66,15 @@ const verResumo = computed(() => ehDT.value || auth.perfil === 'director');
 const trimestre = ref(1);
 const resumo = usePedido(() => (verResumo.value ? api.get(`/turmas/${props.id}/faltas/resumo`, { trimestre: trimestre.value }) : Promise.resolve([])), { inicial: [] });
 const porJustificar = usePedido(() => (ehDT.value ? api.get(`/turmas/${props.id}/faltas`, { trimestre: trimestre.value }) : Promise.resolve([])), { inicial: [] });
-watch(trimestre, () => { resumo.executar(); porJustificar.executar(); });
-const injustificadas = computed(() => porJustificar.dados.value.filter((f) => f.estado === 'injustificada'));
+const disciplinares = usePedido(() => (verResumo.value ? api.get(`/turmas/${props.id}/faltas`, { trimestre: trimestre.value }) : Promise.resolve([])), { inicial: [] });
+const listaVermelhas = computed(() => disciplinares.dados.value.filter((f) => f.tipo === 'disciplinar'));
+watch(trimestre, () => { resumo.executar(); porJustificar.executar(); disciplinares.executar(); });
+async function anularVermelha(f) {
+  const motivo = prompt(`Anular a falta vermelha de ${f.aluno.nome} (${f.sigla}, ${fData(f.data)})? Indique o motivo:`);
+  if (!motivo || motivo.trim().length < 3) return;
+  if (await accao.correr(() => api.post(`/faltas/${f.id}/anular`, { motivo: motivo.trim() }), 'Falta vermelha anulada.')) { resumo.executar(); disciplinares.executar(); }
+}
+const injustificadas = computed(() => porJustificar.dados.value.filter((f) => f.estado === 'injustificada' && f.tipo !== 'disciplinar'));
 async function justificar(f) {
   const motivo = prompt(`Motivo da falta de ${f.aluno.nome} a ${f.sigla} (${fData(f.data)}):`);
   if (!motivo) return;
@@ -85,13 +103,17 @@ async function justificar(f) {
       </div>
       <EstadoPedido :carregando="carregandoDia || turma.carregando.value" :erro="turma.erro.value">
         <template v-if="disciplina && turma.dados.value">
-          <p class="small text-body-secondary mb-2">Marque os alunos que <strong>faltaram</strong>. Desmarcar anula a falta.</p>
+          <p class="small text-body-secondary mb-2">Marque os alunos que <strong>faltaram</strong>. Desmarcar anula a falta.
+            A <strong>falta vermelha</strong> é por indisciplina: fica registada logo, com a ocorrência, e o encarregado é avisado.</p>
           <div class="list-group mb-2">
-            <label v-for="a in turma.dados.value.alunos" :key="a.matricula" class="list-group-item d-flex gap-2 align-items-center"
-                   :class="{ 'list-group-item-danger': faltaram.has(a.matricula) }">
-              <input class="form-check-input m-0" type="checkbox" :checked="faltaram.has(a.matricula)" @change="alternar(a.matricula)" />
-              <span>{{ a.nome }}</span>
-            </label>
+            <div v-for="a in turma.dados.value.alunos" :key="a.matricula" class="list-group-item d-flex gap-2 align-items-center"
+                 :class="{ 'list-group-item-danger': faltaram.has(a.matricula) || vermelhas.has(a.matricula) }">
+              <input :id="`fa-${a.matricula}`" class="form-check-input m-0" type="checkbox" :disabled="vermelhas.has(a.matricula)"
+                     :checked="faltaram.has(a.matricula) || vermelhas.has(a.matricula)" @change="alternar(a.matricula)" />
+              <label class="flex-grow-1" :for="`fa-${a.matricula}`">{{ a.nome }}</label>
+              <span v-if="vermelhas.has(a.matricula)" class="badge text-bg-danger" :title="vermelhas.get(a.matricula).ocorrencia">Falta vermelha</span>
+              <button v-else type="button" class="btn btn-sm btn-outline-danger py-0" :aria-label="`Falta vermelha a ${a.nome}`" @click="faltaVermelha(a)">Falta vermelha</button>
+            </div>
           </div>
           <button type="button" class="btn btn-primary" :disabled="accao.ocupado.value" @click="gravarFaltas">
             Gravar ({{ faltaram.size }} {{ faltaram.size === 1 ? 'falta' : 'faltas' }})
@@ -111,7 +133,7 @@ async function justificar(f) {
     <EstadoPedido :carregando="resumo.carregando.value" :erro="resumo.erro.value" @repetir="resumo.executar()">
       <div class="table-responsive card shadow-sm mb-3">
         <table class="table table-sm mb-0">
-          <thead><tr><th>Aluno</th><th>Por disciplina (justificadas / injustificadas)</th></tr></thead>
+          <thead><tr><th>Aluno</th><th>Por disciplina (justificadas / injustificadas · V = vermelhas)</th></tr></thead>
           <tbody>
             <tr v-for="l in resumo.dados.value" :key="l.aluno.id">
               <td>{{ l.aluno.nome }}</td>
@@ -119,6 +141,7 @@ async function justificar(f) {
                 <span v-if="!l.porDisciplina.length" class="text-body-secondary small">Sem faltas</span>
                 <span v-for="d in l.porDisciplina" :key="d.disciplina" class="badge text-bg-light border me-1">
                   {{ d.disciplina }}: {{ d.justificadas }} / <span :class="{ 'text-danger': d.injustificadas }">{{ d.injustificadas }}</span>
+                  <span v-if="d.disciplinares" class="text-danger" :title="`${d.disciplinares} falta(s) vermelha(s)`"> · {{ d.disciplinares }}V</span>
                 </span>
               </td>
             </tr>
@@ -126,6 +149,16 @@ async function justificar(f) {
         </table>
       </div>
     </EstadoPedido>
+
+    <template v-if="listaVermelhas.length">
+      <h2 class="h6">Faltas vermelhas (disciplinares)</h2>
+      <ul class="list-group shadow-sm mb-3">
+        <li v-for="f in listaVermelhas" :key="f.id" class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <span>{{ f.aluno.nome }} · {{ f.sigla }} · {{ fData(f.data) }}<br /><span class="small text-body-secondary">{{ f.ocorrencia }}</span></span>
+          <button v-if="auth.perfil === 'director'" type="button" class="btn btn-sm btn-outline-danger" @click="anularVermelha(f)">Anular</button>
+        </li>
+      </ul>
+    </template>
 
     <template v-if="ehDT">
       <h2 class="h6">Faltas por justificar</h2>

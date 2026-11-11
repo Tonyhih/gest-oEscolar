@@ -19,6 +19,7 @@ import * as portal from '../services/portal.js';
 import * as horarios from '../services/horarios.js';
 import * as declaracoes from '../services/declaracoes.js';
 import * as financas from '../services/financas.js';
+import * as avisos from '../services/avisos.js';
 import { recibo as reciboPdf } from '../pdf/documentos.js';
 
 /** Cria um controlador a partir de fn(req), que devolve o corpo da resposta. */
@@ -166,6 +167,8 @@ export const faltasCtrl = {
   listar: acao((req, d, u) => faltas.listar(req.bd, u, d.params.id, d.query)),
   justificar: acao((req, d, u) => faltas.justificar(req.bd, u, d.params.id, d.body)),
   resumo: acao((req, d, u) => faltas.resumo(req.bd, u, d.params.id, d.query.trimestre)),
+  disciplinar: acao((req, d, u) => faltas.marcarDisciplinar(req.bd, u, d.params.id, d.params.disciplinaId, d.body), 201),
+  anularDisciplinar: acao((req, d, u) => faltas.anularDisciplinar(req.bd, u, d.params.id, d.body)),
 };
 
 export const estagiosCtrl = {
@@ -189,6 +192,8 @@ export const portalCtrl = {
   acessoEncarregado: acao((req, d, u) => portal.acessoEncarregado(req.bd, u, d.params.id, d.body), 201),
   educandos: acao((req, d, u) => portal.educandos(req.bd, u)),
   resumo: acao((req, d, u) => portal.resumo(req.bd, u, d.params.id)),
+  avisos: acao((req, d, u) => avisos.listar(req.bd, u)),
+  lerAvisos: acao((req, d, u) => avisos.marcarLidos(req.bd, u, d.body)),
 };
 
 export const horariosCtrl = {

@@ -3,6 +3,7 @@ import { conflito, naoEncontrado, proibido, regra } from '../middleware/erros.js
 import { registar } from './auditoria.js';
 import { anoActivo } from './estrutura.js';
 import { SQL_DESIGNACAO_TURMA } from './pessoas.js';
+import * as avisos from './avisos.js';
 
 // Pagamentos e propinas (RF57–RF62). Valores em Kwanzas; cobranças e pagamentos nunca se apagam.
 
@@ -194,6 +195,7 @@ export async function registarPagamento(bd, u, alunoId, { cobrancas, metodo, ref
     }
     await registar(c, u, { entidade: 'aluno', entidadeId: alunoId, accao: 'registar_pagamento',
                            depois: { recibo: `${numero}/${ano}`, total: kz(total), metodo } });
+    await avisos.recibo(c, u.escolaId, { alunoId, pagamentoId: p.id, numeroTexto: `${numero}/${ano}`, total: kz(total) });
     return p.id;
   });
   return (await listarPagamentos(bd, u, alunoId)).find((p) => p.id === id);
@@ -209,6 +211,7 @@ export async function anularPagamento(bd, u, id, { motivo }) {
     await c.query(`UPDATE cobrancas SET estado = 'pendente' WHERE id IN (SELECT cobranca_id FROM pagamento_itens WHERE pagamento_id = $1)`, [id]);
     await registar(c, u, { entidade: 'aluno', entidadeId: p.aluno_id, accao: 'anular_pagamento',
                            antes: { recibo: `${p.numero}/${p.ano}`, total: Number(p.valor_total) }, justificacao: motivo });
+    await avisos.recibo(c, u.escolaId, { alunoId: p.aluno_id, pagamentoId: id, numeroTexto: `${p.numero}/${p.ano}`, anulado: true, motivo });
     return { id, estado: 'anulado' };
   });
 }

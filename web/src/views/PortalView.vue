@@ -6,6 +6,7 @@ import { useAutenticacao } from '@/stores/autenticacao.js';
 import { data as fData, kz, nota1, SITUACOES, TURNOS } from '@/util/formatar.js';
 import EstadoPedido from '@/components/EstadoPedido.vue';
 import GrelhaHorario from '@/components/GrelhaHorario.vue';
+import AvisosPortal from '@/components/AvisosPortal.vue';
 
 // Portal do encarregado de educação e do aluno: só o que a escola já publicou
 const auth = useAutenticacao();
@@ -21,9 +22,10 @@ const negativa = (v) => v !== null && v !== undefined && r.value && v < r.value.
 const faltas = computed(() => {
   const m = new Map();
   for (const f of r.value?.faltas ?? []) {
-    const t = m.get(f.sigla) ?? { nome: f.nome, justificadas: 0, injustificadas: 0 };
+    const t = m.get(f.sigla) ?? { nome: f.nome, justificadas: 0, injustificadas: 0, disciplinares: 0 };
     t.justificadas += f.justificadas;
     t.injustificadas += f.injustificadas;
+    t.disciplinares += f.disciplinares ?? 0;
     m.set(f.sigla, t);
   }
   return [...m.values()];
@@ -33,6 +35,8 @@ const recibo = (p) => descarregar(`/portal/pagamentos/${p.id}/recibo`, `recibo-$
 
 <template>
   <h1 class="h4 mb-3">{{ auth.perfil === 'aluno' ? 'As minhas notas e faltas' : 'Notas e faltas dos educandos' }}</h1>
+
+  <AvisosPortal />
 
   <EstadoPedido :carregando="educandos.carregando.value" :erro="educandos.erro.value" :vazio="educandos.dados.value.length === 0"
                 texto-vazio="Ainda não há alunos ligados a esta conta. Fale com a secretaria da escola." @repetir="educandos.executar()">
@@ -147,17 +151,18 @@ const recibo = (p) => descarregar(`/portal/pagamentos/${p.id}/recibo`, `recibo-$
             <div class="card-header"><h3 id="t-faltas" class="h6 mb-0">Faltas no ano</h3></div>
             <div class="table-responsive">
               <table class="table table-sm mb-0 text-center">
-                <thead><tr><th class="text-start">Disciplina</th><th>Justificadas</th><th>Injustificadas</th></tr></thead>
+                <thead><tr><th class="text-start">Disciplina</th><th>Justificadas</th><th>Injustificadas</th><th>Vermelhas</th></tr></thead>
                 <tbody>
                   <tr v-for="f in faltas" :key="f.nome">
                     <td class="text-start">{{ f.nome }}</td><td>{{ f.justificadas }}</td>
                     <td :class="{ 'text-danger fw-semibold': f.injustificadas > 0 }">{{ f.injustificadas }}</td>
+                    <td><span v-if="f.disciplinares" class="badge text-bg-danger">{{ f.disciplinares }}</span><template v-else>0</template></td>
                   </tr>
-                  <tr v-if="!faltas.length"><td colspan="3" class="text-body-secondary">Sem faltas registadas.</td></tr>
+                  <tr v-if="!faltas.length"><td colspan="4" class="text-body-secondary">Sem faltas registadas.</td></tr>
                 </tbody>
               </table>
             </div>
-            <div class="card-footer small text-body-secondary">Para justificar uma falta, fale com o(a) director(a) de turma.</div>
+            <div class="card-footer small text-body-secondary">Para justificar uma falta, fale com o(a) director(a) de turma. As faltas vermelhas (disciplinares) não se justificam.</div>
           </section>
         </template>
       </template>

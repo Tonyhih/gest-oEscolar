@@ -97,7 +97,7 @@ describe('Faltas (RF35–RF37)', () => {
     const r = await ctx.como(A.adao).get(`/turmas/${turmaA7}/faltas/resumo?trimestre=1`);
     expect(r.status).toBe(200);
     const isa = r.body.find((l) => l.aluno.nome === 'Isabel Ndala');
-    expect(isa.porDisciplina).toEqual([{ disciplina: 'MAT', justificadas: 1, injustificadas: 0 }]);
+    expect(isa.porDisciplina).toEqual([{ disciplina: 'MAT', justificadas: 1, injustificadas: 0, disciplinares: 0 }]);
     // A professora Lurdes lecciona na 7.ª A mas não é directora de turma
     expect((await ctx.como(A.lurdes).get(`/turmas/${turmaA7}/faltas/resumo?trimestre=1`)).status).toBe(403);
   });

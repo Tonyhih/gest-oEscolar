@@ -123,7 +123,8 @@ export async function resumoMatricula(bd, u, aluno, m) {
   const faltas = (await bd.query(`
     SELECT d.sigla, d.nome, f.trimestre,
            count(*) FILTER (WHERE f.estado = 'justificada')::int AS justificadas,
-           count(*) FILTER (WHERE f.estado = 'injustificada')::int AS injustificadas
+           count(*) FILTER (WHERE f.estado = 'injustificada')::int AS injustificadas,
+           count(*) FILTER (WHERE f.tipo = 'disciplinar')::int AS disciplinares
     FROM faltas f JOIN disciplinas d ON d.id = f.disciplina_id
     WHERE f.matricula_id = $1 AND f.estado <> 'anulada'
     GROUP BY d.sigla, d.nome, f.trimestre ORDER BY d.nome, f.trimestre`, [m.id])).rows;

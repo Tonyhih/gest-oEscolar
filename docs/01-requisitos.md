@@ -102,7 +102,9 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 |---|---|---|---|---|
 | RF35 | Registar faltas por disciplina e data | PR | M | Só nas suas turmas; não se regista a mesma falta duas vezes |
 | RF36 | Justificar faltas | DT | M | Motivo obrigatório; a falta passa a "justificada" |
-| RF37 | Ver o resumo de faltas por aluno e disciplina | DT, DE | M | Totais justificadas e injustificadas por trimestre |
+| RF37 | Ver o resumo de faltas por aluno e disciplina | DT, DE | M | Totais justificadas, injustificadas e vermelhas por trimestre |
+| RF64 | Marcar falta vermelha (disciplinar) | PR | M | Só o professor da disciplina; com a descrição da ocorrência; substitui a falta de presença da aula; uma por aula (409); não se justifica; o registo das faltas da aula não a anula |
+| RF65 | Anular falta vermelha | DE | M | Com motivo; fica na auditoria; nunca se apaga |
 
 ### M8. Painel e auditoria
 | ID | Requisito | Ator | Prior. | Critérios de aceitação |
@@ -128,6 +130,13 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 | RF61 | Anular um pagamento ou uma cobrança | DE | M | Com motivo; o recibo fica marcado ANULADO e as cobranças voltam a pendentes; nada se apaga; fica na auditoria |
 | RF62 | Dívidas e resumo do mês | SE, DE | M | Alunos com mensalidades vencidas, por turma e valor; recebido no mês por forma de pagamento; total em atraso e por pagar |
 | RF63 | Propinas no portal | EE, AL | D | O que está por pagar e em atraso, com a multa prevista, e os recibos em PDF; só dos seus educandos |
+
+### M11. Avisos no portal
+| ID | Requisito | Ator | Prior. | Critérios de aceitação |
+|---|---|---|---|---|
+| RF66 | Avisos automáticos ao encarregado e ao aluno | EE, AL | M | Notas do trimestre publicadas; faltas injustificadas a chegar ao limite numa disciplina e trimestre; falta vermelha com a ocorrência; propina em atraso; recibo emitido ou anulado; nunca o mesmo aviso duas vezes; só dos seus educandos |
+| RF67 | Marcar avisos como lidos | EE, AL | M | Um a um ou todos; cada conta tem o seu estado de leitura; contador de avisos por ler |
+| RF68 | Limite de faltas para o aviso | DE | D | Número de faltas injustificadas (1–30, por omissão 3) nos dados da escola |
 
 ---
 
@@ -179,7 +188,8 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 - Gestão detalhada do estágio (relatórios, avaliação pela entidade de acolhimento).
 - Transferência de alunos entre escolas.
 - Certificado do II Ciclo e da Educação de Adultos (falta o modelo oficial).
-- Integração com o SIGE ou outros sistemas do MED; envio de emails ou SMS.
+- Integração com o SIGE ou outros sistemas do MED.
+- Envio de avisos por email ou SMS (os avisos ficam no portal).
 
 ---
 

@@ -134,7 +134,7 @@ export const correccao = z.object({
 });
 export const formatoPauta = z.object({ formato: z.enum(['json', 'csv', 'pdf']).default('json') });
 export const formatoPautaTrimestral = z.object({ formato: z.enum(['json', 'pdf']).default('json') });
-export const dadosEscola = z.object({ decretoCriacao: texto(3, 120) });
+export const dadosEscola = z.object({ decretoCriacao: texto(3, 120).optional(), limiteAvisoFaltas: z.number().int().min(1).max(30).optional() });
 export const queryAnoLectivo = z.object({ anoLectivo: uuid.optional() });
 export const queryCiclo = z.object({ ciclo: z.enum(['primario', 'i_ciclo']) });
 export const certificado = z.object({
@@ -144,6 +144,8 @@ export const certificado = z.object({
 
 // ---------------------------------------------------------------- Faltas
 export const queryData = z.object({ data });
+export const faltaDisciplinar = z.object({ matricula: uuid, data, ocorrencia: texto(3, 300) });
+export const lerAvisos = z.object({ avisos: z.array(uuid).max(100).optional() });
 export const faltasLote = z.array(uuid).max(100);
 export const filtroFaltas = z.object({ aluno: uuid.optional(), trimestre: trimestre.optional() });
 
