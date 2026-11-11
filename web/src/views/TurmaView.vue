@@ -88,6 +88,7 @@ async function mudar() {
         </div>
         <div class="d-flex flex-wrap gap-2">
           <RouterLink v-if="verPautas" class="btn btn-primary" :to="{ name: 'pautas', params: { id } }">Pautas</RouterLink>
+          <RouterLink v-if="!qualitativa && !estagio" class="btn btn-outline-primary" :to="{ name: 'horario', params: { id } }">Horário</RouterLink>
           <RouterLink v-if="ehDT || auth.perfil === 'director'" class="btn btn-outline-primary" :to="{ name: 'faltas', params: { id } }">Faltas da turma</RouterLink>
           <RouterLink v-if="qualitativa && auth.perfil === 'professor'" class="btn btn-outline-primary" :to="{ name: 'descritiva', params: { id } }">Avaliação descritiva</RouterLink>
         </div>

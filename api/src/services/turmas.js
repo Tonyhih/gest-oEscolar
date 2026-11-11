@@ -2,6 +2,7 @@ import { actualizar, camel, colunas, inserir } from '../util/sql.js';
 import { naoEncontrado, proibido, regra } from '../middleware/erros.js';
 import { registar } from './auditoria.js';
 import { SQL_DESIGNACAO_TURMA } from './pessoas.js';
+import { sincronizarAtribuicoes } from './horarios.js';
 
 const TURNOS = { manha: 'Manhã', tarde: 'Tarde', noite: 'Noite' };
 
@@ -160,6 +161,7 @@ export async function definirAtribuicoes(bd, u, turmaId, lista) {
     for (const a of lista) {
       await inserir(c, 'atribuicoes', { escola_id: u.escolaId, turma_id: turmaId, disciplina_id: a.disciplina, professor_id: a.professor });
     }
+    await sincronizarAtribuicoes(c, turmaId); // as aulas do horário seguem o novo professor
     await registar(c, u, { entidade: 'turma', entidadeId: turmaId, accao: 'definir_atribuicoes', antes: { antes }, depois: { lista } });
   });
   return listarAtribuicoes(bd, u, turmaId);

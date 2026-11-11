@@ -232,6 +232,68 @@ paths:
       responses:
         '201': { description: 'Conta criada; a palavra-passe provisória só aparece nesta resposta' }
         '409': { $ref: '#/components/responses/Conflito' }
+  /tempos:
+    get:
+      tags: [Estrutura de ensino]
+      summary: Tempos lectivos de um turno (RF52)
+      parameters:
+        - { name: turno, in: query, required: true, schema: { $ref: '#/components/schemas/Turno' } }
+      responses:
+        '200': { description: 'Tempos (predefinidos: true se ainda não foram configurados)' }
+  /tempos/{turno}:
+    parameters:
+      - { name: turno, in: path, required: true, schema: { $ref: '#/components/schemas/Turno' } }
+    put:
+      tags: [Estrutura de ensino]
+      summary: Definir os tempos lectivos do turno (RF52) – DE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: { type: object, required: [inicio, fim], properties: { inicio: { type: string, example: '07:00' }, fim: { type: string, example: '07:45' } } }
+      responses:
+        '200': { description: Tempos gravados }
+        '422': { $ref: '#/components/responses/Regra' }
+  /turmas/{id}/horario:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Turmas e matrículas]
+      summary: Horário semanal da turma (RF53)
+      responses:
+        '200': { description: Tempos e aulas }
+    put:
+      tags: [Turmas e matrículas]
+      summary: Substituir o horário da turma (RF53) – DE, CO
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                required: [dia, tempo, disciplina]
+                properties:
+                  dia: { type: integer, minimum: 1, maximum: 6, description: '1 = segunda … 6 = sábado' }
+                  tempo: { type: integer, minimum: 1, maximum: 10 }
+                  disciplina: { $ref: '#/components/schemas/Uuid' }
+                  sala: { type: string, description: 'Por omissão, a sala da turma' }
+      responses:
+        '200': { description: Horário gravado }
+        '409':
+          description: Conflito de professor ou de sala com outra turma (CONFLITO_HORARIO)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /horario/professor:
+    get:
+      tags: [Turmas e matrículas]
+      summary: Horário do professor no ano lectivo activo (RF54) – PR
+      responses:
+        '200': { description: Tempos por turno e aulas }
   /portal/educandos:
     get:
       tags: [Pessoas]

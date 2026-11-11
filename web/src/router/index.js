@@ -37,6 +37,10 @@ export const rotas = [
     meta: { perfis: ['professor'], titulo: 'Avaliação descritiva' } },
   { path: '/turmas/:id/faltas', name: 'faltas', component: () => import('@/views/FaltasView.vue'), props: true,
     meta: { perfis: ['director', 'professor'], titulo: 'Faltas' } },
+  { path: '/turmas/:id/horario', name: 'horario', component: () => import('@/views/HorarioView.vue'), props: true,
+    meta: { perfis: TODOS, titulo: 'Horário' } },
+  { path: '/horario', name: 'meu-horario', component: () => import('@/views/MeuHorarioView.vue'),
+    meta: { perfis: ['professor'], titulo: 'O meu horário' } },
   { path: '/turmas/:id/pautas', name: 'pautas', component: () => import('@/views/PautasView.vue'), props: true,
     meta: { perfis: TODOS, titulo: 'Pautas' } },
 

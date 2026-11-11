@@ -75,6 +75,9 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 | RF49 | Histórico escolar: notas finais de classes anteriores ao sistema ou feitas noutra escola | SE, DE | M | Por classe, com ano lectivo e escola de origem; escala da classe; não substitui classes que estão no sistema; usado nos certificados; fica na auditoria |
 | RF50 | Dar acesso ao portal ao encarregado de educação e ao aluno | SE, DE | M | Email e palavra-passe provisória (troca obrigatória); uma conta por encarregado e por aluno; fica na auditoria |
 | RF51 | Portal: o encarregado vê os seus educandos, e o aluno vê-se a si próprio | EE, AL | M | Turma e director de turma; só as notas dos trimestres publicados; notas finais e situação com o 3.º trimestre publicado; faltas; nenhum acesso ao resto do sistema |
+| RF52 | Tempos lectivos por turno | DE | D | Horas de início e fim de cada tempo; valores típicos propostos; sem sobreposições; não se retiram tempos com aulas |
+| RF53 | Horário semanal da turma | DE, CO | D | Grelha dias × tempos; o professor vem da atribuição; recusa conflitos de professor e de sala com outras turmas (também na base de dados); as aulas seguem as mudanças de atribuição |
+| RF54 | Horário do professor e da turma no portal | PR, EE, AL | D | "O meu horário" com todas as turmas do professor; o horário da turma no portal do encarregado e do aluno |
 | RF48 | Certificado do Ensino Primário e do I Ciclo em PDF | SE, DE | M | Modelos do MED; numeração seguida por ano (N.º x/aaaa); só com notas e dados completos (ou rascunho sem número); reimpressão igual; nunca se apaga |
 
 ### M6. Avaliação e pautas
@@ -160,7 +163,6 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 
 ## 5. Exclusões (fora do âmbito)
 - Pagamentos, propinas e emolumentos.
-- Horários e detecção de conflitos de sala ou professor.
 - Gestão detalhada do estágio (relatórios, avaliação pela entidade de acolhimento).
 - Transferência de alunos entre escolas.
 - Declarações em PDF, certificado do II Ciclo e da Educação de Adultos (falta o modelo oficial).

@@ -142,6 +142,14 @@ export function criarRotas(config) {
   r.get('/alunos/:id/historico', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId }), C.historicoCtrl.listar);
   r.put('/alunos/:id/historico/:classe', auth, perfil(...SECRETARIA_DIRECCAO),
     v({ params: E.paramsHistorico, body: E.historicoClasse }), C.historicoCtrl.definir);
+  // Horários
+  const H = C.horariosCtrl;
+  r.get('/tempos', ...escola, v({ query: E.queryTurno }), H.tempos);
+  r.put('/tempos/:turno', auth, perfil(...DIR), v({ params: E.paramsTurno, body: E.tempos }), H.definirTempos);
+  r.get('/turmas/:id/horario', ...escola, v({ params: paramsId }), H.turma);
+  r.put('/turmas/:id/horario', auth, perfil(...EST), v({ params: paramsId, body: E.horario }), H.definirTurma);
+  r.get('/horario/professor', auth, perfil('professor'), H.professor);
+
   // Portal do encarregado e do aluno
   const PORTAL = ['encarregado', 'aluno'];
   r.post('/alunos/:id/acesso-portal', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId, body: E.acessoPortal }), C.portalCtrl.acessoAluno);

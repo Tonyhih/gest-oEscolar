@@ -16,6 +16,7 @@ import * as painel from '../services/painel.js';
 import * as documentos from '../services/documentos.js';
 import * as historico from '../services/historico.js';
 import * as portal from '../services/portal.js';
+import * as horarios from '../services/horarios.js';
 
 /** Cria um controlador a partir de fn(req), que devolve o corpo da resposta. */
 const acao = (fn, estado = 200) => async (req, res) => {
@@ -184,6 +185,14 @@ export const portalCtrl = {
   acessoEncarregado: acao((req, d, u) => portal.acessoEncarregado(req.bd, u, d.params.id, d.body), 201),
   educandos: acao((req, d, u) => portal.educandos(req.bd, u)),
   resumo: acao((req, d, u) => portal.resumo(req.bd, u, d.params.id)),
+};
+
+export const horariosCtrl = {
+  tempos: acao((req, d, u) => horarios.obterTempos(req.bd, u.escolaId, d.query.turno)),
+  definirTempos: acao((req, d, u) => horarios.definirTempos(req.bd, u, d.params.turno, d.body)),
+  turma: acao((req, d, u) => horarios.horarioDaTurma(req.bd, u, d.params.id)),
+  definirTurma: acao((req, d, u) => horarios.definirHorario(req.bd, u, d.params.id, d.body)),
+  professor: acao((req, d, u) => horarios.horarioDoProfessor(req.bd, u)),
 };
 
 export const auditoriaCtrl = {
