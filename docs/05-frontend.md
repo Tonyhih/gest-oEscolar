@@ -9,21 +9,22 @@
 
 ## 1. O que está feito
 
-- **SPA em Vue 3, Vite, Vue Router, Pinia e Bootstrap 5.3**, com 18 ecrãs (mais 4 separadores na configuração) cobrindo todos os requisitos do MVP, incluindo os desejáveis: estágio, TFC e painel.
-- **12 testes unitários** (Vitest): cliente HTTP, guardas de rota e formatação.
-- **Teste no browser** (`web/e2e/fluxos.cjs`, Playwright) com **18 fluxos** reais: secretaria, professora, director de turma, director, administrador da plataforma e uma professora num telemóvel de 360 px. Todos passam, sem erros na consola.
-- **Primeira página leve:** cerca de 82 KB comprimidos (JS 50 KB + CSS 31 KB), bem abaixo dos 500 KB do RNF06. Cada ecrã é carregado só quando é aberto.
+- **SPA em Vue 3, Vite, Vue Router, Pinia e Bootstrap 5.3**, com 22 ecrãs (mais 6 separadores na configuração) cobrindo todos os requisitos.
+- **19 testes unitários** (Vitest): cliente HTTP, guardas de rota e formatação.
+- **Teste no browser** (`web/e2e/fluxos.cjs`, Playwright) com **39 passos** reais: secretaria, professores, director de turma, director, coordenação, administrador da plataforma, encarregada de educação no portal e uma professora num telemóvel de 360 px. Todos passam, sem erros na consola (além dos 401 e 409 provocados de propósito).
+- **Primeira página leve:** cada ecrã é carregado só quando é aberto.
 
 ### Ecrãs por perfil
 
 | Perfil | Ecrãs |
 |---|---|
 | Administração da plataforma | Escolas (registar, activar/desactivar, criar a conta do director com palavra-passe provisória) |
-| Director(a) | Painel (alunos, turmas, transição por classe), configuração (ano lectivo e trimestres abertos/fechados, classes e regras de avaliação, cursos, disciplinas, planos curriculares com disciplinas-chave), utilizadores, turmas e atribuições, pautas, publicação, correcção de notas, exportação CSV, faltas, auditoria |
-| Secretaria | Documentos do aluno (termo, certificado com prévia e rascunho, reimpressão), matrículas (ficha de aluno novo com encarregado e turma, importação de listas do Excel, lista do ano), registo de estágios, alunos (pesquisa, registo, ficha, encarregados, confirmação de matrícula), turmas (criar, matricular, mudar de turma, anular), lançamento de exames |
-| Coordenação | Cursos, disciplinas, planos curriculares, atribuição de professores, pautas, estágios e TFC (notas) |
-| Professor(a) | As minhas turmas, lançamento de notas (MAC/NPP/NPT) e exames, faltas por aula, avaliação descritiva na Iniciação |
+| Director(a) | Painel, configuração (ano lectivo e trimestres, classes e regras de avaliação, cursos, disciplinas, planos curriculares, tempos lectivos, dados da escola e limite de faltas para o aviso), utilizadores, turmas e atribuições, horários, pautas, publicação, correcção de notas, faltas e anulação de faltas vermelhas, pagamentos (preçário, gerar propinas, anular recibos e cobranças), auditoria |
+| Secretaria | Matrículas (ficha de aluno novo, importação de listas, lista do ano), alunos (ficha, encarregados, contas do portal, histórico escolar, termo, declarações, certificados), pagamentos (receber e emitir recibo, dívidas, resumo do mês), estágios, exames |
+| Coordenação | Cursos, disciplinas, planos curriculares, atribuição de professores, horários, pautas, estágios e TFC (notas) |
+| Professor(a) | As minhas turmas, o meu horário, lançamento de notas (MAC/NPP/NPT) e exames, faltas por aula e faltas vermelhas, avaliação descritiva na Iniciação, mini-pauta em PDF |
 | Director(a) de turma | Além do professor: pautas, publicação do trimestre, resumo de faltas, justificação de faltas, fichas dos alunos da turma |
+| Encarregado(a) e aluno(a) | Portal: avisos, notas publicadas, situação no fim do ano, horário, propinas e recibos, faltas (incluindo as vermelhas) |
 
 ---
 
