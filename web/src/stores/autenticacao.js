@@ -13,6 +13,8 @@ export const NOMES_PERFIL = {
   secretaria: 'Secretaria',
   coordenador: 'Coordenação',
   professor: 'Professor(a)',
+  encarregado: 'Encarregado(a) de educação',
+  aluno: 'Aluno(a)',
 };
 
 export const useAutenticacao = defineStore('autenticacao', {

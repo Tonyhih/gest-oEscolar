@@ -226,6 +226,39 @@ async function entrar(page, email) {
     await p.screenshot({ path: `${OUT}/14-historico.png`, fullPage: true });
     await p.close();
 
+    // 5e. Portal: a secretaria dá acesso à encarregada da Graça; a encarregada entra e vê o 1.º trimestre (publicado no passo 3)
+    p = await novaPagina(browser);
+    await entrar(p, 'secretaria@lda101.test');
+    await p.getByRole('link', { name: 'Alunos', exact: true }).click();
+    await p.getByPlaceholder('Pesquisar').fill('Graça');
+    await p.getByText('Graça Lukeny').click();
+    p.once('dialog', (d) => d.accept('joana@familia.test'));
+    await p.locator('li', { hasText: 'Joana Lukeny' }).getByRole('button', { name: 'Dar acesso ao portal' }).click();
+    const aviso = p.getByRole('alert').filter({ hasText: 'Acesso ao portal criado' });
+    await aviso.waitFor();
+    const provisoria = (await aviso.innerText()).match(/Palavra-passe provisória: (\S+)/)[1];
+    ok('secretaria dá acesso ao portal à encarregada de educação');
+    await p.getByRole('button', { name: 'Sair' }).click();
+    await p.getByLabel('Email').fill('joana@familia.test');
+    await p.getByLabel('Palavra-passe').fill(provisoria);
+    await p.getByRole('button', { name: 'Entrar' }).click();
+    await p.locator('#actual').fill(provisoria);
+    await p.locator('#nova').fill('Familia#2026');
+    await p.locator('#confirmar').fill('Familia#2026');
+    await p.getByRole('button', { name: 'Gravar' }).click();
+    await p.getByRole('heading', { name: 'Notas e faltas dos educandos' }).waitFor();
+    await p.getByText('Publicados: 1.º trimestre.').waitFor();
+    const lp = await p.locator('tr', { hasText: 'Língua Portuguesa' }).locator('td').nth(1).innerText();
+    if (lp.trim() !== '12,5') throw new Error(`MT de LP no portal: esperado 12,5, obtido ${lp}`);
+    const t2 = await p.locator('tr', { hasText: 'Língua Portuguesa' }).locator('td').nth(2).innerText();
+    if (t2.trim() !== '—') throw new Error('O 2.º trimestre não publicado não devia aparecer');
+    ok('encarregada entra no portal e vê só o trimestre publicado');
+    await p.goto(p.url().replace(/#.*$/, '#/turmas'));
+    await p.getByRole('heading', { name: 'Notas e faltas dos educandos' }).waitFor();
+    ok('encarregada não chega às turmas: volta ao portal');
+    await p.screenshot({ path: `${OUT}/15-portal.png`, fullPage: true });
+    await p.close();
+
     // 6. Painel do director e estágios (13.ª classe)
     p = await novaPagina(browser);
     await entrar(p, 'director@lda101.test');

@@ -12,7 +12,19 @@ import HistoricoAluno from '@/components/HistoricoAluno.vue';
 const props = defineProps({ id: { type: String, required: true } });
 const auth = useAutenticacao();
 const ehSecretaria = computed(() => auth.perfil === 'secretaria');
+const podeDarAcesso = computed(() => auth.temPerfil('secretaria', 'director'));
+const origem = `${window.location.origin}${window.location.pathname}`;
 const { dados: aluno, carregando, erro, executar } = usePedido(() => api.get(`/alunos/${props.id}`));
+
+// Acesso ao portal (encarregado e aluno): a palavra-passe provisória só é mostrada uma vez
+const credenciais = ref(null);
+async function darAcesso(tipo, id, nome, emailSugerido = '') {
+  const email = prompt(`Email para ${nome} entrar no portal:`, emailSugerido ?? '');
+  if (!email) return;
+  const caminho = tipo === 'aluno' ? `/alunos/${id}/acesso-portal` : `/encarregados/${id}/acesso-portal`;
+  const r = await accao.correr(() => api.post(caminho, { email: email.trim() }));
+  if (r) { credenciais.value = { nome, email: r.utilizador.email, palavraPasse: r.palavraPasseProvisoria }; executar(); }
+}
 const accao = useAccao();
 
 // Edição dos dados pessoais
@@ -75,11 +87,20 @@ async function confirmar() {
         <button v-if="ehSecretaria && !edicao" type="button" class="btn btn-outline-primary" @click="editar">Editar dados</button>
       </div>
       <MensagemAccao :erro="accao.erro.value" :sucesso="accao.sucesso.value" />
+      <div v-if="credenciais" class="alert alert-warning" role="alert">
+        <strong>Acesso ao portal criado para {{ credenciais.nome }}.</strong> Entregue estes dados; a palavra-passe não volta a ser mostrada.
+        <div class="mt-2 font-monospace">Endereço: {{ origem }}<br />Email: {{ credenciais.email }}<br />Palavra-passe provisória: {{ credenciais.palavraPasse }}</div>
+        <button type="button" class="btn btn-sm btn-outline-dark mt-2" @click="credenciais = null">Já anotei</button>
+      </div>
 
       <div class="row g-3">
         <section class="col-lg-6">
           <div class="card shadow-sm">
-            <div class="card-header">Dados pessoais</div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span>Dados pessoais</span>
+              <span v-if="aluno.acessoPortal" class="badge text-bg-light border">aluno com acesso ao portal</span>
+              <button v-else-if="podeDarAcesso" type="button" class="btn btn-sm btn-link p-0" @click="darAcesso('aluno', aluno.id, aluno.nome)">Dar acesso ao portal ao aluno</button>
+            </div>
             <form v-if="edicao" class="card-body" @submit.prevent="gravar">
               <div class="row g-2">
                 <div class="col-12"><label class="form-label" for="ed-nome">Nome</label><input id="ed-nome" v-model="edicao.nome" class="form-control" required /></div>
@@ -125,6 +146,9 @@ async function confirmar() {
                 <strong>{{ e.encarregado.nome }}</strong> <span class="text-body-secondary">({{ e.parentesco }})</span>
                 <span v-if="e.principal" class="badge text-bg-success ms-1">principal</span><br />
                 <a :href="`tel:${e.encarregado.telefone}`" class="small">{{ e.encarregado.telefone }}</a>
+                <span v-if="e.encarregado.acessoPortal" class="badge text-bg-light border ms-2">com acesso ao portal</span>
+                <button v-else-if="podeDarAcesso" type="button" class="btn btn-sm btn-link p-0 ms-2"
+                        @click="darAcesso('encarregado', e.encarregado.id, e.encarregado.nome, e.encarregado.email)">Dar acesso ao portal</button>
               </li>
               <li v-if="!aluno.encarregados.length" class="list-group-item text-body-secondary">Sem encarregados registados.</li>
             </ul>

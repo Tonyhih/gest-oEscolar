@@ -73,6 +73,8 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 | RF46 | Mini-pauta e pautas (trimestral e final) em PDF | PR, DT, DE, SE, CO | M | Cabeçalho oficial (República, Governo da Província, escola); assinaturas; negativas a negrito |
 | RF47 | Termo de frequência e aproveitamento em PDF | SE, DE | M | Modelo da escola: dois anos lado a lado, Ct/F por trimestre, CAP, CPE, CF, OBS |
 | RF49 | Histórico escolar: notas finais de classes anteriores ao sistema ou feitas noutra escola | SE, DE | M | Por classe, com ano lectivo e escola de origem; escala da classe; não substitui classes que estão no sistema; usado nos certificados; fica na auditoria |
+| RF50 | Dar acesso ao portal ao encarregado de educação e ao aluno | SE, DE | M | Email e palavra-passe provisória (troca obrigatória); uma conta por encarregado e por aluno; fica na auditoria |
+| RF51 | Portal: o encarregado vê os seus educandos, e o aluno vê-se a si próprio | EE, AL | M | Turma e director de turma; só as notas dos trimestres publicados; notas finais e situação com o 3.º trimestre publicado; faltas; nenhum acesso ao resto do sistema |
 | RF48 | Certificado do Ensino Primário e do I Ciclo em PDF | SE, DE | M | Modelos do MED; numeração seguida por ano (N.º x/aaaa); só com notas e dados completos (ou rascunho sem número); reimpressão igual; nunca se apaga |
 
 ### M6. Avaliação e pautas
@@ -158,7 +160,6 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 
 ## 5. Exclusões (fora do âmbito)
 - Pagamentos, propinas e emolumentos.
-- Portal do encarregado de educação e do aluno (fase seguinte).
 - Horários e detecção de conflitos de sala ou professor.
 - Gestão detalhada do estágio (relatórios, avaliação pela entidade de acolhimento).
 - Transferência de alunos entre escolas.

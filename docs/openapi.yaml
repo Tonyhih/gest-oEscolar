@@ -206,6 +206,46 @@ paths:
             application/pdf:
               schema: { type: string, format: binary }
         '404': { $ref: '#/components/responses/NaoEncontrado' }
+  /alunos/{id}/acesso-portal:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Pessoas]
+      summary: Dar acesso ao portal ao aluno (RF50) – SE, DE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [email], properties: { email: { type: string, format: email } } }
+      responses:
+        '201': { description: 'Conta criada; a palavra-passe provisória só aparece nesta resposta' }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /encarregados/{id}/acesso-portal:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Pessoas]
+      summary: Dar acesso ao portal ao encarregado de educação (RF50) – SE, DE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [email], properties: { email: { type: string, format: email } } }
+      responses:
+        '201': { description: 'Conta criada; a palavra-passe provisória só aparece nesta resposta' }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /portal/educandos:
+    get:
+      tags: [Pessoas]
+      summary: Alunos a que a conta tem acesso (RF51) – encarregado, aluno
+      responses:
+        '200': { description: Lista de alunos }
+  /portal/alunos/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Pessoas]
+      summary: 'Turma, notas publicadas, situação e faltas do aluno (RF51) – encarregado, aluno'
+      responses:
+        '200': { description: Resumo do aluno }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
   /plataforma/escolas:
     get:
       tags: [Plataforma]
@@ -1507,7 +1547,7 @@ components:
       enum: [activo, inactivo]
     Perfil:
       type: string
-      enum: [admin_plataforma, director, secretaria, coordenador, professor]
+      enum: [admin_plataforma, director, secretaria, coordenador, professor, encarregado, aluno]
     Turno:
       type: string
       enum: [manha, tarde, noite]

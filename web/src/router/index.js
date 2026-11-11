@@ -44,6 +44,8 @@ export const rotas = [
     meta: { perfis: ['director', 'secretaria', 'coordenador'], titulo: 'Estágios e TFC' } },
   { path: '/painel', name: 'painel', component: () => import('@/views/PainelView.vue'),
     meta: { perfis: ['director'], titulo: 'Painel' } },
+  { path: '/portal', name: 'portal', component: () => import('@/views/PortalView.vue'),
+    meta: { perfis: ['encarregado', 'aluno'], titulo: 'Notas e faltas' } },
   { path: '/auditoria', name: 'auditoria', component: () => import('@/views/AuditoriaView.vue'),
     meta: { perfis: ['director'], titulo: 'Auditoria' } },
 
@@ -61,6 +63,8 @@ export function guarda(auth) {
     if (para.meta.publica) return auth.autenticado ? { name: 'inicio' } : true;
     if (!auth.autenticado) return { name: 'entrar', query: { r: para.fullPath } };
     if (auth.trocaPendente && !para.meta.permiteTroca) return { name: 'trocar-palavra-passe' };
+    // O encarregado e o aluno só têm o portal
+    if (auth.temPerfil('encarregado', 'aluno')) return para.name === 'portal' || para.meta.permiteTroca ? true : { name: 'portal' };
     if (para.meta.perfis && !auth.temPerfil(...para.meta.perfis)) return { name: 'inicio' };
     return true;
   };

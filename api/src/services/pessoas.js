@@ -47,9 +47,10 @@ export function listarAlunos(bd, u, { pesquisa, turma, pagina, limite }) {
 
 export async function obterAluno(bd, u, id) {
   const { rows } = await bd.query(`
-    SELECT a.*,
+    SELECT a.*, a.utilizador_id IS NOT NULL AS acesso_portal,
            coalesce((SELECT json_agg(json_build_object(
-                       'encarregado', json_build_object('id', e.id, 'nome', e.nome, 'telefone', e.telefone, 'email', e.email),
+                       'encarregado', json_build_object('id', e.id, 'nome', e.nome, 'telefone', e.telefone, 'email', e.email,
+                                                        'acessoPortal', e.utilizador_id IS NOT NULL),
                        'parentesco', ae.parentesco, 'principal', ae.principal) ORDER BY ae.principal DESC, e.nome)
                      FROM aluno_encarregados ae JOIN encarregados e ON e.id = ae.encarregado_id
                      WHERE ae.aluno_id = a.id), '[]') AS encarregados,
@@ -70,7 +71,7 @@ export async function obterAluno(bd, u, id) {
   if (u.perfil === 'professor' && !aluno.turmas.some((t) => u.turmasDirigidas.includes(t))) {
     throw proibido('Só pode consultar os alunos das turmas que dirige.');
   }
-  const { turmas, ...resto } = camel(aluno);
+  const { turmas, utilizadorId, ...resto } = camel(aluno);
   return minimizar(u, resto);
 }
 
