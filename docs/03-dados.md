@@ -74,6 +74,7 @@ erDiagram
 | Documentos | `documentos` (certificados e declarações numerados, com os dados congelados), `historico_escolar` |
 | Horários | `tempos` (por turno), `aulas` (índices únicos impedem conflitos de professor e de sala) |
 | M10 Pagamentos | `rubricas` (preçário), `cobrancas`, `pagamentos` (recibos numerados por escola e ano), `pagamento_itens` |
+| M12 Transferências | `transferencias` (guia com código e os dados no momento da emissão; uma pendente por matrícula) |
 | M11 Portal | `avisos`, `avisos_lidos`; contas ligadas por `encarregados.utilizador_id` e `alunos.utilizador_id` |
 
 ### Migrações
@@ -89,6 +90,7 @@ erDiagram
 | `007_declaracoes.sql` | Declarações de frequência e com notas |
 | `008_pagamentos.sql` | Preçário, cobranças, pagamentos e recibos |
 | `009_avisos.sql` | Faltas vermelhas, avisos do portal, limite de faltas da escola |
+| `010_transferencias.sql` | Guias de transferência entre escolas da plataforma |
 
 São aplicadas por ordem por `npm run migrar` (no Render, a cada publicação). Uma migração aplicada não se altera: as mudanças vão numa migração nova.
 

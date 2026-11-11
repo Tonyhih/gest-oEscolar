@@ -24,6 +24,7 @@ function formatar(t) {
   } = camel(t);
   return {
     ...turma,
+    classeCodigo,
     designacao: [designacaoCurta, cursoSigla, TURNOS[t.turno]].filter(Boolean).join(' – '),
     avaliacao: { escalaMaxima, notaMinimaAprovacao, minimoNegativa, maxNegativas, classeDeExame, avaliacaoQualitativa, apenasEstagio },
   };

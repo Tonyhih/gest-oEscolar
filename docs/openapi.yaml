@@ -25,6 +25,7 @@ tags:
   - name: Assiduidade
   - name: Estágio
   - name: Pagamentos
+  - name: Transferências
   - name: Auditoria
 
 paths:
@@ -501,6 +502,104 @@ paths:
             application/pdf:
               schema: { type: string, format: binary }
         '404': { $ref: '#/components/responses/NaoEncontrado' }
+  /transferencias/escolas:
+    get:
+      tags: [Transferências]
+      summary: Escolas activas da plataforma para onde se pode transferir (RF69) – SE, DE
+      responses:
+        '200': { description: Escolas }
+  /transferencias:
+    get:
+      tags: [Transferências]
+      summary: Guias enviadas e recebidas pela escola; o destino não vê o código (RF69) – SE, DE
+      parameters: [{ name: aluno, in: query, schema: { $ref: '#/components/schemas/Uuid' } }]
+      responses:
+        '200': { description: Guias }
+  /alunos/{id}/transferencias:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Transferências]
+      summary: Emitir a guia de transferência (RF69) – SE, DE da origem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [escolaDestino, motivo]
+              properties:
+                escolaDestino: { $ref: '#/components/schemas/Uuid' }
+                motivo: { type: string, minLength: 3 }
+      responses:
+        '201': { description: Guia com o código }
+        '409': { $ref: '#/components/responses/Conflito' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /transferencias/{id}/guia:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Transferências]
+      summary: Guia de transferência em PDF (RF69) – SE, DE da origem
+      responses:
+        '200':
+          description: PDF
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+  /transferencias/codigo/{codigo}:
+    parameters: [{ name: codigo, in: path, required: true, schema: { type: string, pattern: '^[A-Za-z0-9]{8}$' } }]
+    get:
+      tags: [Transferências]
+      summary: Prévia da guia pelo código, com as disciplinas sem correspondência (RF70) – SE, DE do destino
+      responses:
+        '200': { description: Prévia }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /transferencias/{id}/aceitar:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Transferências]
+      summary: Aceitar e matricular o aluno; a matrícula de origem passa a transferida (RF70) – SE, DE do destino
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [codigo, turma]
+              properties:
+                codigo: { type: string }
+                turma: { $ref: '#/components/schemas/Uuid' }
+      responses:
+        '200': { description: 'Aluno criado, notas copiadas e disciplinas sem correspondência' }
+        '409': { $ref: '#/components/responses/Conflito' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /transferencias/{id}/recusar:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Transferências]
+      summary: Recusar a guia (RF71) – SE, DE do destino
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [motivo], properties: { motivo: { type: string, minLength: 3 } } }
+      responses:
+        '200': { description: Recusada }
+        '403': { $ref: '#/components/responses/Proibido' }
+  /transferencias/{id}/cancelar:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Transferências]
+      summary: Cancelar a guia (RF71) – SE, DE da origem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [motivo], properties: { motivo: { type: string, minLength: 3 } } }
+      responses:
+        '200': { description: Cancelada }
+        '403': { $ref: '#/components/responses/Proibido' }
   /plataforma/escolas:
     get:
       tags: [Plataforma]
