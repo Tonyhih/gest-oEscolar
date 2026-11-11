@@ -239,3 +239,70 @@ export function certificado(d) {
     + 'Válido só com a assinatura do(a) Director(a) e o carimbo a óleo/selo branco da escola.');
   return paraBuffer(doc);
 }
+
+// ======================================================================
+// Declarações (frequência e notas publicadas)
+// ======================================================================
+const TURNOS_TEXTO = { manha: 'da manhã', tarde: 'da tarde', noite: 'da noite' };
+
+export function declaracao(d) {
+  const doc = novoDocumento({ titulo: `Declaração ${d.numeroTexto} ${d.aluno.nome}`, margem: 55 });
+  cabecalhoEscola(doc, d.escola);
+  doc.moveDown(0.6);
+  doc.font('Times-Bold').fontSize(16).text(`DECLARAÇÃO N.º ${d.numeroTexto}`, { align: 'center' });
+  if (d.tipo === 'notas') doc.font('Times-Roman').fontSize(11).text('(com classificações)', { align: 'center' });
+  doc.moveDown(1.2);
+
+  const a = d.aluno;
+  const m = d.matricula;
+  const larg = doc.page.width - 110;
+  const filiacao = a.nomePai || a.nomeMae ? `, filho(a) de ${[a.nomePai, a.nomeMae].filter(Boolean).join(' e de ')}` : '';
+  const nascimento = a.dataNascimento ? `, nascido(a) aos ${dataCurta(a.dataNascimento)}` : '';
+  const documento = a.documentoNumero ? `, portador(a) do ${a.documentoTipo === 'passaporte' ? 'Passaporte' : a.documentoTipo === 'cedula' ? 'Cédula Pessoal' : 'B.I.'} n.º ${a.documentoNumero}` : '';
+  // "do Complexo Escolar…", "da Escola…", ou "da escola X" quando o nome não diz o tipo
+  const daEscola = /^escola/i.test(d.escola.nome) ? 'da' : /^(col[eé]gio|complexo|instituto|liceu)/i.test(d.escola.nome) ? 'do' : 'da escola';
+  const director = d.escola.director ? `${d.escola.director}, Director(a) ${daEscola} ${d.escola.nome}` : `A Direcção ${daEscola} ${d.escola.nome}`;
+  const verbo = d.tipo === 'frequencia'
+    ? `se encontra matriculado(a) e frequenta, no ano lectivo ${m.anoLectivo}, a ${m.turma} do turno ${TURNOS_TEXTO[m.turno] ?? ''} desta escola`
+    : `frequentou, no ano lectivo ${m.anoLectivo}, a ${m.turma} desta escola, tendo obtido as classificações abaixo`;
+  doc.font('Times-Roman').fontSize(12).text(
+    `${director}, declara, para os devidos efeitos, que ${a.nome}${filiacao}${nascimento}${documento}, `
+    + `com o processo individual n.º ${a.numeroProcesso}, ${verbo}.`
+    + (d.finalidade ? ` A presente declaração destina-se a ${d.finalidade}.` : ''),
+    55, doc.y, { width: larg, align: 'justify', lineGap: 4 });
+
+  if (d.tipo === 'notas') {
+    doc.moveDown(0.8);
+    const publicados = d.trimestresPublicados;
+    const final = publicados.includes(3);
+    const r = tabela(doc, {
+      x: 55, y: doc.y, tamanho: 10.5, alturaLinha: 17,
+      colunas: [
+        { titulo: 'Disciplina', largura: final ? 175 : 235, alinhar: 'left' },
+        { titulo: '1.º Trim.', largura: 60 }, { titulo: '2.º Trim.', largura: 60 }, { titulo: '3.º Trim.', largura: 60 },
+        ...(final && d.classeDeExame ? [{ titulo: 'Exame', largura: 50 }] : []),
+        ...(final ? [{ titulo: 'Final', largura: d.classeDeExame ? 90 : 140 }] : []),
+      ],
+      linhas: d.disciplinas.map((x) => [x.nome, ...x.trimestres.map((t) => nota(t)),
+        ...(final && d.classeDeExame ? [nota(x.exame, 0)] : []),
+        ...(final ? [x.notaFinal === null ? '' : `${x.notaFinal} (${porExtenso(x.notaFinal)})`] : [])]),
+    });
+    doc.y = r.fim + 6;
+    doc.font('Times-Roman').fontSize(9).text(
+      `Médias trimestrais dos trimestres publicados (escala 0–${m.escalaMaxima}).`
+      + (final ? ` Situação no fim do ano: ${{ transita: 'Transita', nao_transita: 'Não transita', pendente: 'Pendente' }[d.situacao?.situacao] ?? '—'}.` : ' O ano lectivo ainda não terminou.'),
+      55, doc.y, { width: larg });
+  }
+
+  doc.moveDown(1.5);
+  doc.font('Times-Roman').fontSize(12).text(
+    'Por ser verdade e me ter sido solicitada, passa-se a presente declaração, que vai assinada e autenticada '
+    + 'com o carimbo a óleo/selo branco em uso nesta escola.', 55, doc.y, { width: larg, align: 'justify', lineGap: 4 });
+  doc.moveDown(1);
+  const p = partesData(d.dataEmissao);
+  doc.text(`${d.escola.municipio ?? '__________'}, aos ${p.dia} de ${p.mes} de ${p.ano}.`, 55, doc.y, { width: larg });
+  assinaturas(doc, [{ titulo: 'O(A) Director(a)', nome: d.escola.director }], { y: doc.y + 28, larguraLinha: 200 });
+  rodape(doc, `Declaração n.º ${d.numeroTexto} emitida pelo Sistema de Gestão Escolar em ${dataCurta(d.dataEmissao)}. `
+    + 'Válida só com a assinatura do(a) Director(a) e o carimbo da escola.');
+  return paraBuffer(doc);
+}

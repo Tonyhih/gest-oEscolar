@@ -78,6 +78,8 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 | RF52 | Tempos lectivos por turno | DE | D | Horas de início e fim de cada tempo; valores típicos propostos; sem sobreposições; não se retiram tempos com aulas |
 | RF53 | Horário semanal da turma | DE, CO | D | Grelha dias × tempos; o professor vem da atribuição; recusa conflitos de professor e de sala com outras turmas (também na base de dados); as aulas seguem as mudanças de atribuição |
 | RF54 | Horário do professor e da turma no portal | PR, EE, AL | D | "O meu horário" com todas as turmas do professor; o horário da turma no portal do encarregado e do aluno |
+| RF55 | Declaração de frequência em PDF | SE, DE | M | Só com matrícula activa no ano activo; finalidade opcional; numeração seguida por tipo e ano; nunca se apaga; fica na auditoria |
+| RF56 | Declaração com notas em PDF | SE, DE | D | Só com trimestres publicados; MT por trimestre e, com o 3.º publicado, notas finais por extenso e situação; não na Iniciação nem na 13.ª |
 | RF48 | Certificado do Ensino Primário e do I Ciclo em PDF | SE, DE | M | Modelos do MED; numeração seguida por ano (N.º x/aaaa); só com notas e dados completos (ou rascunho sem número); reimpressão igual; nunca se apaga |
 
 ### M6. Avaliação e pautas
@@ -165,7 +167,7 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 - Pagamentos, propinas e emolumentos.
 - Gestão detalhada do estágio (relatórios, avaliação pela entidade de acolhimento).
 - Transferência de alunos entre escolas.
-- Declarações em PDF, certificado do II Ciclo e da Educação de Adultos (falta o modelo oficial).
+- Certificado do II Ciclo e da Educação de Adultos (falta o modelo oficial).
 - Integração com o SIGE ou outros sistemas do MED; envio de emails ou SMS.
 
 ---

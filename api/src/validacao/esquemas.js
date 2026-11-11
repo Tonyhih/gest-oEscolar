@@ -163,6 +163,9 @@ export const tfc = z.object({
 });
 export const filtroAno = z.object({ anoLectivo: uuid.optional() });
 export const acessoPortal = z.object({ email });
+export const declaracao = z.object({
+  tipo: z.enum(['frequencia', 'notas']), finalidade: texto(3, 200).optional(), anoLectivo: uuid.optional(),
+});
 const hora = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Hora no formato hh:mm.');
 export const paramsTurno = z.object({ turno });
 export const queryTurno = z.object({ turno });

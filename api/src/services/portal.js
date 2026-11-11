@@ -80,7 +80,15 @@ export async function resumo(bd, u, alunoId) {
     FROM matriculas m JOIN anos_lectivos al ON al.id = m.ano_lectivo_id
     WHERE m.aluno_id = $1 AND m.estado = 'activa' ORDER BY al.activo DESC, al.designacao DESC LIMIT 1`, [alunoId])).rows[0];
   if (!m) return { aluno, matricula: null };
+  return resumoMatricula(bd, u, aluno, m);
+}
 
+/**
+ * Dados académicos de uma matrícula, só com o que já foi publicado: turma, MT dos trimestres publicados,
+ * notas finais e situação com o 3.º trimestre publicado, faltas e horário. Usado pelo portal e pelas declarações.
+ * @param {{ id: string, turma_id: string, ano: string }} m
+ */
+export async function resumoMatricula(bd, u, aluno, m) {
   const turma = (await bd.query(`
     SELECT t.*, ${SQL_DESIGNACAO_TURMA} AS designacao_curta, c.nota_minima_aprovacao, c.minimo_negativa, c.max_negativas,
            c.classe_de_exame, c.avaliacao_qualitativa, c.apenas_estagio, c.escala_maxima, us.nome AS director_turma

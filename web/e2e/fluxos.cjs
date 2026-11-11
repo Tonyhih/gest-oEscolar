@@ -202,6 +202,12 @@ async function entrar(page, email) {
     if (!(await ehPdf(dl))) throw new Error('Certificado não é um PDF');
     await p.getByText(/Certificado n\.º 1\/\d{4}/).waitFor();
     ok(`secretaria emite o certificado do I Ciclo (${dl.suggestedFilename()})`);
+    p.once('dialog', (d) => d.accept());
+    await p.getByLabel('Destina-se a (opcional)').fill('efeitos de abono de família');
+    [dl] = await Promise.all([p.waitForEvent('download'), p.getByRole('button', { name: 'Emitir (PDF)' }).click()]);
+    if (!(await ehPdf(dl))) throw new Error('Declaração não é um PDF');
+    await p.getByText(/Declaração de frequência n\.º 1\/\d{4}/).waitFor();
+    ok(`secretaria emite a declaração de frequência (${dl.suggestedFilename()})`);
     await p.screenshot({ path: `${OUT}/13-documentos.png`, fullPage: true });
     await p.close();
 

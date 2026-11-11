@@ -187,6 +187,25 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
+  /alunos/{id}/declaracoes:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Pessoas]
+      summary: Emitir declaração de frequência ou com notas publicadas, numerada (RF55, RF56) – SE, DE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tipo]
+              properties:
+                tipo: { type: string, enum: [frequencia, notas] }
+                finalidade: { type: string, example: efeitos de abono de família }
+                anoLectivo: { $ref: '#/components/schemas/Uuid' }
+      responses:
+        '201': { description: 'Documento emitido: id, tipo, numeroTexto (ex.: 1/2026)' }
+        '422': { $ref: '#/components/responses/Regra' }
   /alunos/{id}/documentos:
     parameters: [{ $ref: '#/components/parameters/Id' }]
     get:
