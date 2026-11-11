@@ -131,6 +131,7 @@ O encarregado e o aluno recebem avisos no portal, com o número de avisos por le
   - palavras-passe guardadas de forma irreversível (bcrypt);
   - palavra-passe provisória com troca obrigatória no primeiro acesso;
   - bloqueio após 5 tentativas falhadas;
+  - **segundo factor para o director:** depois da palavra-passe, recebe por email um código de 6 algarismos, válido 10 minutos;
   - sessões que expiram.
 - **Dados que nunca se apagam:** notas, matrículas, faltas e documentos. A **auditoria** regista quem alterou o quê e quando.
 - **Lei n.º 22/11:**
@@ -144,11 +145,11 @@ O encarregado e o aluno recebem avisos no portal, com o número de avisos por le
 
 | | |
 |---|---|
-| Rotas na API | 115 |
+| Rotas na API | 117 |
 | Ecrãs | 29 |
-| Requisitos funcionais documentados | 71 |
-| Migrações da base de dados | 10 |
-| Testes automáticos da API | 181 |
+| Requisitos funcionais documentados | 73 |
+| Migrações da base de dados | 11 |
+| Testes automáticos da API | 192 |
 | Testes automáticos do front-end | 19 |
 | Fluxos testados num browser real | 41 |
 

@@ -65,6 +65,8 @@ export const sistema = {
 
 export const auth = (config) => ({
   entrar: acao((req, d) => autenticacao.entrar(req.bd, config, d.body)),
+  confirmarCodigo: acao((req, d) => autenticacao.confirmarCodigo(req.bd, config, d.body)),
+  reenviarCodigo: acao((req, d) => autenticacao.reenviarCodigo(req.bd, config, d.body)),
   eu: acao((req, d, u) => autenticacao.sessao(u)),
   alterarPalavraPasse: acao((req, d, u) => autenticacao.alterarPalavraPasse(req.bd, u, d.body), 204),
 });

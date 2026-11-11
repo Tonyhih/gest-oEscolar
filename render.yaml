@@ -30,3 +30,7 @@ services:
         sync: false            # email do primeiro administrador (a palavra-passe aparece nos Logs)
       - key: ADMIN_NOME
         sync: false
+      - key: BREVO_API_KEY
+        sync: false            # chave da API do Brevo (segundo factor do director); sem ela, o código vai para os Logs
+      - key: EMAIL_REMETENTE
+        sync: false            # remetente verificado no Brevo

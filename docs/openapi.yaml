@@ -63,7 +63,7 @@ paths:
                 palavraPasse: { type: string, minLength: 1 }
       responses:
         '200':
-          description: Sessão iniciada
+          description: 'Sessão iniciada; para o director, em vez do token, { segundoFactor: true, desafio, email } (RF72)'
           content:
             application/json:
               schema:
@@ -74,6 +74,38 @@ paths:
         '400': { $ref: '#/components/responses/Invalido' }
         '401': { $ref: '#/components/responses/NaoAutenticado' }
         '429': { $ref: '#/components/responses/Limite' }
+  /auth/login/codigo:
+    post:
+      tags: [Autenticação]
+      summary: Confirmar o código do segundo factor e receber a sessão (RF72) – director
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [desafio, codigo]
+              properties:
+                desafio: { $ref: '#/components/schemas/Uuid' }
+                codigo: { type: string, pattern: '^\\d{6}$' }
+      responses:
+        '200': { description: Token e dados da sessão }
+        '400': { $ref: '#/components/responses/Invalido' }
+        '401': { $ref: '#/components/responses/NaoAutenticado' }
+        '429': { $ref: '#/components/responses/Limite' }
+  /auth/login/reenviar:
+    post:
+      tags: [Autenticação]
+      summary: Enviar outro código (máximo 3, com 1 minuto de intervalo) (RF73)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [desafio], properties: { desafio: { $ref: '#/components/schemas/Uuid' } } }
+      responses:
+        '200': { description: Código reenviado }
+        '401': { $ref: '#/components/responses/NaoAutenticado' }
+        '422': { $ref: '#/components/responses/Regra' }
   /auth/eu:
     get:
       tags: [Autenticação]

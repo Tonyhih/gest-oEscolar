@@ -18,7 +18,7 @@ function adaptar(pglite) {
  * Cria uma API completa com uma base de dados PostgreSQL em memória, migrada e com o seed.
  * Devolve helpers para pedidos autenticados.
  */
-export async function criarContexto({ limiteLogin = 1000 } = {}) {
+export async function criarContexto({ limiteLogin = 1000, segundoFactor = null } = {}) {
   const pglite = new PGlite({ parsers: { 1700: (v) => (v === null ? null : Number(v)), 1082: (v) => v } });
   await aplicarMigracoes(pglite);
   await pglite.query('BEGIN');
@@ -26,17 +26,21 @@ export async function criarContexto({ limiteLogin = 1000 } = {}) {
   await pglite.query('COMMIT');
 
   const bd = adaptar(pglite);
+  const emails = [];
   const config = {
     producao: false,
     jwt: { segredo: 'segredo-de-teste-com-mais-de-32-caracteres', expira: '1h' },
     corsOrigens: ['http://localhost:5173'],
     limiteLogin,
+    segundoFactor,
+    // Os emails ficam numa caixa em memória (ctx.emails), para os testes lerem os códigos
+    email: { enviar: async (m) => { emails.push(m); } },
   };
   const app = criarApp({ bd, config });
   const tokens = new Map();
 
   const ctx = {
-    app, bd, config,
+    app, bd, config, emails,
     /** Faz login (com cache) e devolve o token. */
     async token(email, palavraPasse = PALAVRA_PASSE) {
       if (!tokens.has(email)) {

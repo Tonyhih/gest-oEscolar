@@ -165,6 +165,8 @@ export const tfc = z.object({
 });
 export const filtroAno = z.object({ anoLectivo: uuid.optional() });
 export const acessoPortal = z.object({ email });
+export const desafio = z.object({ desafio: uuid });
+export const codigoAcesso = z.object({ desafio: uuid, codigo: z.string().trim().regex(/^\d{6}$/, 'O código tem 6 algarismos.') });
 const kwanzas = z.number().positive().max(1e9).multipleOf(0.01, 'No máximo 2 casas decimais.');
 export const rubrica = z.object({
   nome: texto(3, 120), tipo: z.enum(['propina', 'emolumento', 'outro']), valor: kwanzas, classe: uuid.optional(),

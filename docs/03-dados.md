@@ -91,6 +91,7 @@ erDiagram
 | `008_pagamentos.sql` | Preçário, cobranças, pagamentos e recibos |
 | `009_avisos.sql` | Faltas vermelhas, avisos do portal, limite de faltas da escola |
 | `010_transferencias.sql` | Guias de transferência entre escolas da plataforma |
+| `011_segundo_factor.sql` | Códigos de acesso do segundo factor (só o hash) |
 
 São aplicadas por ordem por `npm run migrar` (no Render, a cada publicação). Uma migração aplicada não se altera: as mudanças vão numa migração nova.
 

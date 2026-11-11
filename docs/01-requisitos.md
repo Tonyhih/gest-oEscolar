@@ -145,6 +145,12 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 | RF70 | Receber o aluno transferido | SE, DE (destino) | M | Só com o código da guia; prévia com as disciplinas sem correspondência; turma da mesma classe no ano activo e com vaga; cria o aluno com novo n.º de processo, os encarregados, o histórico e a matrícula, copia as notas (pela sigla ou pelo nome da disciplina); a matrícula de origem passa a "transferida"; tudo numa transacção |
 | RF71 | Recusar ou cancelar a guia | SE, DE | M | O destino recusa e a origem cancela, cada um só do seu lado, com motivo; a matrícula de origem continua activa; nada se apaga |
 
+### M2b. Segundo factor de autenticação
+| ID | Requisito | Ator | Prior. | Critérios de aceitação |
+|---|---|---|---|---|
+| RF72 | Segundo factor do director | DE | M | Depois da palavra-passe certa, o director recebe por email um código de 6 algarismos, válido 10 minutos; só o hash fica guardado; 5 tentativas por código; código usado ou expirado → 401; a palavra-passe errada não envia código; os outros perfis entram como antes |
+| RF73 | Reenviar o código | DE | D | No máximo 3 reenvios, com 1 minuto de intervalo; o código anterior deixa de valer |
+
 ---
 
 ## 3. Requisitos não funcionais

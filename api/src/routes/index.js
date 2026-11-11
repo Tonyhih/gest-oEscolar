@@ -28,6 +28,8 @@ export function criarRotas(config) {
   // ---------------------------------------------------------- Sistema e autenticação
   r.get('/saude', C.sistema.saude);
   r.post('/auth/login', limitarLogin(config.limiteLogin), v({ body: E.login }), A.entrar);
+  r.post('/auth/login/codigo', limitarLogin(config.limiteLogin), v({ body: E.codigoAcesso }), A.confirmarCodigo);
+  r.post('/auth/login/reenviar', limitarLogin(config.limiteLogin), v({ body: E.desafio }), A.reenviarCodigo);
   r.get('/auth/eu', auth2, A.eu);
   r.post('/auth/palavra-passe', auth2, v({ body: E.alterarPalavraPasse }), A.alterarPalavraPasse);
 

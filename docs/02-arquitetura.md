@@ -110,6 +110,7 @@ sequenceDiagram
 | Guardar no browser | `sessionStorage` (fecha com o separador) e store Pinia |
 | Palavra-passe | bcrypt, custo 12, mínimo de 8 caracteres; troca obrigatória no primeiro acesso |
 | Login | 5 tentativas por 15 min por IP; mensagem genérica "Email ou palavra-passe incorrectos." |
+| Segundo factor (director) | Código de 6 algarismos por email (Brevo), válido 10 min; HMAC-SHA256 guardado, nunca o código; 5 tentativas e 3 reenvios por desafio; `SEGUNDO_FACTOR=desligado` desliga-o |
 
 ### Matriz de permissões (resumo)
 
@@ -177,6 +178,8 @@ O detalhe dos corpos e das respostas está em [openapi.yaml](openapi.yaml). Toda
 | POST | `/auth/login` | público | RF05 | 200, 400, 401, 429 |
 | GET | `/auth/eu` | todos | RF05 | 200, 401 |
 | POST | `/auth/palavra-passe` | todos | RF06 | 204, 400, 401, 422 |
+| POST | `/auth/login/codigo` | público (com o desafio) | RF72 | 200, 400, 401, 429 |
+| POST | `/auth/login/reenviar` | público (com o desafio) | RF73 | 200, 401, 422 |
 
 ### Plataforma
 | Método | Caminho | Perfis | RF | Respostas |
