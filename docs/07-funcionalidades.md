@@ -82,6 +82,15 @@ Os cálculos são feitos na base de dados com números exactos, o que evita o er
 ### Assiduidade
 - Faltas por aula, numa lista de caixas. Uma falta desmarcada é **anulada**, nunca apagada.
 - Justificação pelo director de turma, com motivo obrigatório, e resumo por trimestre.
+- **Falta vermelha (disciplinar):** o professor marca-a por indisciplina, com a ocorrência. Não se justifica; só o director a anula, com motivo.
+
+### Avisos no portal
+O encarregado e o aluno recebem avisos no portal, com o número de avisos por ler:
+- notas do trimestre publicadas;
+- faltas injustificadas a chegar ao limite numa disciplina (por omissão 3; o director muda-o nos dados da escola);
+- falta vermelha, com a descrição da ocorrência;
+- propina em atraso;
+- recibo emitido ou anulado.
 
 ### Pautas e painel
 - Pautas trimestrais e final, com a situação de cada aluno e o motivo quando não transita, e exportação CSV que abre no Excel.
@@ -129,13 +138,13 @@ Os cálculos são feitos na base de dados com números exactos, o que evita o er
 
 | | |
 |---|---|
-| Rotas na API | 103 |
+| Rotas na API | 107 |
 | Ecrãs | 29 |
-| Requisitos funcionais documentados | 63 |
-| Migrações da base de dados | 8 |
-| Testes automáticos da API | 161 |
+| Requisitos funcionais documentados | 68 |
+| Migrações da base de dados | 9 |
+| Testes automáticos da API | 172 |
 | Testes automáticos do front-end | 19 |
-| Fluxos testados num browser real | 37 |
+| Fluxos testados num browser real | 39 |
 
 Os testes correm sozinhos no GitHub Actions a cada alteração.
 
@@ -150,4 +159,4 @@ Os testes correm sozinhos no GitHub Actions a cada alteração.
 
 - **Pagamentos online** (Multicaixa Express, referências) e pagamentos parciais: os pagamentos registam-se na secretaria.
 - **Certificado do II Ciclo**, que precisa do modelo oficial.
-- **Envio de emails ou SMS.**
+- **Envio de avisos por email ou SMS:** por agora, os avisos ficam no portal.

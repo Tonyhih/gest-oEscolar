@@ -9,11 +9,12 @@ import MensagemAccao from '@/components/MensagemAccao.vue';
 const { dados, carregando, erro, executar } = usePedido(() => api.get('/escola'));
 const accao = useAccao();
 const decreto = ref('');
-watch(dados, (e) => { decreto.value = e?.decretoCriacao ?? ''; });
+const limite = ref(3);
+watch(dados, (e) => { decreto.value = e?.decretoCriacao ?? ''; limite.value = e?.limiteAvisoFaltas ?? 3; });
 const NATUREZA = { publica: 'Pública', privada: 'Privada', comparticipada: 'Comparticipada' };
 
 async function gravar() {
-  const r = await accao.correr(() => api.patch('/escola', { decretoCriacao: decreto.value }), 'Dados da escola gravados.');
+  const r = await accao.correr(() => api.patch('/escola', { decretoCriacao: decreto.value || undefined, limiteAvisoFaltas: Number(limite.value) }), 'Dados da escola gravados.');
   if (r) dados.value = r;
 }
 </script>
@@ -32,8 +33,13 @@ async function gravar() {
       <div class="row g-2 align-items-end">
         <div class="col-md-6">
           <label class="form-label" for="decreto">Decreto executivo de criação</label>
-          <input id="decreto" v-model="decreto" class="form-control" placeholder="Ex.: 123/2015, de 10 de Março" required minlength="3" aria-describedby="decreto-ajuda" />
+          <input id="decreto" v-model="decreto" class="form-control" placeholder="Ex.: 123/2015, de 10 de Março" minlength="3" aria-describedby="decreto-ajuda" />
           <div id="decreto-ajuda" class="form-text">Aparece nos certificados: "… criado sob o Decreto Executivo n.º …".</div>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label" for="limite">Aviso de faltas</label>
+          <input id="limite" v-model="limite" type="number" min="1" max="30" class="form-control" aria-describedby="limite-ajuda" />
+          <div id="limite-ajuda" class="form-text">Faltas injustificadas numa disciplina, no trimestre, para avisar o encarregado no portal.</div>
         </div>
         <div class="col-md-3"><button type="submit" class="btn btn-primary" :disabled="accao.ocupado.value">Gravar</button></div>
       </div>

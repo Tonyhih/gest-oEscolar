@@ -2,6 +2,7 @@ import { camel } from '../util/sql.js';
 import { ErroAplicacao, conflito, naoEncontrado, proibido, regra } from '../middleware/erros.js';
 import { registar } from './auditoria.js';
 import { decidirTransicao } from './avaliacao.js';
+import * as avisos from './avisos.js';
 import { disciplinasDaTurma, exigirProfessorDaDisciplina, obterTurmaAcessivel } from './turmas.js';
 
 // ======================================================================
@@ -196,6 +197,7 @@ export async function publicar(bd, u, turmaId, trimestre) {
     await c.query('INSERT INTO publicacoes (escola_id, turma_id, trimestre, publicado_por) VALUES ($1, $2, $3, $4)',
       [u.escolaId, turmaId, trimestre, u.id]);
     await registar(c, u, { entidade: 'nota', entidadeId: turmaId, accao: 'publicar', depois: { trimestre } });
+    await avisos.notasPublicadas(c, u.escolaId, turmaId, trimestre);
   });
   return { turma: turmaId, trimestre, publicado: true };
 }

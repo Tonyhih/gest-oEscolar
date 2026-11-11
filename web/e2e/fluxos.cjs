@@ -101,10 +101,15 @@ async function entrar(page, email) {
     ok('director de turma vê o resumo e as faltas por justificar');
     // registar faltas de MAT
     await p.getByLabel('Disciplina').selectOption({ label: 'MAT' });
-    await p.locator('label', { hasText: 'Joaquim Muteka' }).locator('input').check();
+    await p.getByLabel('Joaquim Muteka', { exact: true }).check();
     await p.getByRole('button', { name: /Gravar \(1 falta\)/ }).click();
     await p.getByText(/Faltas de .* gravadas/).waitFor();
     ok('professor regista uma falta');
+    p.once('dialog', (d) => d.accept('Usou o telemóvel e desrespeitou o professor'));
+    await p.getByRole('button', { name: 'Falta vermelha a Graça Lukeny' }).click();
+    await p.getByText('Falta vermelha registada para Graça Lukeny.').waitFor();
+    await p.getByRole('heading', { name: 'Faltas vermelhas (disciplinares)' }).waitFor();
+    ok('professor marca uma falta vermelha (disciplinar) com a ocorrência');
     await p.screenshot({ path: `${OUT}/05-faltas.png`, fullPage: true });
     await p.close();
 
@@ -336,6 +341,13 @@ async function entrar(page, email) {
     await p.getByLabel('Palavra-passe').fill('Familia#2026');
     await p.getByRole('button', { name: 'Entrar' }).click();
     await p.getByRole('heading', { name: 'Propinas e pagamentos' }).waitFor();
+    const avisos = p.locator('section', { has: p.getByRole('heading', { name: /Avisos/ }) });
+    await avisos.getByText('Falta vermelha (disciplinar) a Matemática').waitFor();
+    await avisos.getByText(/Pagamento recebido: recibo n\.º 1\//).waitFor();
+    await p.screenshot({ path: `${OUT}/20-avisos.png`, fullPage: true });
+    await p.getByRole('button', { name: 'Marcar todos como lidos' }).click();
+    await avisos.getByText('por ler').waitFor({ state: 'detached' });
+    ok('encarregada vê os avisos (falta vermelha, recibo, notas) e marca-os como lidos');
     [dl] = await Promise.all([p.waitForEvent('download'), p.getByRole('button', { name: 'PDF' }).first().click()]);
     if (!(await ehPdf(dl))) throw new Error('O recibo do portal não é um PDF');
     ok('encarregada vê as propinas em atraso e descarrega o recibo no portal');

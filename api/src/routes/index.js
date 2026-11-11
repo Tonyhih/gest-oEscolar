@@ -119,6 +119,9 @@ export function criarRotas(config) {
   r.get('/turmas/:id/faltas/resumo', auth, perfil('director', 'professor'), v({ params: paramsId, query: E.queryTrimestre }), F.resumo);
   r.get('/turmas/:id/faltas', auth, perfil('director', 'professor'), v({ params: paramsId, query: E.filtroFaltas }), F.listar);
   r.post('/faltas/:id/justificar', auth, perfil('professor'), v({ params: paramsId, body: E.motivo }), F.justificar);
+  r.post('/turmas/:id/disciplinas/:disciplinaId/faltas-disciplinares', auth, perfil('professor'),
+    v({ params: td, body: E.faltaDisciplinar }), F.disciplinar);
+  r.post('/faltas/:id/anular', auth, perfil('director'), v({ params: paramsId, body: E.motivo }), F.anularDisciplinar);
 
   // ---------------------------------------------------------- Estágio e TFC (13.ª classe) e painel
   const G = C.estagiosCtrl;
@@ -173,6 +176,8 @@ export function criarRotas(config) {
   r.post('/encarregados/:id/acesso-portal', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId, body: E.acessoPortal }), C.portalCtrl.acessoEncarregado);
   r.get('/portal/educandos', auth, perfil(...PORTAL), C.portalCtrl.educandos);
   r.get('/portal/alunos/:id', auth, perfil(...PORTAL), v({ params: paramsId }), C.portalCtrl.resumo);
+  r.get('/portal/avisos', auth, perfil(...PORTAL), C.portalCtrl.avisos);
+  r.post('/portal/avisos/lidos', auth, perfil(...PORTAL), v({ body: E.lerAvisos }), C.portalCtrl.lerAvisos);
   r.get('/portal/pagamentos/:id/recibo', auth, perfil(...PORTAL), v({ params: paramsId }), C.financasCtrl.reciboPortal);
   r.get('/documentos/:id/pdf', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId }), D.pdf);
 

@@ -282,14 +282,15 @@ export async function documentoPdf(bd, u, id) {
 // ======================================================================
 
 export async function obterEscola(bd, u) {
-  return camel((await bd.query(`SELECT id, nome, codigo, provincia, municipio, natureza, ciclos, decreto_criacao
+  return camel((await bd.query(`SELECT id, nome, codigo, provincia, municipio, natureza, ciclos, decreto_criacao, limite_aviso_faltas
                                 FROM escolas WHERE id = $1`, [u.escolaId])).rows[0]);
 }
 
-export async function actualizarEscola(bd, u, { decretoCriacao }) {
+export async function actualizarEscola(bd, u, { decretoCriacao, limiteAvisoFaltas }) {
   await bd.transaccao(async (c) => {
-    await c.query('UPDATE escolas SET decreto_criacao = $2 WHERE id = $1', [u.escolaId, decretoCriacao]);
-    await registar(c, u, { entidade: 'escola', entidadeId: u.escolaId, accao: 'actualizar_dados', depois: { decretoCriacao } });
+    await c.query('UPDATE escolas SET decreto_criacao = coalesce($2, decreto_criacao), limite_aviso_faltas = coalesce($3, limite_aviso_faltas) WHERE id = $1',
+      [u.escolaId, decretoCriacao ?? null, limiteAvisoFaltas ?? null]);
+    await registar(c, u, { entidade: 'escola', entidadeId: u.escolaId, accao: 'actualizar_dados', depois: { decretoCriacao, limiteAvisoFaltas } });
   });
   return obterEscola(bd, u);
 }
