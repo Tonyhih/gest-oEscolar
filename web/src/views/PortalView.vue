@@ -5,6 +5,7 @@ import { usePedido } from '@/composables/usePedido.js';
 import { useAutenticacao } from '@/stores/autenticacao.js';
 import { nota1, SITUACOES, TURNOS } from '@/util/formatar.js';
 import EstadoPedido from '@/components/EstadoPedido.vue';
+import GrelhaHorario from '@/components/GrelhaHorario.vue';
 
 // Portal do encarregado de educação e do aluno: só o que a escola já publicou
 const auth = useAutenticacao();
@@ -105,6 +106,12 @@ const faltas = computed(() => {
                 <dt class="col-5">Curso</dt><dd class="col-7">{{ r.estagio.cursoConcluido ? 'Concluído' : 'Por concluir' }}</dd>
               </dl>
             </div>
+          </section>
+
+          <!-- Horário -->
+          <section v-if="r.horario?.aulas.length" class="card shadow-sm mb-3" aria-labelledby="t-horario">
+            <div class="card-header"><h3 id="t-horario" class="h6 mb-0">Horário da turma</h3></div>
+            <GrelhaHorario :tempos="r.horario.tempos" :aulas="r.horario.aulas" />
           </section>
 
           <!-- Faltas -->

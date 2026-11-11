@@ -259,6 +259,36 @@ async function entrar(page, email) {
     await p.screenshot({ path: `${OUT}/15-portal.png`, fullPage: true });
     await p.close();
 
+    // 5f. Horários: o director marca aulas na 7.ª A; o conflito na 9.ª A é recusado; o professor vê o seu horário
+    p = await novaPagina(browser);
+    await entrar(p, 'director@lda101.test');
+    await p.getByRole('link', { name: 'Turmas', exact: true }).click();
+    await p.getByRole('link', { name: /7\.ª A/ }).click();
+    await p.getByRole('link', { name: 'Horário' }).click();
+    await p.getByRole('button', { name: 'Editar horário' }).click();
+    await p.getByLabel('Dia 1, 1.º tempo').selectOption({ label: 'MAT' });
+    await p.getByLabel('Dia 1, 2.º tempo').selectOption({ label: 'LP' });
+    await p.getByRole('button', { name: 'Gravar horário' }).click();
+    await p.getByText('Horário gravado.').waitFor();
+    ok('director monta o horário da 7.ª A');
+    await p.screenshot({ path: `${OUT}/16-horario.png`, fullPage: true });
+    await p.goBack(); await p.goBack();
+    await p.getByRole('link', { name: 'Turmas', exact: true }).click();
+    await p.getByRole('link', { name: /9\.ª A/ }).click();
+    await p.getByRole('link', { name: 'Horário' }).click();
+    await p.getByRole('button', { name: 'Editar horário' }).click();
+    await p.getByLabel('Dia 1, 1.º tempo').selectOption({ label: 'MAT' });
+    await p.getByRole('button', { name: 'Gravar horário' }).click();
+    await p.getByText('Adão Ngola (fictício) já tem aula na 7.ª A.').waitFor();
+    ok('o conflito de professor é recusado com uma mensagem clara');
+    await p.close();
+    p = await novaPagina(browser);
+    await entrar(p, 'adao@lda101.test');
+    await p.getByRole('link', { name: 'O meu horário' }).click();
+    await p.getByText('1 tempos por semana.').waitFor();
+    ok('professor vê o seu horário');
+    await p.close();
+
     // 6. Painel do director e estágios (13.ª classe)
     p = await novaPagina(browser);
     await entrar(p, 'director@lda101.test');
@@ -306,4 +336,5 @@ async function entrar(page, email) {
     console.log(`\n${passos.length} passos OK`);
     console.log(erros.length ? `ERROS:\n${erros.join('\n')}` : 'Sem erros na consola.');
   }
-})().then(() => { if (erros.some((e) => !e.includes("401"))) process.exitCode = 1; });
+// 401 (login errado) e 409 (conflito de horário) são provocados de propósito
+})().then(() => { if (erros.some((e) => !/status of 40[19]/.test(e))) process.exitCode = 1; });

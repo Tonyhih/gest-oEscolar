@@ -13,6 +13,7 @@ const menu = computed(() => {
   if (p === 'admin_plataforma') return [{ nome: 'escolas', texto: 'Escolas' }];
   if (p === 'encarregado' || p === 'aluno') return [{ nome: 'portal', texto: 'Notas e faltas' }];
   const itens = [{ nome: 'turmas', texto: p === 'professor' ? 'As minhas turmas' : 'Turmas' }];
+  if (p === 'professor') itens.push({ nome: 'meu-horario', texto: 'O meu horário' });
   if (['director', 'secretaria'].includes(p)) itens.push({ nome: 'matriculas', texto: 'Matrículas' });
   if (['director', 'secretaria', 'coordenador'].includes(p)) itens.push({ nome: 'alunos', texto: 'Alunos' });
   if (['director', 'secretaria', 'coordenador'].includes(p)) itens.push({ nome: 'estagios', texto: 'Estágios' });
@@ -46,11 +47,12 @@ function sair() {
           </li>
         </ul>
         <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-2 text-white small text-nowrap">
-          <span :title="auth.utilizador.escola?.nome">
+          <!-- Entre 992 e 1400 px o menu ocupa a barra toda: o nome passa para a dica do botão "Sair" -->
+          <span class="d-lg-none d-xxl-inline" :title="auth.utilizador.escola?.nome">
             <strong>{{ auth.utilizador.nome }}</strong> · {{ NOMES_PERFIL[auth.perfil] }}
           </span>
           <RouterLink class="btn btn-sm btn-outline-light" :to="{ name: 'trocar-palavra-passe' }">Palavra-passe</RouterLink>
-          <button type="button" class="btn btn-sm btn-light" @click="sair">Sair</button>
+          <button type="button" class="btn btn-sm btn-light" :title="`${auth.utilizador.nome} · ${NOMES_PERFIL[auth.perfil]}`" @click="sair">Sair</button>
         </div>
       </div>
     </div>

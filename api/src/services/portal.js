@@ -5,6 +5,7 @@ import { registar } from './auditoria.js';
 import { decidirTransicao } from './avaliacao.js';
 import { disciplinasDaTurma } from './turmas.js';
 import { SQL_DESIGNACAO_TURMA } from './pessoas.js';
+import { horarioDaTurma } from './horarios.js';
 
 // Portal do encarregado de educação e do aluno (RF50, RF51).
 // Só mostra o que já foi publicado pela escola: as notas dos trimestres publicados e,
@@ -97,6 +98,7 @@ export async function resumo(bd, u, alunoId) {
       escalaMaxima: turma.escala_maxima, notaMinimaAprovacao: Number(turma.nota_minima_aprovacao),
     },
     trimestresPublicados: publicados,
+    horario: await horarioDaTurma(bd, u, turma.id, { verificarAcesso: false }),
   };
 
   // Faltas registadas (não dependem da publicação)

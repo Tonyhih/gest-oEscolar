@@ -163,6 +163,13 @@ export const tfc = z.object({
 });
 export const filtroAno = z.object({ anoLectivo: uuid.optional() });
 export const acessoPortal = z.object({ email });
+const hora = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Hora no formato hh:mm.');
+export const paramsTurno = z.object({ turno });
+export const queryTurno = z.object({ turno });
+export const tempos = z.array(z.object({ inicio: hora, fim: hora })).min(1).max(10);
+export const horario = z.array(z.object({
+  dia: z.number().int().min(1).max(6), tempo: z.number().int().min(1).max(10), disciplina: uuid, sala: texto(1, 30).optional(),
+})).max(60);
 export const paramsHistorico = z.object({ id: uuid, classe: z.enum(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']) });
 export const historicoClasse = z.object({
   anoLectivo: z.string().regex(/^\d{4}\/\d{4}$/, 'Formato 2024/2025.'),

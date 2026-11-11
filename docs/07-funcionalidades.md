@@ -65,6 +65,12 @@ Estas regras vêm por omissão, e o director pode ajustá-las.
 
 Os cálculos são feitos na base de dados com números exactos, o que evita o erro de arredondamento do JavaScript.
 
+### Horários
+- **Tempos lectivos** por turno (manhã, tarde e noite), com horas típicas propostas que o director ajusta.
+- **Horário de cada turma** numa grelha de segunda a sexta (ou sábado). O professor vem da atribuição da disciplina.
+- **Conflitos impedidos:** o mesmo professor em duas turmas ao mesmo tempo, ou a mesma sala ocupada duas vezes. A mensagem diz com que turma é o conflito.
+- **"O meu horário"** para o professor, e o horário da turma no portal do encarregado e do aluno.
+
 ### Assiduidade
 - Faltas por aula, numa lista de caixas. Uma falta desmarcada é **anulada**, nunca apagada.
 - Justificação pelo director de turma, com motivo obrigatório, e resumo por trimestre.
@@ -132,6 +138,5 @@ Os testes correm sozinhos no GitHub Actions a cada alteração.
 ## 7. O que ainda não faz
 
 - **Pagamentos** de propinas e emolumentos, que ficaram fora do âmbito por decisão do autor.
-- **Horários.**
 - **Declarações e certificados** do II Ciclo, que precisam do modelo oficial.
 - **Envio de emails ou SMS.**
