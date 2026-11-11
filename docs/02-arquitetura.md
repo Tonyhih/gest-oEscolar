@@ -127,6 +127,12 @@ sequenceDiagram
 | Notas (corrigir publicada) | — | ✓ | — | — | — | — |
 | Pautas | — | L | L | L¹ | L² | L³ |
 | Faltas | — | L | L | — | L + justificar² | CU³ |
+| Faltas vermelhas | — | L + anular | — | — | L² | C³ |
+| Horários e tempos lectivos | — | CRUD | L | CRU¹ | L² | L³ |
+| Histórico escolar, termos, declarações, certificados | — | CRU | CRU | — | — | — |
+| Preçário e geração de propinas | — | CRUD | L | — | — | — |
+| Pagamentos e recibos | — | CR + anular | CR | — | — | — |
+| Contas do portal | — | C | C | — | — | — |
 | Estágio e TFC | — | L | CRU | CRUD¹ | — | — |
 | Auditoria | — | L | — | — | — | — |
 
@@ -256,6 +262,45 @@ O detalhe dos corpos e das respostas está em [openapi.yaml](openapi.yaml). Toda
 | GET | `/turmas/:id/faltas?aluno=&trimestre=` | DT², DE, PR³ | RF37 | 200 |
 | POST | `/faltas/:id/justificar` | DT² | RF36 | 200, 404, 422 |
 | GET | `/turmas/:id/faltas/resumo?trimestre=` | DT², DE | RF37 | 200 |
+| POST | `/turmas/:id/disciplinas/:disciplinaId/faltas-disciplinares` | PR³ | RF64 | 201, 403, 409, 422 |
+| POST | `/faltas/:id/anular` | DE | RF65 | 200, 422 |
+
+### Horários
+| Método | Caminho | Perfis | RF | Respostas |
+|---|---|---|---|---|
+| GET · PUT | `/tempos?turno=` · `/tempos/:turno` | todos · DE | RF52 | 200, 422 |
+| GET, PUT | `/turmas/:id/horario` | todos² ³ / DE, CO¹ | RF53 | 200, 409 (conflito), 422 |
+| GET | `/horario/professor` | PR | RF54 | 200 |
+
+### Documentos e histórico escolar
+| Método | Caminho | Perfis | RF | Respostas |
+|---|---|---|---|---|
+| GET · PUT | `/alunos/:id/historico` · `/alunos/:id/historico/:classe` | SE, DE | — | 200, 409, 422 |
+| GET | `/alunos/:id/termo`, `…/mini-pauta`, `…/pautas/…?formato=pdf` | SE, DE, PR³, DT² | RF46–RF47 | 200 (PDF) |
+| GET, POST | `/alunos/:id/certificados/previa`, `/alunos/:id/certificados` | SE, DE | RF48 | 200 / 201, 422 |
+| POST | `/alunos/:id/declaracoes` | SE, DE | RF55, RF56 | 201, 422 |
+| GET | `/alunos/:id/documentos`, `/documentos/:id/pdf` | SE, DE | RF48 | 200 |
+
+### Pagamentos
+| Método | Caminho | Perfis | RF | Respostas |
+|---|---|---|---|---|
+| GET, POST | `/financas/rubricas` | SE / DE | RF57 | 200 / 201, 422 |
+| PATCH | `/financas/rubricas/:id` | DE | RF57 | 200, 404 |
+| POST | `/financas/rubricas/:id/gerar` | DE | RF58 | 200, 422 |
+| GET | `/alunos/:id/financas` | SE, DE | RF60 | 200, 404 |
+| POST | `/alunos/:id/cobrancas` | SE, DE | RF59 | 201, 422 |
+| POST | `/alunos/:id/pagamentos` | SE, DE | RF60 | 201, 404, 409, 422 |
+| GET | `/pagamentos/:id/recibo` | SE, DE | RF60 | 200 (PDF) |
+| POST | `/pagamentos/:id/anular`, `/cobrancas/:id/anular` | DE | RF61 | 200, 409 |
+| GET | `/financas/dividas?turma=`, `/financas/resumo?mes=` | SE, DE | RF62 | 200 |
+
+### Portal do encarregado e do aluno
+| Método | Caminho | Perfis | RF | Respostas |
+|---|---|---|---|---|
+| POST | `/encarregados/:id/acesso-portal`, `/alunos/:id/acesso-portal` | SE, DE | RF50 | 201, 409 |
+| GET | `/portal/educandos`, `/portal/alunos/:id` | EE, AL | RF51, RF54, RF63 | 200, 404 |
+| GET | `/portal/pagamentos/:id/recibo` | EE, AL | RF63 | 200 (PDF), 404 |
+| GET | `/portal/avisos` · POST `/portal/avisos/lidos` | EE, AL | RF66, RF67 | 200 |
 
 ### Estágio e TFC (13.ª classe, desejável)
 | Método | Caminho | Perfis | RF | Respostas |
@@ -302,19 +347,22 @@ export function decidirTransicao(classe, resultados) {
 
 | Rota | Ecrã | Perfis |
 |---|---|---|
-| `/entrar` | Login | visitante |
-| `/` | Início (atalhos conforme o perfil) | todos |
+| `/entrar`, `/trocar-palavra-passe`, `/privacidade` | Login, troca de palavra-passe, política de privacidade | todos |
+| `/` | Início (atalhos conforme o perfil) | pessoal da escola |
 | `/plataforma/escolas` | Escolas | AP |
-| `/escola/configuracao` | Ano lectivo, classes, cursos, disciplinas, planos | DE, CO |
-| `/utilizadores` | Utilizadores | DE |
-| `/alunos`, `/alunos/:id` | Alunos e processo do aluno | SE, DE |
-| `/turmas`, `/turmas/:id` | Turmas, alunos, atribuições | SE, DE, CO, DT |
-| `/matriculas` | Matrículas e confirmações | SE |
-| `/minhas-turmas` | Turmas e disciplinas do professor | PR |
-| `/turmas/:id/notas/:disciplina` | Lançamento de notas (grelha) | PR |
-| `/turmas/:id/faltas/:disciplina` | Registo de faltas | PR |
-| `/turmas/:id/pautas` | Pautas trimestrais e final | DT, DE, SE |
-| `/auditoria` | Registo de auditoria | DE |
+| `/painel` | Painel do director | DE |
+| `/configuracao` | Ano lectivo, classes, cursos, disciplinas, planos, tempos lectivos, dados da escola | DE, CO |
+| `/utilizadores`, `/auditoria` | Utilizadores e registo de auditoria | DE |
+| `/alunos`, `/alunos/:id` | Alunos; ficha com encarregados, histórico, documentos e pagamentos | SE, DE, CO (ficha também DT) |
+| `/matriculas` | Ficha de matrícula, importação de listas, matrículas do ano | SE, DE |
+| `/pagamentos` | Receber pagamento, dívidas, resumo do mês, preçário | SE, DE |
+| `/turmas`, `/turmas/:id` | Turmas, alunos, atribuições | todos (o professor só as suas) |
+| `/turmas/:id/notas/:disciplina`, `/turmas/:id/descritiva` | Lançamento de notas e avaliação descritiva | PR |
+| `/turmas/:id/faltas` | Faltas da aula, faltas vermelhas, resumo e justificação | PR, DT, DE |
+| `/turmas/:id/horario`, `/horario` | Horário da turma e do professor | todos / PR |
+| `/turmas/:id/pautas` | Pautas trimestrais e final, PDF e CSV | DT, DE, SE, CO, PR |
+| `/estagios` | Estágios e TFC | SE, CO, DE |
+| `/portal` | Notas, faltas, horário, propinas e avisos dos educandos | EE, AL |
 
 Cada rota tem `meta: { perfis: [...] }`, e a guarda `beforeEach` redirecciona para `/` quem não tiver o perfil. A API volta a verificar sempre.
 

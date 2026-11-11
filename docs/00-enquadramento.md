@@ -108,16 +108,23 @@ Exemplo (escala 0–20): MT = 12, 13 e 11 → MFD = 12; exame = 9 → CF = 12 ×
 5. Lançamento de notas (MAC, NPP, NPT), cálculo automático da MT e da MFD e pautas, com auditoria.
 6. Faltas por disciplina e justificação pelo director de turma.
 
+### Acrescentado depois da primeira entrega
+7. Estágio e TFC da 13.ª classe, painel do director e auditoria.
+8. Documentos em PDF: mini-pautas, pautas, termos, certificados do Primário e do I Ciclo, declarações e recibos.
+9. Histórico escolar (notas de anos anteriores, para os certificados).
+10. Portal do encarregado de educação e do aluno, com avisos.
+11. Horários com detecção de conflitos de professor e de sala.
+12. Pagamentos: preçário, propinas mensais, emolumentos, recibos e dívidas.
+13. Faltas vermelhas (disciplinares).
+
 ### Fica para fases seguintes
-- Pagamentos e emolumentos (fora do âmbito por decisão do autor).
-- Portal do encarregado de educação e do aluno.
-- Horários com detecção de conflitos.
+- Certificado do II Ciclo (falta o modelo oficial do MED).
+- Envio de avisos por email ou SMS (precisa de um fornecedor pago).
 - Gestão detalhada do estágio da 13.ª classe (relatórios, avaliação pela entidade de acolhimento).
-- Emissão de declarações em PDF.
 
 ### Exclusões
 - Integração com o SIGE ou outros sistemas do MED.
-- Pagamentos online reais.
+- Pagamentos online reais e pagamentos parciais.
 - Aplicação móvel nativa (o sistema é uma página web responsiva).
 
 ---
@@ -144,7 +151,7 @@ Exemplo (escala 0–20): MT = 12, 13 e 11 → MFD = 12; exame = 9 → CF = 12 ×
 | 2026-11-08 | Lei n.º 22/11 como referência de proteção de dados | Legislação angolana aplicável |
 | 2026-11-08 | Trabalho individual, prazo de 60 dias | Resposta do autor |
 | 2026-11-08 | A plataforma serve várias escolas | Resposta do autor |
-| 2026-11-08 | Sem módulo de pagamentos no MVP | Resposta do autor |
+| 2026-11-08 | Sem módulo de pagamentos no MVP | Resposta do autor (revista a 2026-11-11) |
 | 2026-11-08 | Fórmula MT = (MAC + NPP + NPT) / 3 e MFD = média das MT confirmadas | Resposta do autor |
 | 2026-11-08 | Classes de exame: CF = MFD × 40% + exame × 60% | Resposta do autor |
 | 2026-11-08 | Primário: escala 0–10, aprovação com ≥ 5 | Resposta do autor |
@@ -157,6 +164,12 @@ Exemplo (escala 0–20): MT = 12, 13 e 11 → MFD = 12; exame = 9 → CF = 12 ×
 | 2026-11-08 | Requisitos (Fase 1) dados como aprovados | Todas as dúvidas de avaliação respondidas |
 | 2026-11-08 | Arquitectura (Fase 2) aprovada | Resposta do autor |
 | 2026-11-08 | Base de dados: PostgreSQL em vez de MongoDB | O professor pediu a base de dados mais adequada; o domínio é muito relacional (ver 03-dados.md) |
+| 2026-11-10 | Notas de anos anteriores lançadas como histórico escolar | Alunos vindos de outras escolas precisam do certificado |
+| 2026-11-10 | Portal do encarregado e do aluno, só com o que foi publicado | Pedido do autor |
+| 2026-11-11 | Pagamentos registados na secretaria: propinas por mês, emolumentos, multa por atraso, recibo numerado; sem pagamentos parciais nem online | Pedido do autor |
+| 2026-11-11 | Avisos só no portal (sem email nem SMS) | Resposta do autor: evita custos e contas externas |
+| 2026-11-11 | Faltas vermelhas (disciplinares): não se justificam; só o director anula | Pedido do autor |
+| 2026-11-11 | Certificado do II Ciclo adiado | Falta o modelo oficial do MED |
 
 ---
 

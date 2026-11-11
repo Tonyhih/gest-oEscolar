@@ -9,11 +9,11 @@
 
 ## 1. O que está feito
 
-- **68 rotas em `/api/v1`**, que cobrem todos os requisitos do MVP: os obrigatórios (M) e também os desejáveis (D), ou seja, estágio, TFC e painel.
-- **86 testes automáticos:**
-  - 8 unitários;
-  - 23 da base de dados;
-  - 55 de integração com Supertest, que fazem pedidos HTTP reais à API sobre um PostgreSQL em memória.
+- **107 rotas em `/api/v1`**, que cobrem todos os requisitos (RF01–RF68), obrigatórios e desejáveis.
+- **172 testes automáticos:**
+  - 11 unitários;
+  - 24 da base de dados;
+  - 137 de integração com Supertest, que fazem pedidos HTTP reais à API sobre um PostgreSQL em memória.
 - **Node.js 24 e Express 5:** as excepções em funções `async` vão directamente para o tratamento central de erros, sem `try/catch` em cada rota.
 
 | Módulo | Rotas | Requisitos |
@@ -21,15 +21,22 @@
 | Sistema e autenticação | `/saude`, `/auth/login`, `/auth/eu`, `/auth/palavra-passe` | RF05, RF06 |
 | Plataforma | `/plataforma/escolas`, `…/:id`, `…/:id/director` | RF01–RF04 |
 | Utilizadores | `/utilizadores`, `…/:id`, `…/:id/repor-palavra-passe` | RF07–RF09 |
-| Estrutura | `/anos-lectivos`, `/catalogo/classes`, `/classes`, `/cursos`, `/disciplinas`, `/planos-curriculares` | RF10–RF14 |
-| Pessoas | `/alunos`, `/alunos/:id/encarregados`, `/encarregados`, `/professores` | RF15–RF18 |
+| Estrutura | `/anos-lectivos`, `/catalogo/classes`, `/classes`, `/cursos`, `/disciplinas`, `/planos-curriculares`, `/escola` | RF10–RF14, RF68 |
+| Pessoas | `/alunos`, `/alunos/:id/encarregados`, `/encarregados`, `/professores`, `…/acesso-portal` | RF15–RF18, RF50 |
 | Turmas e matrículas | `/turmas`, `/turmas/:id/atribuicoes`, `/matriculas`, `/matriculas/novas`, `/matriculas/importacao`, `/matriculas/confirmacoes`, `…/mudar-turma`, `…/anular` | RF19–RF23, RF44, RF45 |
-| Avaliação | notas, exame, avaliações descritivas, publicar, correcções, pautas (JSON e CSV) | RF24–RF34 |
-| Assiduidade | faltas em lote, listagem, justificação, resumo | RF35–RF37 |
+| Avaliação | notas, exame, avaliações descritivas, publicar, correcções, pautas (JSON, CSV e PDF) | RF24–RF34 |
+| Assiduidade | faltas em lote, listagem, justificação, resumo, faltas vermelhas | RF35–RF37, RF64, RF65 |
+| Horários | `/tempos`, `/turmas/:id/horario`, `/horario/professor` | RF52–RF54 |
+| Documentos | mini-pauta, termo, certificados (prévia e rascunho), declarações, histórico escolar, reimpressão | RF46–RF48, RF55, RF56 |
+| Pagamentos | `/financas/rubricas` (+ `/gerar`), `/alunos/:id/financas`, `…/cobrancas`, `…/pagamentos`, `/pagamentos/:id/recibo`, anulações, `/financas/dividas`, `/financas/resumo` | RF57–RF62 |
+| Portal | `/portal/educandos`, `/portal/alunos/:id`, `/portal/pagamentos/:id/recibo`, `/portal/avisos` | RF51, RF54, RF63, RF66, RF67 |
 | Auditoria | `/auditoria` | RF39 |
 | Estágio e TFC (13.ª) | `/estagios`, `/estagios/:id`, `/estagios/:id/tfc` | RF40–RF43 |
 | Painel do director | `/painel` | RF38 |
-| Documentos em PDF | `…/mini-pauta`, `…/pautas/…?formato=pdf`, `/alunos/:id/termo`, `/alunos/:id/certificados` (+ `/previa`), `/alunos/:id/documentos`, `/documentos/:id/pdf`, `/escola` | RF46–RF48 |
+
+**Avisos:** criam-se na mesma transacção da acção que os origina (publicar, registar faltas, pagar, anular). A chave de cada aviso (por exemplo `recibo:<id>`) impede repetições. Os avisos de propina em atraso criam-se quando o portal é aberto, porque não há uma acção que os origine.
+
+**Pagamentos:** os valores são `numeric(12,2)` na base de dados e as contas fazem-se em cêntimos inteiros no JavaScript. O número do recibo é atribuído com a linha da escola bloqueada (`FOR UPDATE`), para dois pagamentos ao mesmo tempo não terem o mesmo número.
 
 **Estágio e TFC:** só na 13.ª classe e um por matrícula. A nota do estágio e o TFC são da coordenação (a secretaria regista o estágio). A nota da defesa exige a data da defesa.
 
@@ -88,15 +95,26 @@ helmet → cors → express.json (100 kb) → req.bd
 ## 5. Testes
 
 ```
-✓ tests/unit/avaliacao.test.js                 8   regras de transição
-✓ tests/bd/restricoes.test.js                 18   restrições do esquema
-✓ tests/bd/resultados.test.js                  5   vista de resultados
-✓ tests/integracao/autenticacao.test.js       13   login, JWT, limite, primeiro acesso, atribuição em massa
+✓ tests/unit/avaliacao.test.js                  8   regras de transição
+✓ tests/unit/kwanzas.test.js                    3   valores por extenso nos recibos
+✓ tests/bd/restricoes.test.js                  18   restrições do esquema
+✓ tests/bd/resultados.test.js                   5   vista de resultados
+✓ tests/bd/admin.test.js                        1   primeiro administrador
+✓ tests/integracao/autenticacao.test.js        13   login, JWT, limite, primeiro acesso, atribuição em massa
 ✓ tests/integracao/isolamento-permissoes.test.js 14 escolas, perfis, director de turma, coordenador
-✓ tests/integracao/avaliacao.test.js          14   notas, escala, trimestre, publicação, correcção, exame, pautas, CSV
-✓ tests/integracao/matriculas-faltas.test.js   9   duplicadas, capacidade, anular, mudar de turma, faltas
-✓ tests/integracao/seguranca.test.js           5   helmet, CORS, erros, UUID, injecção
-Tests  86 passed (86)
+✓ tests/integracao/avaliacao.test.js           14   notas, escala, trimestre, publicação, correcção, exame, pautas, CSV
+✓ tests/integracao/matriculas-faltas.test.js    9   duplicadas, capacidade, anular, mudar de turma, faltas
+✓ tests/integracao/matriculas-novas.test.js     7   ficha de matrícula e importação de listas
+✓ tests/integracao/documentos.test.js          13   mini-pauta, pautas, termo, certificados
+✓ tests/integracao/historico-escolar.test.js    6   notas de anos anteriores
+✓ tests/integracao/declaracoes.test.js          7   declarações de frequência e com notas
+✓ tests/integracao/estagio-painel.test.js       9   estágio, TFC, painel
+✓ tests/integracao/horarios.test.js             9   tempos, horário, conflitos
+✓ tests/integracao/portal.test.js               8   contas e o que o encarregado e o aluno vêem
+✓ tests/integracao/financas.test.js            12   preçário, propinas, pagamentos, recibos, anulações, dívidas
+✓ tests/integracao/avisos.test.js              11   avisos do portal e faltas vermelhas
+✓ tests/integracao/seguranca.test.js            5   helmet, CORS, erros, UUID, injecção
+Tests  172 passed (172)
 ```
 
 Cada ficheiro de integração cria a sua própria base de dados com o seed. Os testes não dependem uns dos outros e correm no GitHub Actions sem um servidor PostgreSQL.

@@ -68,9 +68,29 @@ erDiagram
 | M4 Pessoas | `alunos`, `encarregados`, `aluno_encarregados`, `professores`, `professor_disciplinas` |
 | M5 Turmas | `turmas`, `atribuicoes`, `publicacoes`, `matriculas`, `matricula_historico` |
 | M6 Avaliação | `notas` (uma linha por aluno, disciplina e trimestre), `exames`, `avaliacoes_descritivas`, vista `v_resultados_disciplina` |
-| M7 Assiduidade | `faltas` |
+| M7 Assiduidade | `faltas` (de presença e vermelhas, com a ocorrência) |
 | M8 Auditoria | `auditoria` |
 | M9 Estágio | `estagios` (inclui o TFC) |
+| Documentos | `documentos` (certificados e declarações numerados, com os dados congelados), `historico_escolar` |
+| Horários | `tempos` (por turno), `aulas` (índices únicos impedem conflitos de professor e de sala) |
+| M10 Pagamentos | `rubricas` (preçário), `cobrancas`, `pagamentos` (recibos numerados por escola e ano), `pagamento_itens` |
+| M11 Portal | `avisos`, `avisos_lidos`; contas ligadas por `encarregados.utilizador_id` e `alunos.utilizador_id` |
+
+### Migrações
+
+| Ficheiro | Conteúdo |
+|---|---|
+| `001_inicial.sql` | Esquema base (M1–M9), vista `v_resultados_disciplina`, triggers |
+| `002_faltas_anuladas.sql` | Faltas desmarcadas passam a "anulada" |
+| `003_documentos.sql` | Documentos emitidos, dados do aluno para os certificados, decreto da escola |
+| `004_historico_escolar.sql` | Notas de anos anteriores |
+| `005_portal.sql` | Perfis encarregado e aluno |
+| `006_horarios.sql` | Tempos lectivos e aulas |
+| `007_declaracoes.sql` | Declarações de frequência e com notas |
+| `008_pagamentos.sql` | Preçário, cobranças, pagamentos e recibos |
+| `009_avisos.sql` | Faltas vermelhas, avisos do portal, limite de faltas da escola |
+
+São aplicadas por ordem por `npm run migrar` (no Render, a cada publicação). Uma migração aplicada não se altera: as mudanças vão numa migração nova.
 
 ### Decisões de desenho
 - **UUID** como chave primária: não revela quantos alunos há nem permite adivinhar ids.
@@ -96,6 +116,11 @@ erDiagram
 | RF35 Sem faltas repetidas | `UNIQUE (matricula_id, disciplina_id, data)` | — |
 | RF36 Falta justificada tem motivo e autor | `CHECK` | `faltas_check` |
 | RF23 Mudar de turma e anular exigem motivo | `CHECK` | `matricula_historico_check` |
+| RF53 Professor ou sala ocupados duas vezes no mesmo tempo | Índices únicos | `aulas_professor_sem_conflito`, `aulas_sala_sem_conflito` |
+| RF58 A mesma propina não se gera duas vezes | Índice único parcial | `cobrancas_propina_unica` |
+| RF60 Número do recibo único por escola e ano | `UNIQUE` | `pagamentos_escola_id_ano_numero_key` |
+| RF61 Cobranças e pagamentos não se apagam; anulação com motivo | Triggers e `CHECK` | `cobrancas_sem_delete`, `pagamentos_sem_delete` |
+| RF64 Falta vermelha com ocorrência e nunca justificada | `CHECK` | `faltas_disciplinar_com_ocorrencia`, `faltas_disciplinar_nao_justificada` |
 | RF25 MT calculada | Coluna gerada `mt` | — |
 | RF43 Curso concluído com estágio e TFC ≥ 10 | Coluna gerada `curso_concluido` | — |
 | RNF04 Notas, exames, matrículas e faltas não se apagam | Trigger `BEFORE DELETE` | `*_sem_delete` |
