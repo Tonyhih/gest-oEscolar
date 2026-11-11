@@ -28,6 +28,8 @@ export function criarRotas(config) {
   // ---------------------------------------------------------- Sistema e autenticação
   r.get('/saude', C.sistema.saude);
   r.post('/auth/login', limitarLogin(config.limiteLogin), v({ body: E.login }), A.entrar);
+  r.post('/auth/login/codigo', limitarLogin(config.limiteLogin), v({ body: E.codigoAcesso }), A.confirmarCodigo);
+  r.post('/auth/login/reenviar', limitarLogin(config.limiteLogin), v({ body: E.desafio }), A.reenviarCodigo);
   r.get('/auth/eu', auth2, A.eu);
   r.post('/auth/palavra-passe', auth2, v({ body: E.alterarPalavraPasse }), A.alterarPalavraPasse);
 
@@ -169,6 +171,17 @@ export function criarRotas(config) {
   r.get('/pagamentos/:id/recibo', auth, perfil(...FIN), v({ params: paramsId }), P2.recibo);
   r.post('/pagamentos/:id/anular', auth, perfil(...DIR), v({ params: paramsId, body: E.motivo }), P2.anularPagamento);
   r.post('/cobrancas/:id/anular', auth, perfil(...DIR), v({ params: paramsId, body: E.motivo }), P2.anularCobranca);
+
+  // Transferências entre escolas da plataforma
+  const TR = C.transferenciasCtrl;
+  r.get('/transferencias/escolas', auth, perfil(...FIN), TR.destinos);
+  r.get('/transferencias', auth, perfil(...FIN), v({ query: E.filtroTransferencias }), TR.listar);
+  r.post('/alunos/:id/transferencias', auth, perfil(...FIN), v({ params: paramsId, body: E.transferencia }), TR.emitir);
+  r.get('/transferencias/codigo/:codigo', auth, perfil(...FIN), v({ params: E.paramsCodigo }), TR.previa);
+  r.post('/transferencias/:id/aceitar', auth, perfil(...FIN), v({ params: paramsId, body: E.aceitarTransferencia }), TR.aceitar);
+  r.post('/transferencias/:id/recusar', auth, perfil(...FIN), v({ params: paramsId, body: E.motivo }), TR.recusar);
+  r.post('/transferencias/:id/cancelar', auth, perfil(...FIN), v({ params: paramsId, body: E.motivo }), TR.cancelar);
+  r.get('/transferencias/:id/guia', auth, perfil(...FIN), v({ params: paramsId }), TR.guia);
 
   // Portal do encarregado e do aluno
   const PORTAL = ['encarregado', 'aluno'];

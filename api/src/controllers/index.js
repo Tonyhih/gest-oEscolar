@@ -20,7 +20,8 @@ import * as horarios from '../services/horarios.js';
 import * as declaracoes from '../services/declaracoes.js';
 import * as financas from '../services/financas.js';
 import * as avisos from '../services/avisos.js';
-import { recibo as reciboPdf } from '../pdf/documentos.js';
+import * as transferencias from '../services/transferencias.js';
+import { recibo as reciboPdf, guiaTransferencia } from '../pdf/documentos.js';
 
 /** Cria um controlador a partir de fn(req), que devolve o corpo da resposta. */
 const acao = (fn, estado = 200) => async (req, res) => {
@@ -64,6 +65,8 @@ export const sistema = {
 
 export const auth = (config) => ({
   entrar: acao((req, d) => autenticacao.entrar(req.bd, config, d.body)),
+  confirmarCodigo: acao((req, d) => autenticacao.confirmarCodigo(req.bd, config, d.body)),
+  reenviarCodigo: acao((req, d) => autenticacao.reenviarCodigo(req.bd, config, d.body)),
   eu: acao((req, d, u) => autenticacao.sessao(u)),
   alterarPalavraPasse: acao((req, d, u) => autenticacao.alterarPalavraPasse(req.bd, u, d.body), 204),
 });
@@ -226,6 +229,21 @@ export const financasCtrl = {
   async reciboPortal(req, res) {
     const permitidos = (await portal.alunosPermitidos(req.bd, req.utilizador)).map((a) => a.id);
     return enviarRecibo(req, res, permitidos);
+  },
+};
+
+export const transferenciasCtrl = {
+  destinos: acao((req, d, u) => transferencias.escolasDestino(req.bd, u)),
+  listar: acao((req, d, u) => transferencias.listar(req.bd, u, d.query)),
+  emitir: acao((req, d, u) => transferencias.emitir(req.bd, u, d.params.id, d.body), 201),
+  previa: acao((req, d, u) => transferencias.previa(req.bd, u, d.params.codigo)),
+  aceitar: acao((req, d, u) => transferencias.aceitar(req.bd, u, d.params.id, d.body)),
+  recusar: acao((req, d, u) => transferencias.encerrar(req.bd, u, d.params.id, d.body, 'recusada')),
+  cancelar: acao((req, d, u) => transferencias.encerrar(req.bd, u, d.params.id, d.body, 'cancelada')),
+  async guia(req, res) {
+    const g = await transferencias.dadosGuia(req.bd, req.utilizador, req.dados.params.id);
+    const escola = await documentos.dadosEscola(req.bd, req.utilizador.escolaId);
+    enviarPdf(res, `guia-transferencia-${g.codigo}.pdf`, await guiaTransferencia({ ...g, escola }));
   },
 };
 

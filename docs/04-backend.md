@@ -9,11 +9,11 @@
 
 ## 1. O que está feito
 
-- **107 rotas em `/api/v1`**, que cobrem todos os requisitos (RF01–RF68), obrigatórios e desejáveis.
-- **172 testes automáticos:**
-  - 11 unitários;
+- **117 rotas em `/api/v1`**, que cobrem todos os requisitos (RF01–RF73), obrigatórios e desejáveis.
+- **192 testes automáticos:**
+  - 15 unitários;
   - 24 da base de dados;
-  - 137 de integração com Supertest, que fazem pedidos HTTP reais à API sobre um PostgreSQL em memória.
+  - 153 de integração com Supertest, que fazem pedidos HTTP reais à API sobre um PostgreSQL em memória.
 - **Node.js 24 e Express 5:** as excepções em funções `async` vão directamente para o tratamento central de erros, sem `try/catch` em cada rota.
 
 | Módulo | Rotas | Requisitos |
@@ -114,7 +114,10 @@ helmet → cors → express.json (100 kb) → req.bd
 ✓ tests/integracao/financas.test.js            12   preçário, propinas, pagamentos, recibos, anulações, dívidas
 ✓ tests/integracao/avisos.test.js              11   avisos do portal e faltas vermelhas
 ✓ tests/integracao/seguranca.test.js            5   helmet, CORS, erros, UUID, injecção
-Tests  172 passed (172)
+✓ tests/integracao/transferencias.test.js       9   guia, código, aceitar, recusar, cancelar
+✓ tests/integracao/segundo-factor.test.js       7   código por email, tentativas, expiração, reenvio
+✓ tests/unit/email.test.js                      4   envio pelo Brevo e modo de teste
+Tests  192 passed (192)
 ```
 
 Cada ficheiro de integração cria a sua própria base de dados com o seed. Os testes não dependem uns dos outros e correm no GitHub Actions sem um servidor PostgreSQL.

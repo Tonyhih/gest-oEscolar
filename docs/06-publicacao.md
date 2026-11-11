@@ -68,6 +68,18 @@ Abra https://github.com/Tonyhih/gest-oEscolar/pull/1, confirme que os testes est
 6. Abra `https://gestao-escolar-api.onrender.com/api/v1/saude`. A resposta tem de ser `{"estado":"ok"}`.
    Se o Render tiver dado outro nome ao serviço (por exemplo, com um sufixo), crie no GitHub a variável `VITE_API_URL` com o endereço certo: **Settings → Secrets and variables → Actions → Variables**. Por exemplo, `https://gestao-escolar-api-xyz.onrender.com/api/v1`.
 
+### Passo 3b: Email do segundo factor (Brevo)
+O director recebe um código por email ao entrar. Sem esta configuração, o código aparece nos **Logs** do Render (modo de teste).
+1. Crie uma conta gratuita em **brevo.com** (300 emails por dia).
+2. Em **Senders, Domains & Dedicated IPs → Senders**, acrescente e confirme o email remetente (por exemplo, o email da escola).
+3. Em **SMTP & API → API Keys**, crie uma chave. Copie-a: só aparece uma vez. **Não a envie por chat nem a ponha no repositório.**
+4. No Render, abra o serviço → **Environment** e acrescente:
+   - `BREVO_API_KEY`: a chave do passo 3;
+   - `EMAIL_REMETENTE`: o email confirmado no passo 2.
+5. Guarde. O Render reinicia a API. Entre como director: o código chega ao email do director.
+
+Para desligar o segundo factor (por exemplo, numa demonstração), acrescente `SEGUNDO_FACTOR=desligado`.
+
 ### Passo 4: Front-end no GitHub Pages
 1. No GitHub, abra **Settings → Pages → Build and deployment → Source** e escolha **GitHub Actions**.
 2. Abra **Actions → Front-end (testes e GitHub Pages) → Run workflow** e escolha o ramo `main`.

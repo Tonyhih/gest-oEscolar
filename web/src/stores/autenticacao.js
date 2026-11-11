@@ -48,8 +48,19 @@ export const useAutenticacao = defineStore('autenticacao', {
       }
     },
 
+    /** Devolve o desafio do segundo factor (director) ou guarda a sessão. */
     async entrar(email, palavraPasse) {
-      const { token, utilizador } = await api.post('/auth/login', { email, palavraPasse });
+      const r = await api.post('/auth/login', { email, palavraPasse });
+      if (r.segundoFactor) return r;
+      this.guardarSessao(r);
+      return null;
+    },
+
+    async confirmarCodigo(desafio, codigo) {
+      this.guardarSessao(await api.post('/auth/login/codigo', { desafio, codigo }));
+    },
+
+    guardarSessao({ token, utilizador }) {
       this.token = token;
       this.utilizador = utilizador;
       gravar(token);

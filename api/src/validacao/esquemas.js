@@ -165,6 +165,8 @@ export const tfc = z.object({
 });
 export const filtroAno = z.object({ anoLectivo: uuid.optional() });
 export const acessoPortal = z.object({ email });
+export const desafio = z.object({ desafio: uuid });
+export const codigoAcesso = z.object({ desafio: uuid, codigo: z.string().trim().regex(/^\d{6}$/, 'O código tem 6 algarismos.') });
 const kwanzas = z.number().positive().max(1e9).multipleOf(0.01, 'No máximo 2 casas decimais.');
 export const rubrica = z.object({
   nome: texto(3, 120), tipo: z.enum(['propina', 'emolumento', 'outro']), valor: kwanzas, classe: uuid.optional(),
@@ -183,6 +185,10 @@ export const pagamento = z.object({
 });
 export const queryMes = z.object({ mes: z.string().regex(/^\d{4}-\d{2}$/, 'Formato aaaa-mm.').optional() });
 export const filtroDividas = z.object({ turma: uuid.optional() });
+export const transferencia = z.object({ escolaDestino: uuid, motivo: texto(3, 300) });
+export const aceitarTransferencia = z.object({ codigo: z.string().trim().regex(/^[A-Za-z0-9]{8}$/, 'O código tem 8 letras e números.'), turma: uuid });
+export const paramsCodigo = z.object({ codigo: z.string().trim().regex(/^[A-Za-z0-9]{8}$/, 'O código tem 8 letras e números.') });
+export const filtroTransferencias = z.object({ aluno: uuid.optional() });
 export const declaracao = z.object({
   tipo: z.enum(['frequencia', 'notas']), finalidade: texto(3, 200).optional(), anoLectivo: uuid.optional(),
 });

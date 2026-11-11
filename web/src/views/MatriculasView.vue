@@ -7,12 +7,14 @@ import { data as fData } from '@/util/formatar.js';
 import { lerLista, exemploDeTeste } from '@/util/importacao.js';
 import EstadoPedido from '@/components/EstadoPedido.vue';
 import MensagemAccao from '@/components/MensagemAccao.vue';
+import ReceberTransferencia from '@/components/ReceberTransferencia.vue';
 
 const auth = useAutenticacao();
 const ehSecretaria = computed(() => auth.perfil === 'secretaria');
 const separadores = computed(() => [
   ...(ehSecretaria.value ? [{ id: 'nova', texto: 'Nova matrícula' }, { id: 'importar', texto: 'Importar lista' }] : []),
   { id: 'lista', texto: 'Matrículas do ano' },
+  { id: 'transferencias', texto: 'Transferências' },
 ]);
 const activo = ref(separadores.value[0].id);
 const accao = useAccao();
@@ -82,7 +84,7 @@ const ESTADOS = { activa: 'text-bg-success', anulada: 'text-bg-secondary', trans
   </ul>
   <MensagemAccao :erro="accao.erro.value" :sucesso="accao.sucesso.value" />
 
-  <EstadoPedido v-if="activo !== 'lista'" :carregando="turmas.carregando.value" :erro="turmas.erro.value"
+  <EstadoPedido v-if="activo === 'nova' || activo === 'importar'" :carregando="turmas.carregando.value" :erro="turmas.erro.value"
                 :vazio="turmas.dados.value.length === 0" @repetir="turmas.executar()">
     <template #vazio>Ainda não há turmas no ano lectivo activo. O director tem de criar o ano lectivo, as classes e as turmas.</template>
 
@@ -178,6 +180,9 @@ const ESTADOS = { activa: 'text-bg-success', anulada: 'text-bg-secondary', trans
       </div>
     </div>
   </EstadoPedido>
+
+  <!-- Transferências recebidas de outras escolas -->
+  <ReceberTransferencia v-if="activo === 'transferencias'" :turmas="turmas.dados.value" @recebido="turmas.executar(); lista.executar()" />
 
   <!-- Matrículas do ano -->
   <template v-if="activo === 'lista'">

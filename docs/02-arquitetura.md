@@ -110,6 +110,7 @@ sequenceDiagram
 | Guardar no browser | `sessionStorage` (fecha com o separador) e store Pinia |
 | Palavra-passe | bcrypt, custo 12, mínimo de 8 caracteres; troca obrigatória no primeiro acesso |
 | Login | 5 tentativas por 15 min por IP; mensagem genérica "Email ou palavra-passe incorrectos." |
+| Segundo factor (director) | Código de 6 algarismos por email (Brevo), válido 10 min; HMAC-SHA256 guardado, nunca o código; 5 tentativas e 3 reenvios por desafio; `SEGUNDO_FACTOR=desligado` desliga-o |
 
 ### Matriz de permissões (resumo)
 
@@ -177,6 +178,8 @@ O detalhe dos corpos e das respostas está em [openapi.yaml](openapi.yaml). Toda
 | POST | `/auth/login` | público | RF05 | 200, 400, 401, 429 |
 | GET | `/auth/eu` | todos | RF05 | 200, 401 |
 | POST | `/auth/palavra-passe` | todos | RF06 | 204, 400, 401, 422 |
+| POST | `/auth/login/codigo` | público (com o desafio) | RF72 | 200, 400, 401, 429 |
+| POST | `/auth/login/reenviar` | público (com o desafio) | RF73 | 200, 401, 422 |
 
 ### Plataforma
 | Método | Caminho | Perfis | RF | Respostas |
@@ -293,6 +296,16 @@ O detalhe dos corpos e das respostas está em [openapi.yaml](openapi.yaml). Toda
 | GET | `/pagamentos/:id/recibo` | SE, DE | RF60 | 200 (PDF) |
 | POST | `/pagamentos/:id/anular`, `/cobrancas/:id/anular` | DE | RF61 | 200, 409 |
 | GET | `/financas/dividas?turma=`, `/financas/resumo?mes=` | SE, DE | RF62 | 200 |
+
+### Transferências entre escolas
+| Método | Caminho | Perfis | RF | Respostas |
+|---|---|---|---|---|
+| GET | `/transferencias/escolas`, `/transferencias?aluno=` | SE, DE | RF69 | 200 |
+| POST | `/alunos/:id/transferencias` | SE, DE (origem) | RF69 | 201, 409, 422 |
+| GET | `/transferencias/:id/guia` | SE, DE (origem) | RF69 | 200 (PDF), 404 |
+| GET | `/transferencias/codigo/:codigo` | SE, DE (destino) | RF70 | 200, 404, 409 |
+| POST | `/transferencias/:id/aceitar` | SE, DE (destino) | RF70 | 200, 409, 422 |
+| POST | `/transferencias/:id/recusar`, `/transferencias/:id/cancelar` | SE, DE | RF71 | 200, 403, 409 |
 
 ### Portal do encarregado e do aluno
 | Método | Caminho | Perfis | RF | Respostas |
