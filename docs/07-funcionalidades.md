@@ -88,6 +88,8 @@ Os cálculos são feitos na base de dados com números exactos, o que evita o er
 | **Mini-pauta** | Uma disciplina, uma turma, um trimestre: MAC, NPP, NPT, MT e faltas |
 | **Pautas** trimestral e final | A4 paisagem, com assinaturas do director de turma e do director |
 | **Termo de frequência e aproveitamento** | Modelo da escola: dois anos lado a lado, Ct/F por trimestre, CAP, CPE, CF, OBS |
+| **Declaração de frequência** | Matrícula, classe, turma e turno no ano activo, com finalidade opcional |
+| **Declaração com notas** | Médias dos trimestres publicados e, no fim do ano, notas finais por extenso e situação |
 | **Certificados do Ensino Primário e do I Ciclo** | Modelos do MED, com o artigo 109.º da LBSEE 17/16 e as médias por extenso |
 
 **Certificados:**
@@ -138,5 +140,5 @@ Os testes correm sozinhos no GitHub Actions a cada alteração.
 ## 7. O que ainda não faz
 
 - **Pagamentos** de propinas e emolumentos, que ficaram fora do âmbito por decisão do autor.
-- **Declarações e certificados** do II Ciclo, que precisam do modelo oficial.
+- **Certificado do II Ciclo**, que precisa do modelo oficial.
 - **Envio de emails ou SMS.**

@@ -17,6 +17,22 @@ const anoTermo = ref(anos.value[0]?.anoLectivo ?? '');
 const termo = () => accao.correr(() => descarregar(`/alunos/${props.aluno.id}/termo`,
   `termo-${props.aluno.numeroProcesso}.pdf`, { anoLectivo: anoTermo.value || undefined }));
 
+// ---------------------------------------------------------------- Declarações
+const tipoDeclaracao = ref('frequencia');
+const finalidade = ref('');
+const anoDeclaracao = ref(anos.value[0]?.anoLectivo ?? '');
+async function emitirDeclaracao() {
+  const corpo = { tipo: tipoDeclaracao.value, finalidade: finalidade.value || undefined,
+                  anoLectivo: tipoDeclaracao.value === 'notas' ? anoDeclaracao.value || undefined : undefined };
+  const doc = await accao.correr(() => api.post(`/alunos/${props.aluno.id}/declaracoes`, corpo), 'Declaração emitida.');
+  if (doc) {
+    await descarregar(`/documentos/${doc.id}/pdf`, `declaracao-${tipoDeclaracao.value}-${doc.numeroTexto.replace('/', '-')}.pdf`);
+    finalidade.value = '';
+    documentos.executar();
+  }
+}
+const NOMES_DOC = { certificado: 'Certificado', declaracao_frequencia: 'Declaração de frequência', declaracao_notas: 'Declaração com notas' };
+
 // ---------------------------------------------------------------- Certificado
 const CICLOS = { primario: 'Ensino Primário (2.ª, 4.ª e 6.ª classes)', i_ciclo: 'I Ciclo do Ensino Secundário (7.ª, 8.ª e 9.ª classes)' };
 const ciclo = ref('i_ciclo');
@@ -36,7 +52,8 @@ async function emitir(rascunho) {
     documentos.executar();
   }
 }
-const reimprimir = (d) => accao.correr(() => descarregar(`/documentos/${d.id}/pdf`, `certificado-${d.numeroTexto.replace('/', '-')}.pdf`));
+const reimprimir = (d) => accao.correr(() => descarregar(`/documentos/${d.id}/pdf`,
+  `${d.tipo === 'certificado' ? 'certificado' : d.tipo.replace('_', '-')}-${d.numeroTexto.replace('/', '-')}.pdf`));
 </script>
 
 <template>
@@ -53,6 +70,21 @@ const reimprimir = (d) => accao.correr(() => descarregar(`/documentos/${d.id}/pd
           </select></div>
         <button type="button" class="btn btn-sm btn-outline-primary" :disabled="!anos.length || accao.ocupado.value" @click="termo">Descarregar PDF</button>
         <span v-if="!anos.length" class="small text-body-secondary">O aluno ainda não tem matrículas.</span>
+      </div>
+
+      <h3 class="h6">Declaração</h3>
+      <div class="row g-2 align-items-end mb-4">
+        <div class="col-12 col-md-3"><label class="form-label small mb-0" for="dc-tipo">Tipo</label>
+          <select id="dc-tipo" v-model="tipoDeclaracao" class="form-select form-select-sm">
+            <option value="frequencia">De frequência</option><option value="notas">Com notas publicadas</option>
+          </select></div>
+        <div v-if="tipoDeclaracao === 'notas'" class="col-12 col-md-3"><label class="form-label small mb-0" for="dc-ano">Ano lectivo</label>
+          <select id="dc-ano" v-model="anoDeclaracao" class="form-select form-select-sm">
+            <option v-for="m in anos" :key="m.anoLectivo" :value="m.anoLectivo">{{ m.anoLectivoDesignacao }} · {{ m.turmaDesignacao }}</option>
+          </select></div>
+        <div class="col-12 col-md-4"><label class="form-label small mb-0" for="dc-fin">Destina-se a (opcional)</label>
+          <input id="dc-fin" v-model="finalidade" class="form-control form-control-sm" placeholder="Ex.: efeitos de abono de família" /></div>
+        <div class="col-12 col-md-2"><button type="button" class="btn btn-sm btn-outline-primary w-100" :disabled="!anos.length || accao.ocupado.value" @click="emitirDeclaracao">Emitir (PDF)</button></div>
       </div>
 
       <h3 class="h6">Certificado</h3>
@@ -101,8 +133,8 @@ const reimprimir = (d) => accao.correr(() => descarregar(`/documentos/${d.id}/pd
         <ul class="list-group">
           <li v-for="d in documentos.dados.value" :key="d.id" class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
             <span>
-              <strong>Certificado {{ d.rascunho ? '(rascunho)' : `n.º ${d.numeroTexto}` }}</strong>
-              <span class="small text-body-secondary"> · {{ d.ciclo === 'primario' ? 'Ensino Primário' : 'I Ciclo' }} · {{ dataHora(d.emitidoEm) }} · {{ d.emitidoPor }}</span>
+              <strong>{{ NOMES_DOC[d.tipo] }} {{ d.rascunho ? '(rascunho)' : `n.º ${d.numeroTexto}` }}</strong>
+              <span class="small text-body-secondary"><template v-if="d.ciclo"> · {{ d.ciclo === 'primario' ? 'Ensino Primário' : 'I Ciclo' }}</template> · {{ dataHora(d.emitidoEm) }} · {{ d.emitidoPor }}</span>
             </span>
             <button type="button" class="btn btn-sm btn-outline-primary" @click="reimprimir(d)">PDF</button>
           </li>

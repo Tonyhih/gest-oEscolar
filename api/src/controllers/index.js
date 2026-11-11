@@ -17,6 +17,7 @@ import * as documentos from '../services/documentos.js';
 import * as historico from '../services/historico.js';
 import * as portal from '../services/portal.js';
 import * as horarios from '../services/horarios.js';
+import * as declaracoes from '../services/declaracoes.js';
 
 /** Cria um controlador a partir de fn(req), que devolve o corpo da resposta. */
 const acao = (fn, estado = 200) => async (req, res) => {
@@ -41,6 +42,7 @@ export const documentosCtrl = {
   },
   previa: acao((req, d, u) => documentos.previaCertificado(req.bd, u, d.params.id, d.query.ciclo)),
   emitir: acao((req, d, u) => documentos.emitirCertificado(req.bd, u, d.params.id, d.body), 201),
+  declaracao: acao((req, d, u) => declaracoes.emitir(req.bd, u, d.params.id, d.body), 201),
   listar: acao((req, d, u) => documentos.listarDocumentos(req.bd, u, d.params.id)),
   async pdf(req, res) {
     const r = await documentos.documentoPdf(req.bd, req.utilizador, req.dados.params.id);

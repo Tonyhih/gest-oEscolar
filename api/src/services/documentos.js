@@ -13,7 +13,7 @@ const hoje = () => new Date().toISOString().slice(0, 10);
 const arredondar = (x) => Math.round(Math.round(x * 100) / 100);
 
 /** Dados da escola para os cabeçalhos, com o nome do director activo. */
-async function dadosEscola(bd, escolaId) {
+export async function dadosEscola(bd, escolaId) {
   const { rows } = await bd.query(`
     SELECT e.nome, e.codigo, e.provincia, e.municipio, e.natureza, e.decreto_criacao,
            (SELECT nome FROM utilizadores WHERE escola_id = e.id AND perfil = 'director' AND estado = 'activo'
@@ -271,7 +271,10 @@ export async function documentoPdf(bd, u, id) {
   const { rows } = await bd.query('SELECT tipo, dados FROM documentos WHERE id = $1 AND escola_id = $2', [id, u.escolaId]);
   if (!rows[0]) throw naoEncontrado('Documento');
   if (u.perfil === 'professor') throw proibido();
-  return { nome: `certificado-${rows[0].dados.numeroTexto.replace('/', '-')}.pdf`, pdf: await pdf.certificado(rows[0].dados) };
+  const { tipo, dados } = rows[0];
+  const numero = dados.numeroTexto.replace('/', '-');
+  if (tipo === 'certificado') return { nome: `certificado-${numero}.pdf`, pdf: await pdf.certificado(dados) };
+  return { nome: `declaracao-${tipo === 'declaracao_notas' ? 'notas' : 'frequencia'}-${numero}.pdf`, pdf: await pdf.declaracao(dados) };
 }
 
 // ======================================================================
