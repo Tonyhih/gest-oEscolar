@@ -294,6 +294,16 @@ O detalhe dos corpos e das respostas está em [openapi.yaml](openapi.yaml). Toda
 | POST | `/pagamentos/:id/anular`, `/cobrancas/:id/anular` | DE | RF61 | 200, 409 |
 | GET | `/financas/dividas?turma=`, `/financas/resumo?mes=` | SE, DE | RF62 | 200 |
 
+### Transferências entre escolas
+| Método | Caminho | Perfis | RF | Respostas |
+|---|---|---|---|---|
+| GET | `/transferencias/escolas`, `/transferencias?aluno=` | SE, DE | RF69 | 200 |
+| POST | `/alunos/:id/transferencias` | SE, DE (origem) | RF69 | 201, 409, 422 |
+| GET | `/transferencias/:id/guia` | SE, DE (origem) | RF69 | 200 (PDF), 404 |
+| GET | `/transferencias/codigo/:codigo` | SE, DE (destino) | RF70 | 200, 404, 409 |
+| POST | `/transferencias/:id/aceitar` | SE, DE (destino) | RF70 | 200, 409, 422 |
+| POST | `/transferencias/:id/recusar`, `/transferencias/:id/cancelar` | SE, DE | RF71 | 200, 403, 409 |
+
 ### Portal do encarregado e do aluno
 | Método | Caminho | Perfis | RF | Respostas |
 |---|---|---|---|---|

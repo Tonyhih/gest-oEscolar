@@ -300,6 +300,36 @@ async function entrar(page, email) {
     ok('professor vê o seu horário');
     await p.close();
 
+    // 5h. Transferência: a secretaria da escola A emite a guia; a escola B introduz o código, confere e (sem turma da 7.ª) recusa
+    p = await novaPagina(browser);
+    await entrar(p, 'secretaria@lda101.test');
+    await p.getByRole('link', { name: 'Alunos', exact: true }).click();
+    await p.getByPlaceholder('Pesquisar').fill('Hélder');
+    await p.getByText('Hélder Cassoma').click();
+    await p.getByLabel('Escola de destino').selectOption({ index: 1 });
+    await p.getByLabel('Motivo').fill('Mudança de residência para o Huambo');
+    p.once('dialog', (d) => d.accept());
+    [dl] = await Promise.all([p.waitForEvent('download'), p.getByRole('button', { name: 'Emitir guia' }).click()]);
+    if (!(await ehPdf(dl))) throw new Error('A guia de transferência não é um PDF');
+    const codigoGuia = (await p.locator('code').first().innerText()).trim();
+    ok(`secretaria emite a guia de transferência (${dl.suggestedFilename()})`);
+    await p.close();
+
+    p = await novaPagina(browser);
+    await entrar(p, 'secretaria@hbo201.test');
+    await p.getByRole('navigation').getByRole('link', { name: 'Matrículas', exact: true }).click();
+    await p.getByRole('tab', { name: 'Transferências' }).click();
+    await p.getByLabel('Código da guia de transferência').fill(codigoGuia.toLowerCase());
+    await p.getByRole('button', { name: 'Procurar' }).click();
+    await p.getByRole('heading', { name: /Hélder Cassoma · vem de Complexo Escolar/ }).waitFor();
+    await p.getByText('Não há turmas da 7.ª classe no ano lectivo activo.').waitFor();
+    await p.screenshot({ path: `${OUT}/21-transferencia.png`, fullPage: true });
+    p.once('dialog', (d) => d.accept('Não temos a 7.ª classe'));
+    await p.getByRole('button', { name: 'Recusar' }).click();
+    await p.getByText('Transferência recusada.').waitFor();
+    ok('escola de destino introduz o código, confere os dados e recusa');
+    await p.close();
+
     // 5g. Pagamentos: o director cria a propina e gera as mensalidades; a secretaria recebe e emite o recibo; a encarregada vê-o
     p = await novaPagina(browser);
     await entrar(p, 'director@lda101.test');

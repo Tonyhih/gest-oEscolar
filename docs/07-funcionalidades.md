@@ -71,6 +71,11 @@ Os cálculos são feitos na base de dados com números exactos, o que evita o er
 - **Conflitos impedidos:** o mesmo professor em duas turmas ao mesmo tempo, ou a mesma sala ocupada duas vezes. A mensagem diz com que turma é o conflito.
 - **"O meu horário"** para o professor, e o horário da turma no portal do encarregado e do aluno.
 
+### Transferência entre escolas da plataforma
+- A escola de origem emite a **guia de transferência** em PDF, com um código. Não é emitida se houver propinas em atraso.
+- A escola de destino introduz o código, confere os dados e escolhe a turma. O aluno é criado com um novo número de processo, com os encarregados, o histórico escolar e as notas dos trimestres publicados.
+- A matrícula na origem passa a "transferida". O destino pode recusar e a origem pode cancelar, sempre com motivo.
+
 ### Pagamentos e propinas
 - **Preçário** do ano lectivo, feito pelo director: propinas mensais por classe (meses cobrados, dia de vencimento e multa por atraso) e emolumentos (declarações, certificados…).
 - **Gerar propinas**: uma mensalidade para cada aluno matriculado; pode repetir-se depois de novas matrículas sem duplicar.
@@ -107,6 +112,7 @@ O encarregado e o aluno recebem avisos no portal, com o número de avisos por le
 | **Termo de frequência e aproveitamento** | Modelo da escola: dois anos lado a lado, Ct/F por trimestre, CAP, CPE, CF, OBS |
 | **Declaração de frequência** | Matrícula, classe, turma e turno no ano activo, com finalidade opcional |
 | **Declaração com notas** | Médias dos trimestres publicados e, no fim do ano, notas finais por extenso e situação |
+| **Guia de transferência** | Dados do aluno, notas do ano, código para a escola de destino |
 | **Recibo de pagamento** | Numerado por escola e ano, com o valor por extenso; marca ANULADO se for anulado |
 | **Certificados do Ensino Primário e do I Ciclo** | Modelos do MED, com o artigo 109.º da LBSEE 17/16 e as médias por extenso |
 
@@ -138,13 +144,13 @@ O encarregado e o aluno recebem avisos no portal, com o número de avisos por le
 
 | | |
 |---|---|
-| Rotas na API | 107 |
+| Rotas na API | 115 |
 | Ecrãs | 29 |
-| Requisitos funcionais documentados | 68 |
-| Migrações da base de dados | 9 |
-| Testes automáticos da API | 172 |
+| Requisitos funcionais documentados | 71 |
+| Migrações da base de dados | 10 |
+| Testes automáticos da API | 181 |
 | Testes automáticos do front-end | 19 |
-| Fluxos testados num browser real | 39 |
+| Fluxos testados num browser real | 41 |
 
 Os testes correm sozinhos no GitHub Actions a cada alteração.
 

@@ -138,6 +138,13 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 | RF67 | Marcar avisos como lidos | EE, AL | M | Um a um ou todos; cada conta tem o seu estado de leitura; contador de avisos por ler |
 | RF68 | Limite de faltas para o aviso | DE | D | Número de faltas injustificadas (1–30, por omissão 3) nos dados da escola |
 
+### M12. Transferência entre escolas da plataforma
+| ID | Requisito | Ator | Prior. | Critérios de aceitação |
+|---|---|---|---|---|
+| RF69 | Emitir a guia de transferência | SE, DE (origem) | M | Matrícula activa no ano activo; escola de destino activa e diferente; recusa com propinas em atraso; uma só guia pendente por matrícula (409); código de 8 caracteres; PDF da guia; guarda a ficha, os encarregados, o histórico e as notas dos trimestres publicados |
+| RF70 | Receber o aluno transferido | SE, DE (destino) | M | Só com o código da guia; prévia com as disciplinas sem correspondência; turma da mesma classe no ano activo e com vaga; cria o aluno com novo n.º de processo, os encarregados, o histórico e a matrícula, copia as notas (pela sigla ou pelo nome da disciplina); a matrícula de origem passa a "transferida"; tudo numa transacção |
+| RF71 | Recusar ou cancelar a guia | SE, DE | M | O destino recusa e a origem cancela, cada um só do seu lado, com motivo; a matrícula de origem continua activa; nada se apaga |
+
 ---
 
 ## 3. Requisitos não funcionais
@@ -186,7 +193,7 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 ## 5. Exclusões (fora do âmbito)
 - Pagamentos online (Multicaixa Express, referências bancárias) e pagamentos parciais.
 - Gestão detalhada do estágio (relatórios, avaliação pela entidade de acolhimento).
-- Transferência de alunos entre escolas.
+- Transferência para escolas que não usam a plataforma (faz-se com a guia em PDF, em papel).
 - Certificado do II Ciclo e da Educação de Adultos (falta o modelo oficial).
 - Integração com o SIGE ou outros sistemas do MED.
 - Envio de avisos por email ou SMS (os avisos ficam no portal).

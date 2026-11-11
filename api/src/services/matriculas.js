@@ -34,7 +34,7 @@ export async function listar(bd, u, { anoLectivo, turma }) {
  * Bloqueia a turma (SELECT … FOR UPDATE) para que dois pedidos em simultâneo não ultrapassem
  * a capacidade (RN07). Tem de ser chamado dentro de uma transacção.
  */
-async function reservarLugar(c, u, turmaId, lugares = 1) {
+export async function reservarLugar(c, u, turmaId, lugares = 1) {
   const t = (await c.query(
     `SELECT t.*, cc.ordem FROM turmas t JOIN classes cl ON cl.id = t.classe_id JOIN classes_catalogo cc ON cc.codigo = cl.codigo
      WHERE t.id = $1 AND t.escola_id = $2 FOR UPDATE OF t`, [turmaId, u.escolaId])).rows[0];

@@ -352,3 +352,61 @@ export function recibo(d) {
   rodape(doc, `Recibo n.º ${d.numeroTexto} emitido pelo Sistema de Gestão Escolar. Conserve este recibo.`);
   return paraBuffer(doc);
 }
+
+// ======================================================================
+// Guia de transferência
+// ======================================================================
+export function guiaTransferencia(g) {
+  const d = g.dados;
+  const a = d.aluno;
+  const m = d.matricula;
+  const doc = novoDocumento({ titulo: `Guia de transferência ${g.codigo}`, margem: 55 });
+  if (g.estado === 'cancelada' || g.estado === 'recusada') marcaDagua(doc, g.estado.toUpperCase());
+  cabecalhoEscola(doc, g.escola);
+  doc.moveDown(0.6);
+  doc.font('Times-Bold').fontSize(16).text('GUIA DE TRANSFERÊNCIA', { align: 'center' });
+  doc.font('Times-Roman').fontSize(11).text(`Código: ${g.codigo}`, { align: 'center' });
+  doc.moveDown(1);
+  const larg = doc.page.width - 110;
+  const filiacao = a.nomePai || a.nomeMae ? `, filho(a) de ${[a.nomePai, a.nomeMae].filter(Boolean).join(' e de ')}` : '';
+  const documento = a.documentoNumero ? `, portador(a) do ${a.documentoTipo === 'passaporte' ? 'Passaporte' : a.documentoTipo === 'cedula' ? 'Cédula Pessoal' : 'B.I.'} n.º ${a.documentoNumero}` : '';
+  doc.font('Times-Roman').fontSize(12).text(
+    `Para os devidos efeitos, declara-se que ${a.nome}${filiacao}, nascido(a) aos ${dataCurta(a.dataNascimento)}${documento}, `
+    + `com o processo individual n.º ${a.numeroProcesso}, matriculado(a) no ano lectivo ${m.anoLectivo} na ${m.turma}`
+    + `${m.curso ? ` (curso de ${m.curso})` : ''} desta escola, é transferido(a) para ${g.escolaDestino}. Motivo: ${g.motivo}.`,
+    55, doc.y, { width: larg, align: 'justify', lineGap: 4 });
+
+  if (d.notasAno.length) {
+    doc.moveDown(0.8);
+    doc.font('Times-Bold').fontSize(11).text('Classificações do ano lectivo (trimestres publicados)', 55, doc.y);
+    doc.moveDown(0.3);
+    const porDisc = new Map();
+    for (const n of d.notasAno) {
+      if (!porDisc.has(n.nome)) porDisc.set(n.nome, [null, null, null]);
+      porDisc.get(n.nome)[n.trimestre - 1] = n.mac === null || n.npp === null || n.npt === null ? null : (n.mac + n.npp + n.npt) / 3;
+    }
+    const r = tabela(doc, {
+      x: 55, y: doc.y, tamanho: 10.5, alturaLinha: 17,
+      colunas: [{ titulo: 'Disciplina', largura: 245, alinhar: 'left' }, { titulo: '1.º Trim.', largura: 80 },
+        { titulo: '2.º Trim.', largura: 80 }, { titulo: '3.º Trim.', largura: larg - 405 }],
+      linhas: [...porDisc].map(([nome, t]) => [nome, ...t.map((v) => nota(v))]),
+    });
+    doc.y = r.fim + 4;
+  }
+  if (d.historico.length) {
+    doc.moveDown(0.6);
+    doc.font('Times-Roman').fontSize(10).text(
+      `Acompanha o histórico escolar das classes anteriores: ${d.historico.map((h) => `${h.classe}.ª (${h.anoLectivo})`).join(', ')}.`,
+      55, doc.y, { width: larg });
+  }
+  doc.moveDown(0.8);
+  doc.font('Times-Bold').fontSize(11).text(
+    `Para concluir a transferência, a secretaria da escola de destino (${g.escolaDestino}) introduz o código ${g.codigo} no Sistema de Gestão Escolar.`,
+    55, doc.y, { width: larg });
+  const p = partesData(String(g.criadoEm instanceof Date ? g.criadoEm.toISOString() : g.criadoEm).slice(0, 10));
+  doc.moveDown(1).font('Times-Roman').fontSize(12).text(`${g.escola.municipio ?? '__________'}, aos ${p.dia} de ${p.mes} de ${p.ano}.`, 55, doc.y, { width: larg });
+  assinaturas(doc, [{ titulo: 'O(A) Director(a)', nome: g.escola.director ?? '' }, { titulo: 'A Secretaria', nome: g.criadoPor }],
+    { y: doc.y + 30, larguraLinha: 190 });
+  rodape(doc, `Guia de transferência ${g.codigo} emitida pelo Sistema de Gestão Escolar.`);
+  return paraBuffer(doc);
+}

@@ -9,6 +9,7 @@ import MensagemAccao from '@/components/MensagemAccao.vue';
 import DocumentosAluno from '@/components/DocumentosAluno.vue';
 import HistoricoAluno from '@/components/HistoricoAluno.vue';
 import FinancasAluno from '@/components/FinancasAluno.vue';
+import TransferenciaAluno from '@/components/TransferenciaAluno.vue';
 
 const props = defineProps({ id: { type: String, required: true } });
 const auth = useAutenticacao();
@@ -197,6 +198,7 @@ async function confirmar() {
         <HistoricoAluno :aluno="aluno" />
         <DocumentosAluno :aluno="aluno" />
         <FinancasAluno :aluno-id="aluno.id" />
+        <TransferenciaAluno :aluno="aluno" @alterado="executar()" />
       </template>
     </template>
   </EstadoPedido>
