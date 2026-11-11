@@ -44,6 +44,8 @@ export const rotas = [
   { path: '/turmas/:id/pautas', name: 'pautas', component: () => import('@/views/PautasView.vue'), props: true,
     meta: { perfis: TODOS, titulo: 'Pautas' } },
 
+  { path: '/pagamentos', name: 'pagamentos', component: () => import('@/views/FinancasView.vue'),
+    meta: { perfis: ['director', 'secretaria'], titulo: 'Pagamentos' } },
   { path: '/estagios', name: 'estagios', component: () => import('@/views/EstagiosView.vue'),
     meta: { perfis: ['director', 'secretaria', 'coordenador'], titulo: 'Estágios e TFC' } },
   { path: '/painel', name: 'painel', component: () => import('@/views/PainelView.vue'),

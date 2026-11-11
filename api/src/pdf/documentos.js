@@ -1,6 +1,6 @@
 // Desenho de cada documento. Recebem dados já preparados (src/services/documentos.js) e devolvem um Buffer PDF.
 import { assinaturas, cabecalho, marcaDagua, novoDocumento, paraBuffer, rodape, tabela } from './base.js';
-import { dataCurta, nota, partesData, porExtenso } from '../util/extenso.js';
+import { dataCurta, kwanzas, kwanzasPorExtenso, nota, partesData, porExtenso } from '../util/extenso.js';
 
 const SITUACOES = { transita: 'Transita', nao_transita: 'Não transita', pendente: 'Pendente', concluido: 'Concluído' };
 const emitidoEm = (d) => `Emitido pelo Sistema de Gestão Escolar em ${dataCurta(d.hoje)}.`;
@@ -304,5 +304,51 @@ export function declaracao(d) {
   assinaturas(doc, [{ titulo: 'O(A) Director(a)', nome: d.escola.director }], { y: doc.y + 28, larguraLinha: 200 });
   rodape(doc, `Declaração n.º ${d.numeroTexto} emitida pelo Sistema de Gestão Escolar em ${dataCurta(d.dataEmissao)}. `
     + 'Válida só com a assinatura do(a) Director(a) e o carimbo da escola.');
+  return paraBuffer(doc);
+}
+
+// ======================================================================
+// Recibo de pagamento
+// ======================================================================
+const METODOS = { numerario: 'Numerário', transferencia: 'Transferência bancária', multicaixa: 'Multicaixa Express', deposito: 'Depósito bancário', outro: 'Outro' };
+
+export function recibo(d) {
+  const doc = novoDocumento({ titulo: `Recibo ${d.numeroTexto}`, margem: 50 });
+  if (d.anulado) marcaDagua(doc, 'ANULADO');
+  cabecalhoEscola(doc, d.escola);
+  doc.moveDown(0.4);
+  doc.font('Times-Bold').fontSize(16).text(`RECIBO N.º ${d.numeroTexto}`, { align: 'center' });
+  doc.moveDown(0.8);
+  const larg = doc.page.width - 100;
+  doc.font('Times-Roman').fontSize(11.5).text(
+    `Recebemos de ${d.pagador}, referente ao(à) aluno(a) ${d.aluno.nome} (processo n.º ${d.aluno.numeroProcesso}`
+    + `${d.aluno.turma ? `, ${d.aluno.turma}` : ''}), a quantia de `, 50, doc.y, { width: larg, align: 'justify', continued: true, lineGap: 3 })
+    .font('Times-Bold').text(`${kwanzas(d.valorTotal)} (${kwanzasPorExtenso(d.valorTotal)})`, { continued: true })
+    .font('Times-Roman').text(', pelo pagamento de:');
+  doc.moveDown(0.6);
+  const comMulta = d.itens.some((i) => i.multa > 0);
+  const r = tabela(doc, {
+    x: 50, y: doc.y, tamanho: 10.5, alturaLinha: 17,
+    colunas: [
+      { titulo: 'Descrição', largura: comMulta ? 245 : 345, alinhar: 'left' },
+      { titulo: 'Valor', largura: 100, alinhar: 'right' },
+      ...(comMulta ? [{ titulo: 'Multa', largura: 90, alinhar: 'right' }, { titulo: 'Subtotal', largura: larg - 435, alinhar: 'right' }]
+        : [{ titulo: 'Subtotal', largura: larg - 445, alinhar: 'right' }]),
+    ],
+    linhas: [
+      ...d.itens.map((i) => [i.descricao, kwanzas(i.valor), ...(comMulta ? [i.multa ? kwanzas(i.multa) : '—'] : []), kwanzas(i.valor + i.multa)]),
+      ['TOTAL', '', ...(comMulta ? [''] : []), kwanzas(d.valorTotal)],
+    ],
+    destacar: (li) => li === d.itens.length,
+  });
+  doc.y = r.fim + 12;
+  doc.font('Times-Roman').fontSize(11)
+    .text(`Forma de pagamento: ${METODOS[d.metodo] ?? d.metodo}${d.referencia ? ` · Referência: ${d.referencia}` : ''}`, 50, doc.y, { width: larg })
+    .text(`Data do pagamento: ${dataCurta(d.data)}`, { width: larg });
+  if (d.anulado) doc.moveDown(0.5).font('Times-Bold').fillColor('#b00').text(`RECIBO ANULADO: ${d.anuladoMotivo}`, { width: larg }).fillColor('#000');
+  const p = partesData(d.data);
+  doc.moveDown(1).font('Times-Roman').text(`${d.escola.municipio ?? '__________'}, aos ${p.dia} de ${p.mes} de ${p.ano}.`, { width: larg });
+  assinaturas(doc, [{ titulo: 'Pela Secretaria', nome: d.registadoPor }], { y: doc.y + 24, larguraLinha: 200 });
+  rodape(doc, `Recibo n.º ${d.numeroTexto} emitido pelo Sistema de Gestão Escolar. Conserve este recibo.`);
   return paraBuffer(doc);
 }

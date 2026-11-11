@@ -118,6 +118,17 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 | RF42 | Registar o Trabalho de Fim de Curso (TFC) | CO | D | Tema, orientador, data da defesa e júri |
 | RF43 | Lançar a nota da defesa do TFC | CO | D | Nota 0–20, aprovação com ≥ 10; o curso fica concluído com o estágio e o TFC aprovados ⚠️ |
 
+### M10. Pagamentos e propinas
+| ID | Requisito | Ator | Prior. | Critérios de aceitação |
+|---|---|---|---|---|
+| RF57 | Preçário do ano lectivo | DE | M | Propinas mensais (por classe ou todas), com os meses cobrados, o dia de vencimento (1–28) e a multa por atraso em %; emolumentos e outras rubricas; valores em Kwanzas com 2 casas; mudar o valor não altera o que já foi cobrado; rubricas desactivam-se, não se apagam |
+| RF58 | Gerar as propinas | DE | M | Uma mensalidade por aluno com matrícula activa e mês; repetir não duplica (também na base de dados); Setembro–Dezembro no 1.º ano civil, Janeiro–Agosto no 2.º |
+| RF59 | Cobrar um emolumento a um aluno | SE, DE | M | Declarações, certificados, cartão…; as propinas não se cobram à mão |
+| RF60 | Registar um pagamento e emitir o recibo | SE, DE | M | Uma ou mais cobranças pendentes do aluno, pagas por inteiro; numerário, transferência, Multicaixa, depósito; data não futura; multa se pago depois do vencimento; recibo n.º x/ano seguido por escola, em PDF, com o valor por extenso; pagar duas vezes → 409 |
+| RF61 | Anular um pagamento ou uma cobrança | DE | M | Com motivo; o recibo fica marcado ANULADO e as cobranças voltam a pendentes; nada se apaga; fica na auditoria |
+| RF62 | Dívidas e resumo do mês | SE, DE | M | Alunos com mensalidades vencidas, por turma e valor; recebido no mês por forma de pagamento; total em atraso e por pagar |
+| RF63 | Propinas no portal | EE, AL | D | O que está por pagar e em atraso, com a multa prevista, e os recibos em PDF; só dos seus educandos |
+
 ---
 
 ## 3. Requisitos não funcionais
@@ -164,7 +175,7 @@ Prioridades: **M** = obrigatório no MVP, **D** = desejável (entra se houver te
 ---
 
 ## 5. Exclusões (fora do âmbito)
-- Pagamentos, propinas e emolumentos.
+- Pagamentos online (Multicaixa Express, referências bancárias) e pagamentos parciais.
 - Gestão detalhada do estágio (relatórios, avaliação pela entidade de acolhimento).
 - Transferência de alunos entre escolas.
 - Certificado do II Ciclo e da Educação de Adultos (falta o modelo oficial).

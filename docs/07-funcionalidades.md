@@ -71,6 +71,14 @@ Os cálculos são feitos na base de dados com números exactos, o que evita o er
 - **Conflitos impedidos:** o mesmo professor em duas turmas ao mesmo tempo, ou a mesma sala ocupada duas vezes. A mensagem diz com que turma é o conflito.
 - **"O meu horário"** para o professor, e o horário da turma no portal do encarregado e do aluno.
 
+### Pagamentos e propinas
+- **Preçário** do ano lectivo, feito pelo director: propinas mensais por classe (meses cobrados, dia de vencimento e multa por atraso) e emolumentos (declarações, certificados…).
+- **Gerar propinas**: uma mensalidade para cada aluno matriculado; pode repetir-se depois de novas matrículas sem duplicar.
+- **Receber pagamento**: a secretaria procura o aluno, escolhe as mensalidades e emolumentos, a forma de pagamento (numerário, transferência, Multicaixa, depósito) e o sistema emite o **recibo numerado em PDF**, com o valor por extenso e a multa se estiver em atraso.
+- **Anular** um recibo ou uma cobrança (isenção) só o director, com motivo. Nada se apaga.
+- **Dívidas** por turma e **resumo do mês** por forma de pagamento.
+- No **portal**, o encarregado vê o que está por pagar e descarrega os recibos.
+
 ### Assiduidade
 - Faltas por aula, numa lista de caixas. Uma falta desmarcada é **anulada**, nunca apagada.
 - Justificação pelo director de turma, com motivo obrigatório, e resumo por trimestre.
@@ -90,6 +98,7 @@ Os cálculos são feitos na base de dados com números exactos, o que evita o er
 | **Termo de frequência e aproveitamento** | Modelo da escola: dois anos lado a lado, Ct/F por trimestre, CAP, CPE, CF, OBS |
 | **Declaração de frequência** | Matrícula, classe, turma e turno no ano activo, com finalidade opcional |
 | **Declaração com notas** | Médias dos trimestres publicados e, no fim do ano, notas finais por extenso e situação |
+| **Recibo de pagamento** | Numerado por escola e ano, com o valor por extenso; marca ANULADO se for anulado |
 | **Certificados do Ensino Primário e do I Ciclo** | Modelos do MED, com o artigo 109.º da LBSEE 17/16 e as médias por extenso |
 
 **Certificados:**
@@ -120,13 +129,13 @@ Os cálculos são feitos na base de dados com números exactos, o que evita o er
 
 | | |
 |---|---|
-| Rotas na API | 78 |
-| Ecrãs | 19 |
-| Requisitos funcionais documentados | 48 |
-| Migrações da base de dados | 3 |
-| Testes automáticos da API | 116 |
-| Testes automáticos do front-end | 18 |
-| Fluxos testados num browser real | 25 |
+| Rotas na API | 103 |
+| Ecrãs | 29 |
+| Requisitos funcionais documentados | 63 |
+| Migrações da base de dados | 8 |
+| Testes automáticos da API | 161 |
+| Testes automáticos do front-end | 19 |
+| Fluxos testados num browser real | 37 |
 
 Os testes correm sozinhos no GitHub Actions a cada alteração.
 
@@ -139,6 +148,6 @@ Os testes correm sozinhos no GitHub Actions a cada alteração.
 
 ## 7. O que ainda não faz
 
-- **Pagamentos** de propinas e emolumentos, que ficaram fora do âmbito por decisão do autor.
+- **Pagamentos online** (Multicaixa Express, referências) e pagamentos parciais: os pagamentos registam-se na secretaria.
 - **Certificado do II Ciclo**, que precisa do modelo oficial.
 - **Envio de emails ou SMS.**

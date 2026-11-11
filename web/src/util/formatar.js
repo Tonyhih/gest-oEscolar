@@ -43,3 +43,8 @@ export function lerNota(texto) {
   const n = Number(String(texto).replace(',', '.'));
   return Number.isFinite(n) ? n : NaN;
 }
+
+const moeda = new Intl.NumberFormat('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: 'always' });
+/** Valor em Kwanzas: 10500 → '10 500,00 Kz' */
+export const kz = (v) => `${moeda.format(Number(v ?? 0)).replace(/ | /g, ' ')} Kz`;
+export const METODOS = { numerario: 'Numerário', transferencia: 'Transferência', multicaixa: 'Multicaixa Express', deposito: 'Depósito', outro: 'Outro' };

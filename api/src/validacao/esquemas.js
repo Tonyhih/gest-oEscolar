@@ -163,6 +163,24 @@ export const tfc = z.object({
 });
 export const filtroAno = z.object({ anoLectivo: uuid.optional() });
 export const acessoPortal = z.object({ email });
+const kwanzas = z.number().positive().max(1e9).multipleOf(0.01, 'No máximo 2 casas decimais.');
+export const rubrica = z.object({
+  nome: texto(3, 120), tipo: z.enum(['propina', 'emolumento', 'outro']), valor: kwanzas, classe: uuid.optional(),
+  meses: z.array(z.number().int().min(1).max(12)).min(1).max(12).optional(),
+  diaVencimento: z.number().int().min(1).max(28).optional(), multaPercentagem: z.number().min(0).max(100).optional(),
+  anoLectivo: uuid.optional(),
+});
+export const actualizarRubrica = z.object({
+  nome: texto(3, 120).optional(), valor: kwanzas.optional(), diaVencimento: z.number().int().min(1).max(28).optional(),
+  multaPercentagem: z.number().min(0).max(100).optional(), activa: z.boolean().optional(),
+});
+export const cobranca = z.object({ rubrica: uuid, descricao: texto(3, 200).optional(), vencimento: data.optional() });
+export const pagamento = z.object({
+  cobrancas: z.array(uuid).min(1).max(24), metodo: z.enum(['numerario', 'transferencia', 'multicaixa', 'deposito', 'outro']),
+  referencia: texto(1, 60).optional(), dataPagamento: data.optional(),
+});
+export const queryMes = z.object({ mes: z.string().regex(/^\d{4}-\d{2}$/, 'Formato aaaa-mm.').optional() });
+export const filtroDividas = z.object({ turma: uuid.optional() });
 export const declaracao = z.object({
   tipo: z.enum(['frequencia', 'notas']), finalidade: texto(3, 200).optional(), anoLectivo: uuid.optional(),
 });

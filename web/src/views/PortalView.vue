@@ -1,9 +1,9 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
-import { api } from '@/api/cliente.js';
+import { api, descarregar } from '@/api/cliente.js';
 import { usePedido } from '@/composables/usePedido.js';
 import { useAutenticacao } from '@/stores/autenticacao.js';
-import { nota1, SITUACOES, TURNOS } from '@/util/formatar.js';
+import { data as fData, kz, nota1, SITUACOES, TURNOS } from '@/util/formatar.js';
 import EstadoPedido from '@/components/EstadoPedido.vue';
 import GrelhaHorario from '@/components/GrelhaHorario.vue';
 
@@ -28,6 +28,7 @@ const faltas = computed(() => {
   }
   return [...m.values()];
 });
+const recibo = (p) => descarregar(`/portal/pagamentos/${p.id}/recibo`, `recibo-${p.numeroTexto.replace('/', '-')}.pdf`);
 </script>
 
 <template>
@@ -112,6 +113,33 @@ const faltas = computed(() => {
           <section v-if="r.horario?.aulas.length" class="card shadow-sm mb-3" aria-labelledby="t-horario">
             <div class="card-header"><h3 id="t-horario" class="h6 mb-0">Horário da turma</h3></div>
             <GrelhaHorario :tempos="r.horario.tempos" :aulas="r.horario.aulas" />
+          </section>
+
+          <!-- Propinas -->
+          <section v-if="r.financas && (r.financas.pendentes.length || r.financas.pagamentos.length)" class="card shadow-sm mb-3" aria-labelledby="t-propinas">
+            <div class="card-header d-flex flex-wrap justify-content-between gap-2">
+              <h3 id="t-propinas" class="h6 mb-0">Propinas e pagamentos</h3>
+              <span class="small">Em atraso: <strong :class="{ 'text-danger': r.financas.totais.emAtraso > 0 }">{{ kz(r.financas.totais.emAtraso) }}</strong></span>
+            </div>
+            <div class="card-body">
+              <h4 class="h6">Por pagar</h4>
+              <ul v-if="r.financas.pendentes.length" class="list-unstyled small">
+                <li v-for="c in r.financas.pendentes" :key="c.id" :class="{ 'text-danger': c.emAtraso }">
+                  {{ c.descricao }} · {{ kz(c.valor) }} · vence a {{ fData(c.vencimento) }}<template v-if="c.emAtraso"> (em atraso<template v-if="c.multaPrevista">, multa {{ kz(c.multaPrevista) }}</template>)</template>
+                </li>
+              </ul>
+              <p v-else class="small text-success">Tudo pago.</p>
+              <template v-if="r.financas.pagamentos.length">
+                <h4 class="h6 mt-3">Recibos</h4>
+                <ul class="list-group">
+                  <li v-for="p in r.financas.pagamentos" :key="p.id" class="list-group-item d-flex justify-content-between align-items-center gap-2 small">
+                    <span><strong>N.º {{ p.numeroTexto }}</strong> · {{ fData(p.dataPagamento) }} · {{ kz(p.valorTotal) }}<br />{{ p.itens.map((i) => i.descricao).join(', ') }}</span>
+                    <button type="button" class="btn btn-sm btn-outline-primary" @click="recibo(p)">PDF</button>
+                  </li>
+                </ul>
+              </template>
+              <p class="small text-body-secondary mt-2 mb-0">Os pagamentos fazem-se na secretaria da escola.</p>
+            </div>
           </section>
 
           <!-- Faltas -->

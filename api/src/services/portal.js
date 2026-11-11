@@ -6,6 +6,7 @@ import { decidirTransicao } from './avaliacao.js';
 import { disciplinasDaTurma } from './turmas.js';
 import { SQL_DESIGNACAO_TURMA } from './pessoas.js';
 import { horarioDaTurma } from './horarios.js';
+import { fichaFinanceira } from './financas.js';
 
 // Portal do encarregado de educação e do aluno (RF50, RF51).
 // Só mostra o que já foi publicado pela escola: as notas dos trimestres publicados e,
@@ -55,7 +56,7 @@ export async function acessoAluno(bd, u, alunoId, { email }) {
 // ======================================================================
 
 /** Alunos a que a conta tem acesso: os educandos do encarregado, ou o próprio aluno. */
-async function alunosPermitidos(bd, u) {
+export async function alunosPermitidos(bd, u) {
   const sql = u.perfil === 'encarregado'
     ? `SELECT a.id, a.nome, a.numero_processo FROM alunos a
        JOIN aluno_encarregados ae ON ae.aluno_id = a.id
@@ -80,7 +81,16 @@ export async function resumo(bd, u, alunoId) {
     FROM matriculas m JOIN anos_lectivos al ON al.id = m.ano_lectivo_id
     WHERE m.aluno_id = $1 AND m.estado = 'activa' ORDER BY al.activo DESC, al.designacao DESC LIMIT 1`, [alunoId])).rows[0];
   if (!m) return { aluno, matricula: null };
-  return resumoMatricula(bd, u, aluno, m);
+  const r = await resumoMatricula(bd, u, aluno, m);
+  // Pagamentos: o que está em dívida e os últimos recibos
+  const f = await fichaFinanceira(bd, u, alunoId);
+  r.financas = {
+    totais: f.totais,
+    pendentes: f.cobrancas.filter((c) => c.estado === 'pendente'),
+    pagamentos: f.pagamentos.filter((p) => p.estado === 'valido').slice(0, 12)
+      .map(({ id, numeroTexto, dataPagamento, valorTotal, itens }) => ({ id, numeroTexto, dataPagamento, valorTotal, itens })),
+  };
+  return r;
 }
 
 /**
