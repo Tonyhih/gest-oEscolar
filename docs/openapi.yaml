@@ -24,6 +24,7 @@ tags:
   - name: Avaliação
   - name: Assiduidade
   - name: Estágio
+  - name: Pagamentos
   - name: Auditoria
 
 paths:
@@ -323,9 +324,182 @@ paths:
     parameters: [{ $ref: '#/components/parameters/Id' }]
     get:
       tags: [Pessoas]
-      summary: 'Turma, notas publicadas, situação e faltas do aluno (RF51) – encarregado, aluno'
+      summary: 'Turma, notas publicadas, situação, faltas, horário e propinas do aluno (RF51, RF63) – encarregado, aluno'
       responses:
         '200': { description: Resumo do aluno }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+  /financas/rubricas:
+    get:
+      tags: [Pagamentos]
+      summary: Preçário do ano lectivo (RF57) – SE, DE
+      parameters: [{ name: anoLectivo, in: query, schema: { $ref: '#/components/schemas/Uuid' } }]
+      responses:
+        '200': { description: Rubricas }
+    post:
+      tags: [Pagamentos]
+      summary: Criar rubrica (RF57) – DE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nome, tipo, valor]
+              properties:
+                nome: { type: string, minLength: 3 }
+                tipo: { type: string, enum: [propina, emolumento, outro] }
+                valor: { type: number, minimum: 0.01, description: 'Kwanzas, até 2 casas decimais' }
+                classe: { $ref: '#/components/schemas/Uuid' }
+                meses: { type: array, items: { type: integer, minimum: 1, maximum: 12 }, description: Obrigatório nas propinas }
+                diaVencimento: { type: integer, minimum: 1, maximum: 28, default: 10 }
+                multaPercentagem: { type: number, minimum: 0, maximum: 100, default: 0 }
+                anoLectivo: { $ref: '#/components/schemas/Uuid' }
+      responses:
+        '201': { description: Rubrica criada }
+        '400': { $ref: '#/components/responses/Invalido' }
+        '403': { $ref: '#/components/responses/Proibido' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /financas/rubricas/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    patch:
+      tags: [Pagamentos]
+      summary: 'Mudar nome, valor, vencimento, multa ou activar/desactivar (RF57) – DE'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome: { type: string }
+                valor: { type: number }
+                diaVencimento: { type: integer }
+                multaPercentagem: { type: number }
+                activa: { type: boolean }
+      responses:
+        '200': { description: Rubrica actualizada }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+  /financas/rubricas/{id}/gerar:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Pagamentos]
+      summary: Gerar as mensalidades da propina para os alunos matriculados, sem duplicar (RF58) – DE
+      responses:
+        '200': { description: '{ alunos, criadas, jaExistiam }' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /financas/dividas:
+    get:
+      tags: [Pagamentos]
+      summary: Alunos com cobranças vencidas por pagar (RF62) – SE, DE
+      parameters: [{ name: turma, in: query, schema: { $ref: '#/components/schemas/Uuid' } }]
+      responses:
+        '200': { description: Dívidas por aluno }
+  /financas/resumo:
+    get:
+      tags: [Pagamentos]
+      summary: Recebido no mês por forma de pagamento e totais em dívida (RF62) – SE, DE
+      parameters: [{ name: mes, in: query, schema: { type: string, example: 2026-11 } }]
+      responses:
+        '200': { description: Resumo }
+  /alunos/{id}/financas:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Pagamentos]
+      summary: 'Cobranças, recibos e totais de um aluno (RF60) – SE, DE'
+      responses:
+        '200': { description: Ficha financeira }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+  /alunos/{id}/cobrancas:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Pagamentos]
+      summary: Cobrar um emolumento ao aluno (RF59) – SE, DE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [rubrica]
+              properties:
+                rubrica: { $ref: '#/components/schemas/Uuid' }
+                descricao: { type: string }
+                vencimento: { type: string, format: date }
+      responses:
+        '201': { description: Cobrança criada }
+        '422': { $ref: '#/components/responses/Regra' }
+  /alunos/{id}/pagamentos:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Pagamentos]
+      summary: Registar o pagamento de cobranças pendentes e numerar o recibo (RF60) – SE, DE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [cobrancas, metodo]
+              properties:
+                cobrancas: { type: array, minItems: 1, items: { $ref: '#/components/schemas/Uuid' } }
+                metodo: { type: string, enum: [numerario, transferencia, multicaixa, deposito, outro] }
+                referencia: { type: string }
+                dataPagamento: { type: string, format: date, description: Por omissão hoje; nunca futura }
+      responses:
+        '201': { description: 'Pagamento com numeroTexto (ex.: 1/2026), valorTotal e itens' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '409': { $ref: '#/components/responses/Conflito' }
+        '422': { $ref: '#/components/responses/Regra' }
+  /pagamentos/{id}/recibo:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Pagamentos]
+      summary: Recibo em PDF (RF60) – SE, DE
+      responses:
+        '200':
+          description: PDF
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+  /pagamentos/{id}/anular:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Pagamentos]
+      summary: Anular um pagamento; as cobranças voltam a pendentes (RF61) – DE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [motivo], properties: { motivo: { type: string, minLength: 3 } } }
+      responses:
+        '200': { description: Anulado }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /cobrancas/{id}/anular:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [Pagamentos]
+      summary: Anular uma cobrança pendente (isenção, erro) (RF61) – DE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [motivo], properties: { motivo: { type: string, minLength: 3 } } }
+      responses:
+        '200': { description: Anulada }
+        '409': { $ref: '#/components/responses/Conflito' }
+  /portal/pagamentos/{id}/recibo:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Pagamentos]
+      summary: Recibo em PDF de um educando (RF63) – encarregado, aluno
+      responses:
+        '200':
+          description: PDF
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
         '404': { $ref: '#/components/responses/NaoEncontrado' }
   /plataforma/escolas:
     get:

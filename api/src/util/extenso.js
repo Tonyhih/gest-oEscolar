@@ -35,3 +35,57 @@ export const nota = (v, casas = 1) => {
   const n = Math.round(Number(v) * 10 ** casas) / 10 ** casas;
   return String(n).replace('.', ',');
 };
+
+// ======================================================================
+// Valores em Kwanzas por extenso (recibos): 10500 → "dez mil e quinhentos kwanzas"
+// ======================================================================
+
+const UNID = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez', 'onze', 'doze', 'treze',
+  'catorze', 'quinze', 'dezasseis', 'dezassete', 'dezoito', 'dezanove'];
+const DEZ = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+const CEM = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+
+/** 0 < n < 1000 */
+function centenas(n) {
+  if (n === 100) return 'cem';
+  const c = Math.floor(n / 100);
+  const r = n % 100;
+  const partes = [];
+  if (c) partes.push(CEM[c]);
+  if (r) partes.push(r < 20 ? UNID[r] : DEZ[Math.floor(r / 10)] + (r % 10 ? ` e ${UNID[r % 10]}` : ''));
+  return partes.join(' e ');
+}
+
+/** Inteiro por extenso (até 999 999 999). */
+export function inteiroPorExtenso(n) {
+  if (n === 0) return 'zero';
+  const grupos = [
+    [Math.floor(n / 1e6), (g) => (g === 1 ? 'um milhão' : `${centenas(g)} milhões`)],
+    [Math.floor((n % 1e6) / 1000), (g) => (g === 1 ? 'mil' : `${centenas(g)} mil`)],
+    [n % 1000, (g) => centenas(g)],
+  ].filter(([g]) => g > 0);
+  // Regra do "e": antes do último grupo, se for inferior a 100 ou um número redondo de centenas
+  return grupos.map(([g, f], i) => {
+    const texto = f(g);
+    if (i === 0) return texto;
+    const ultimo = i === grupos.length - 1;
+    return (ultimo && (g < 100 || g % 100 === 0) ? ' e ' : ' ') + texto;
+  }).join('');
+}
+
+/** 10500.5 → "dez mil e quinhentos kwanzas e cinquenta cêntimos" */
+export function kwanzasPorExtenso(valor) {
+  const total = Math.round(Number(valor) * 100);
+  const kz = Math.floor(total / 100);
+  const ct = total % 100;
+  const partes = [];
+  if (kz || !ct) {
+    const palavra = kz === 1 ? 'kwanza' : 'kwanzas';
+    partes.push(`${inteiroPorExtenso(kz)}${kz >= 1e6 && kz % 1e6 === 0 ? ' de' : ''} ${palavra}`);
+  }
+  if (ct) partes.push(`${inteiroPorExtenso(ct)} ${ct === 1 ? 'cêntimo' : 'cêntimos'}`);
+  return partes.join(' e ');
+}
+
+/** 10500 → "10 500,00 Kz" */
+export const kwanzas = (valor) => `${Number(valor).toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: 'always' }).replace(/ | /g, ' ')} Kz`;

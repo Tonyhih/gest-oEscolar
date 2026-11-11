@@ -14,7 +14,7 @@ const menu = computed(() => {
   if (p === 'encarregado' || p === 'aluno') return [{ nome: 'portal', texto: 'Notas e faltas' }];
   const itens = [{ nome: 'turmas', texto: p === 'professor' ? 'As minhas turmas' : 'Turmas' }];
   if (p === 'professor') itens.push({ nome: 'meu-horario', texto: 'O meu horário' });
-  if (['director', 'secretaria'].includes(p)) itens.push({ nome: 'matriculas', texto: 'Matrículas' });
+  if (['director', 'secretaria'].includes(p)) itens.push({ nome: 'matriculas', texto: 'Matrículas' }, { nome: 'pagamentos', texto: 'Pagamentos' });
   if (['director', 'secretaria', 'coordenador'].includes(p)) itens.push({ nome: 'alunos', texto: 'Alunos' });
   if (['director', 'secretaria', 'coordenador'].includes(p)) itens.push({ nome: 'estagios', texto: 'Estágios' });
   if (['director', 'coordenador'].includes(p)) itens.push({ nome: 'configuracao', texto: 'Configuração' });

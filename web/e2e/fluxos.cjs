@@ -295,6 +295,52 @@ async function entrar(page, email) {
     ok('professor vê o seu horário');
     await p.close();
 
+    // 5g. Pagamentos: o director cria a propina e gera as mensalidades; a secretaria recebe e emite o recibo; a encarregada vê-o
+    p = await novaPagina(browser);
+    await entrar(p, 'director@lda101.test');
+    await p.getByRole('link', { name: 'Pagamentos' }).click();
+    await p.getByRole('tab', { name: 'Preçário' }).click();
+    await p.getByLabel('Nome').fill('Propina mensal');
+    await p.getByLabel('Valor (Kz)').fill('5000');
+    await p.getByLabel('Multa por atraso (%)').fill('10');
+    await p.getByRole('button', { name: 'Criar' }).click();
+    await p.getByText('Rubrica criada.').waitFor();
+    p.once('dialog', (d) => d.accept());
+    await p.getByRole('button', { name: 'Gerar propinas' }).click();
+    await p.getByText(/mensalidades geradas para \d+ alunos/).waitFor();
+    ok('director cria a propina mensal e gera as mensalidades');
+    await p.screenshot({ path: `${OUT}/18-precario.png`, fullPage: true });
+    await p.close();
+
+    p = await novaPagina(browser);
+    await entrar(p, 'secretaria@lda101.test');
+    await p.getByRole('link', { name: 'Pagamentos' }).click();
+    await p.getByLabel('Aluno').fill('Graça');
+    await p.getByRole('button', { name: /Graça Lukeny/ }).click();
+    await p.getByLabel('Propina mensal – Setembro 2026').check();
+    await p.getByLabel('Forma de pagamento').selectOption('multicaixa');
+    await p.getByLabel('Referência (opcional)').fill('MCX-0001');
+    [dl] = await Promise.all([p.waitForEvent('download'), p.getByRole('button', { name: /Registar pagamento/ }).click()]);
+    if (!(await ehPdf(dl))) throw new Error('O recibo não é um PDF');
+    await p.getByText(/Pagamento registado: recibo n\.º 1\//).waitFor();
+    ok(`secretaria regista o pagamento e descarrega o recibo (${dl.suggestedFilename()})`);
+    await p.screenshot({ path: `${OUT}/19-pagamento.png`, fullPage: true });
+    await p.getByRole('tab', { name: 'Dívidas' }).click();
+    await p.locator('tr', { hasText: 'Graça Lukeny' }).waitFor();
+    ok('lista de dívidas por turma');
+    await p.close();
+
+    p = await novaPagina(browser);
+    await p.goto(URL);
+    await p.getByLabel('Email').fill('joana@familia.test');
+    await p.getByLabel('Palavra-passe').fill('Familia#2026');
+    await p.getByRole('button', { name: 'Entrar' }).click();
+    await p.getByRole('heading', { name: 'Propinas e pagamentos' }).waitFor();
+    [dl] = await Promise.all([p.waitForEvent('download'), p.getByRole('button', { name: 'PDF' }).first().click()]);
+    if (!(await ehPdf(dl))) throw new Error('O recibo do portal não é um PDF');
+    ok('encarregada vê as propinas em atraso e descarrega o recibo no portal');
+    await p.close();
+
     // 6. Painel do director e estágios (13.ª classe)
     p = await novaPagina(browser);
     await entrar(p, 'director@lda101.test');

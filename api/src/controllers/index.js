@@ -18,6 +18,8 @@ import * as historico from '../services/historico.js';
 import * as portal from '../services/portal.js';
 import * as horarios from '../services/horarios.js';
 import * as declaracoes from '../services/declaracoes.js';
+import * as financas from '../services/financas.js';
+import { recibo as reciboPdf } from '../pdf/documentos.js';
 
 /** Cria um controlador a partir de fn(req), que devolve o corpo da resposta. */
 const acao = (fn, estado = 200) => async (req, res) => {
@@ -195,6 +197,31 @@ export const horariosCtrl = {
   turma: acao((req, d, u) => horarios.horarioDaTurma(req.bd, u, d.params.id)),
   definirTurma: acao((req, d, u) => horarios.definirHorario(req.bd, u, d.params.id, d.body)),
   professor: acao((req, d, u) => horarios.horarioDoProfessor(req.bd, u)),
+};
+
+async function enviarRecibo(req, res, permitidos) {
+  const d = await financas.dadosRecibo(req.bd, req.utilizador, req.dados.params.id, permitidos);
+  const escola = await documentos.dadosEscola(req.bd, req.utilizador.escolaId);
+  enviarPdf(res, `recibo-${d.numeroTexto.replace('/', '-')}.pdf`, await reciboPdf({ ...d, escola }));
+}
+
+export const financasCtrl = {
+  rubricas: acao((req, d, u) => financas.listarRubricas(req.bd, u, d.query)),
+  criarRubrica: acao((req, d, u) => financas.criarRubrica(req.bd, u, d.body), 201),
+  actualizarRubrica: acao((req, d, u) => financas.actualizarRubrica(req.bd, u, d.params.id, d.body)),
+  gerar: acao((req, d, u) => financas.gerarPropinas(req.bd, u, d.params.id)),
+  dividas: acao((req, d, u) => financas.dividas(req.bd, u, d.query)),
+  resumo: acao((req, d, u) => financas.resumo(req.bd, u, d.query)),
+  ficha: acao((req, d, u) => financas.fichaFinanceira(req.bd, u, d.params.id)),
+  cobrar: acao((req, d, u) => financas.criarCobranca(req.bd, u, d.params.id, d.body), 201),
+  pagar: acao((req, d, u) => financas.registarPagamento(req.bd, u, d.params.id, d.body), 201),
+  anularPagamento: acao((req, d, u) => financas.anularPagamento(req.bd, u, d.params.id, d.body)),
+  anularCobranca: acao((req, d, u) => financas.anularCobranca(req.bd, u, d.params.id, d.body)),
+  recibo: (req, res) => enviarRecibo(req, res),
+  async reciboPortal(req, res) {
+    const permitidos = (await portal.alunosPermitidos(req.bd, req.utilizador)).map((a) => a.id);
+    return enviarRecibo(req, res, permitidos);
+  },
 };
 
 export const auditoriaCtrl = {

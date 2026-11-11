@@ -151,12 +151,29 @@ export function criarRotas(config) {
   r.put('/turmas/:id/horario', auth, perfil(...EST), v({ params: paramsId, body: E.horario }), H.definirTurma);
   r.get('/horario/professor', auth, perfil('professor'), H.professor);
 
+  // Pagamentos e propinas
+  const P2 = C.financasCtrl;
+  const FIN = ['director', 'secretaria'];
+  r.get('/financas/rubricas', auth, perfil(...FIN), v({ query: E.filtroAno }), P2.rubricas);
+  r.post('/financas/rubricas', auth, perfil(...DIR), v({ body: E.rubrica }), P2.criarRubrica);
+  r.patch('/financas/rubricas/:id', auth, perfil(...DIR), v({ params: paramsId, body: E.actualizarRubrica }), P2.actualizarRubrica);
+  r.post('/financas/rubricas/:id/gerar', auth, perfil(...DIR), v({ params: paramsId }), P2.gerar);
+  r.get('/financas/dividas', auth, perfil(...FIN), v({ query: E.filtroDividas }), P2.dividas);
+  r.get('/financas/resumo', auth, perfil(...FIN), v({ query: E.queryMes }), P2.resumo);
+  r.get('/alunos/:id/financas', auth, perfil(...FIN), v({ params: paramsId }), P2.ficha);
+  r.post('/alunos/:id/cobrancas', auth, perfil(...FIN), v({ params: paramsId, body: E.cobranca }), P2.cobrar);
+  r.post('/alunos/:id/pagamentos', auth, perfil(...FIN), v({ params: paramsId, body: E.pagamento }), P2.pagar);
+  r.get('/pagamentos/:id/recibo', auth, perfil(...FIN), v({ params: paramsId }), P2.recibo);
+  r.post('/pagamentos/:id/anular', auth, perfil(...DIR), v({ params: paramsId, body: E.motivo }), P2.anularPagamento);
+  r.post('/cobrancas/:id/anular', auth, perfil(...DIR), v({ params: paramsId, body: E.motivo }), P2.anularCobranca);
+
   // Portal do encarregado e do aluno
   const PORTAL = ['encarregado', 'aluno'];
   r.post('/alunos/:id/acesso-portal', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId, body: E.acessoPortal }), C.portalCtrl.acessoAluno);
   r.post('/encarregados/:id/acesso-portal', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId, body: E.acessoPortal }), C.portalCtrl.acessoEncarregado);
   r.get('/portal/educandos', auth, perfil(...PORTAL), C.portalCtrl.educandos);
   r.get('/portal/alunos/:id', auth, perfil(...PORTAL), v({ params: paramsId }), C.portalCtrl.resumo);
+  r.get('/portal/pagamentos/:id/recibo', auth, perfil(...PORTAL), v({ params: paramsId }), C.financasCtrl.reciboPortal);
   r.get('/documentos/:id/pdf', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId }), D.pdf);
 
   // ---------------------------------------------------------- Auditoria
