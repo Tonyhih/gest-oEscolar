@@ -92,6 +92,12 @@ describe('guarda de rotas', () => {
     sessao('professor');
     expect(await guarda(auth)(rota({ publica: true, sempre: true }))).toBe(true);
   });
+  it('o encarregado e o aluno vão sempre para o portal', async () => {
+    sessao('encarregado');
+    expect(await guarda(auth)({ name: 'inicio', meta: {}, fullPath: '/' })).toEqual({ name: 'portal' });
+    expect(await guarda(auth)({ name: 'portal', meta: { perfis: ['encarregado', 'aluno'] }, fullPath: '/portal' })).toBe(true);
+    expect(await guarda(auth)({ name: 'trocar-palavra-passe', meta: { permiteTroca: true }, fullPath: '/t' })).toBe(true);
+  });
   it('perfil sem acesso → início', async () => {
     sessao('professor');
     expect(await guarda(auth)(rota({ perfis: ['director'] }))).toEqual({ name: 'inicio' });

@@ -162,6 +162,7 @@ export const tfc = z.object({
   juri: z.array(texto(2, 120)).max(5).optional(), nota: nota.nullable().optional(),
 });
 export const filtroAno = z.object({ anoLectivo: uuid.optional() });
+export const acessoPortal = z.object({ email });
 export const paramsHistorico = z.object({ id: uuid, classe: z.enum(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']) });
 export const historicoClasse = z.object({
   anoLectivo: z.string().regex(/^\d{4}\/\d{4}$/, 'Formato 2024/2025.'),

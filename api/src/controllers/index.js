@@ -15,6 +15,7 @@ import * as estagios from '../services/estagios.js';
 import * as painel from '../services/painel.js';
 import * as documentos from '../services/documentos.js';
 import * as historico from '../services/historico.js';
+import * as portal from '../services/portal.js';
 
 /** Cria um controlador a partir de fn(req), que devolve o corpo da resposta. */
 const acao = (fn, estado = 200) => async (req, res) => {
@@ -176,6 +177,13 @@ export const painelCtrl = {
 export const historicoCtrl = {
   listar: acao((req, d, u) => historico.listar(req.bd, u, d.params.id)),
   definir: acao((req, d, u) => historico.definirClasse(req.bd, u, d.params.id, d.params.classe, d.body)),
+};
+
+export const portalCtrl = {
+  acessoAluno: acao((req, d, u) => portal.acessoAluno(req.bd, u, d.params.id, d.body), 201),
+  acessoEncarregado: acao((req, d, u) => portal.acessoEncarregado(req.bd, u, d.params.id, d.body), 201),
+  educandos: acao((req, d, u) => portal.educandos(req.bd, u)),
+  resumo: acao((req, d, u) => portal.resumo(req.bd, u, d.params.id)),
 };
 
 export const auditoriaCtrl = {

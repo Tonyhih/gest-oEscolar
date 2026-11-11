@@ -142,6 +142,12 @@ export function criarRotas(config) {
   r.get('/alunos/:id/historico', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId }), C.historicoCtrl.listar);
   r.put('/alunos/:id/historico/:classe', auth, perfil(...SECRETARIA_DIRECCAO),
     v({ params: E.paramsHistorico, body: E.historicoClasse }), C.historicoCtrl.definir);
+  // Portal do encarregado e do aluno
+  const PORTAL = ['encarregado', 'aluno'];
+  r.post('/alunos/:id/acesso-portal', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId, body: E.acessoPortal }), C.portalCtrl.acessoAluno);
+  r.post('/encarregados/:id/acesso-portal', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId, body: E.acessoPortal }), C.portalCtrl.acessoEncarregado);
+  r.get('/portal/educandos', auth, perfil(...PORTAL), C.portalCtrl.educandos);
+  r.get('/portal/alunos/:id', auth, perfil(...PORTAL), v({ params: paramsId }), C.portalCtrl.resumo);
   r.get('/documentos/:id/pdf', auth, perfil(...SECRETARIA_DIRECCAO), v({ params: paramsId }), D.pdf);
 
   // ---------------------------------------------------------- Auditoria

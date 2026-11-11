@@ -11,6 +11,7 @@ const menu = computed(() => {
   const p = auth.perfil;
   if (!auth.autenticado || auth.trocaPendente) return [];
   if (p === 'admin_plataforma') return [{ nome: 'escolas', texto: 'Escolas' }];
+  if (p === 'encarregado' || p === 'aluno') return [{ nome: 'portal', texto: 'Notas e faltas' }];
   const itens = [{ nome: 'turmas', texto: p === 'professor' ? 'As minhas turmas' : 'Turmas' }];
   if (['director', 'secretaria'].includes(p)) itens.push({ nome: 'matriculas', texto: 'Matrículas' });
   if (['director', 'secretaria', 'coordenador'].includes(p)) itens.push({ nome: 'alunos', texto: 'Alunos' });
